@@ -1,0 +1,13 @@
+<p>Provider: <%= user.provider %></p>
+<p>ID: <%= user.id %></p>
+<p>Username: <%= user.username %></p>
+<p>DisplayName: <%= user.displayName %></p>
+<% if (user.name) {%>
+<p>FamilyName: <%= user.name.familyName %></p>
+<p>GivenName: <%= user.name.givenName %></p>
+<p>MiddleName: <%= user.name.middleName %></p>
+<% } %>
+<p>ProfileURL: <%= user.profileUrl %></p>
+<% if (user.emails) {%>
+<p>Emails: <% user.emails.join(',') %><p>
+<% } %>
