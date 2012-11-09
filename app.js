@@ -1,8 +1,8 @@
 var express = require('express')
   , util = require('util')
   , auth = require('./auth')
-  , config = require('./config.js');
-
+  , config = require('./conf/config')
+  , mongoose = require('mongoose');
 
 
 var app = express();
@@ -22,6 +22,7 @@ app.configure(function() {
 });
 
 require('./routes/index')(app);
+require('./conf/initialize')(app);
 
 app.listen(config.port, function (){
   console.log('App listening on port '+config.port);

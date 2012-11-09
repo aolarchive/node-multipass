@@ -1,10 +1,9 @@
 var mongoose = require('mongoose')
-    , config = require('../config.js')
-    , Schema = require('./schemas.js');
+    , config = require('../conf/config')
+    , Schema = require('./schemas');
 
 
-mongoose.connect(config.mongo.data.connection);
-var UserProfile = mongoose.model('UserProfile', Schema.UserProfile);
+var UserProfile = mongoose.model('UserProfile', Schema.UserProfile, 'userprofiles');
 
 
 function buildUserProfile(user, authToken){
@@ -19,8 +18,8 @@ function buildUserProfile(user, authToken){
       profileUrl : user.profileUrl,
       authToken : authToken,
       emails : user.emails,
-      created_on : Date.now(),
-      updated_on : Date.now()
+      creationDate : Date.now(),
+      modifiedDate : Date.now()
   };
   return (new UserProfile(data));
 };
@@ -36,13 +35,11 @@ var profile = {
           doc.authToken = authToken;
           doc.markModified('authToken');
           doc.save(function(err,doc){
-            debugger;
             callback(doc);
           });
         } else {
           var userProfile = buildUserProfile(profile, authToken);
           userProfile.save(function(err,doc) {
-            debugger;
               callback(doc);
           });
         }
@@ -55,7 +52,7 @@ var profile = {
       function(err, doc){
         if (err) {
           callback(err);
-        } else if (doc) {
+        } else {
           callback(doc);
         }
       }

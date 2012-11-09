@@ -1,5 +1,5 @@
 var passport = require('passport')
-  , config = require('../config.js')
+  , config = require('../conf/config')
   , providers = require('./providers')
   , userProfile = require('../data/user');
 
@@ -58,7 +58,6 @@ var auth = {
   
   associate: function() {
     return function(req, res, next) {
-  
        var user = req.user;
        var profile = req.account;
   

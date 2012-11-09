@@ -1,5 +1,6 @@
 var passport = require('passport')
-  , auth = require('../auth');
+  , auth = require('../auth')
+  , userProfile = require('../data/user');
 
 
 //Simple route middleware to ensure user is authenticated.
@@ -31,6 +32,18 @@ module.exports = function(app){
     res.redirect('/');
   });
   
+  app.get('/provider/:provider/:providerId', 
+    //ensureAuthenticated, 
+    function(req, res, next) {
+      var profile = {
+          provider: req.params.provider,
+          id: req.params.providerId
+      };
+      userProfile.findProfile(profile, function(doc){
+        res.json(doc);
+      });
+    }
+  );
   
   // GET /auth/facebook
   //   Use passport.authenticate() as route middleware to authenticate the

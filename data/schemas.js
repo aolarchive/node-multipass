@@ -13,8 +13,17 @@ var UserProfile = new Schema({
   profileUrl : String,
   authToken : String,
   emails : [],
-  created_on : Date,
-  updated_on : Date
+  creationDate: Date,
+  modifiedDate: Date
 });
 
+var User = new Schema({
+  userId : {type: String, unique: true},
+  profiles : [UserProfile],
+  creationDate: Date,
+  modifiedDate: Date
+});
+
+
+exports.User = User;
 exports.UserProfile = UserProfile;

@@ -1,5 +1,5 @@
 var passport = require('passport')
-  , config = require('../config.js')
+  , config = require('../conf/config')
   , FacebookStrategy = require('passport-facebook').Strategy
   , TwitterStrategy = require('passport-twitter').Strategy
   , userProfile = require('../data/user');
