@@ -2,7 +2,7 @@ var passport = require('passport')
   , config = require('../conf/config')
   , FacebookStrategy = require('passport-facebook').Strategy
   , TwitterStrategy = require('passport-twitter').Strategy
-  , userProfile = require('../data/user');
+  , userAPI = require('../data/user');
 
 
 // Use the FacebookStrategy within Passport.
@@ -18,7 +18,7 @@ passport.use('facebook', new FacebookStrategy({
     // asynchronous verification, for effect...
     process.nextTick(function () {
       profile.authToken = accessToken;
-      userProfile.loadProfile(profile, accessToken, function(obj){
+      userAPI.addOrUpdateUser(profile, accessToken, function(obj){
           return done(null, obj);
       });
     });
@@ -53,7 +53,7 @@ passport.use('twitter', new TwitterStrategy({
    // asynchronous verification, for effect...
    process.nextTick(function () {
      profile.authToken = token;
-     userProfile.loadProfile(profile, token, function(obj){
+     userAPI.addOrUpdateUser(profile, token, function(obj){
          return done(null, obj);
      });
    });

@@ -14,14 +14,8 @@ var config = {
         }
     },
     mongo: {
-      data : {
-        connection : "mongodb://localhost:27017/multipass_dev"
-      },
-      session : {
-          host : "localhost",
-          port : 27017,
-          db : "Multipass"
-      }
+      connection : "mongodb://localhost:27017/multipass_dev",
+      collection : 'users'
     }
 };
 

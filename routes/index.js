@@ -1,6 +1,6 @@
 var passport = require('passport')
   , auth = require('../auth')
-  , userProfile = require('../data/user');
+  , userAPI = require('../data/user');
 
 
 //Simple route middleware to ensure user is authenticated.
@@ -39,10 +39,25 @@ module.exports = function(app){
           provider: req.params.provider,
           id: req.params.providerId
       };
-      userProfile.findProfile(profile, function(doc){
+      userAPI.findProfile(profile, function(doc){
         res.json(doc);
       });
     }
+  );
+  
+  app.get('/user',
+      ensureAuthenticated, 
+      function(req, res){
+        userAPI.getUser(req.user.userId,
+          function(userDoc){
+              if (userDoc != null){
+                res.json(userDoc);
+              } else {
+                res.json({});
+              }
+          }
+        );
+      }
   );
   
   // GET /auth/facebook

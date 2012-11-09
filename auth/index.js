@@ -1,7 +1,7 @@
 var passport = require('passport')
   , config = require('../conf/config')
   , providers = require('./providers')
-  , userProfile = require('../data/user');
+  , userAPI = require('../data/user');
 
 
 // Passport session setup.
@@ -58,27 +58,34 @@ var auth = {
   
   associate: function() {
     return function(req, res, next) {
-       var user = req.user;
-       var profile = req.account;
-  
-       if (user != null && profile != null) {
-           var bExists=false;
-           if (user.provider == profile.provider) {
-               bExists=true;
-           }
-           if (!bExists) {
-               userProfile.addProfile(profile, profile.authToken,
-                   function(u){
-                       res.redirect(req.session.authredirect);
-                   }
-               );
-           } else {
-               res.redirect(req.session.authredirect);
-           }
-       } else {
-           res.redirect(req.session.authredirect);
-       }
-  
+
+      var user = req.user;
+      var profile = req.account;
+
+      if (user != null && profile != null) {
+          var profiles = user.profiles;
+          var bExists=false;
+          //debugger;
+          for (var i=0; i < profiles.length; i++) {
+              if (profiles[i].provider == profile.provider && profiles[i].providerId == profile.id) {
+                  bExists=true;
+                  break;
+              }
+          }
+          //debugger;
+          if (!bExists) {
+              userAPI.addProfile(user, profile, profile.authToken,
+                function(u){
+                    res.redirect(req.session.authredirect);
+                }
+              );
+          } else {
+              res.redirect(req.session.authredirect);
+          }
+      } else {
+          res.redirect(req.session.authredirect);
+      }
+
     }
   }
   
