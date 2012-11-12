@@ -1,0 +1,37 @@
+<h2>User Summary</h2>
+
+<table cellspacing="0" cellpadding="0" border="0" class="user-table">
+	<tr>
+		<th>UserId</th>
+		<th>Last Updated</th>
+		<th>Actions</th>
+	</tr>
+	<tr>
+		<td><a href="/user"><%= user.userId %></a></td>
+		<td><%= (new Date(user.modifiedDate)).toString() %></td>
+		<td><a class="user-remove" data-url="/user" href="/">Remove User</a></td>
+	</tr>
+</table>
+
+<h3>Profiles</h3>
+
+<table cellspacing="0" cellpadding="0" border="0" class="profile-table">
+	<tr>
+		<th>Provider</th>
+		<th>Provider Id</th>
+		<th>Username</th>
+		<th>Display Name</th>
+		<th>Last Updated</th>
+		<th>Actions</th>
+	</tr>
+	<% user.profiles.forEach(function(profile){ %>
+		<tr>
+			<td><%= profile.provider %></td>
+			<td><a href="/user/<%= profile.provider %>/<%= profile.providerId %>"><%= profile.providerId %></a></td>
+			<td><%= profile.username %></td>
+			<td><%= profile.displayName %></td>
+			<td><%= (new Date(profile.modifiedDate)).toString() %></td>
+			<td><a class="profile-remove" data-url="/user/<%= profile.provider %>/<%= profile.providerId %>" href="/">Remove Profile</a></td>
+		</tr>
+	<% }) %>
+</table>

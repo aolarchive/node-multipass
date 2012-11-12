@@ -92,6 +92,16 @@ var auth = {
     }
   },
   
+  //Simple route middleware to ensure user is authenticated.
+  //Use this route middleware on any resource that needs to be protected.  If
+  //the request is authenticated (typically via a persistent login session),
+  //the request will proceed.  Otherwise, a 401 status will be returned
+  ensureAuthenticated: function(req, res, next) {
+    if (req.isAuthenticated()) { return next(); }
+    //res.redirect(config.paths.login);
+    res.send(401);
+  },
+  
   getProviderLoginUrl: function(strategy) {
     return config.paths.api + '/auth/' + String(strategy).toLowerCase();
   },

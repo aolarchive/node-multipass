@@ -140,7 +140,7 @@ var userAPI = {
   removeProfile : function(user, provider, providerId, callback) {
     this.getUser(user.userId,
       function(u){
-        var matchingProfile = findProfile(u, provider, providerId, authToken);
+        var matchingProfile = findProfile(u, provider, providerId);
         if (matchingProfile != null) {
           matchingProfile.remove();
           u.save(function(err,doc) {

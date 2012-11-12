@@ -1,0 +1,15 @@
+body {
+	font-family: Helvetica, Arial, sans-serif;
+	font-size: 100%;
+	padding: 10px 30px;
+}
+
+table {
+	width: 960px;
+	margin-bottom: 1em;
+}
+
+td, th {
+	border: 1px solid #CCC;
+	padding: 10px;
+}

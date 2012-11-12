@@ -1,5 +1,10 @@
-<p><a href="/auth/facebook">Login with Facebook</a></p>
-
-<p><a href="/auth/twitter">Login with Twitter</a></p>
-
-<p><a href="/auth/aol">Login with AOL</a></p>
+<% if (!user) { %>
+<h2>Login</h2>
+<% } else { %>
+<h2>Associate another account</h2>
+<% } %>
+<ul class="providers">
+	<% providers.forEach(function(provider){ %>
+		<li><a href="<%= provider.loginUrl %>"><%= provider.provider %></a></li>
+	<% }) %>
+</ul>

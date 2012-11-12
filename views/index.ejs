@@ -2,19 +2,21 @@
 <html>
 	<head>
 		<title>node-multipass</title>
+		<link rel="stylesheet" href="css/main.css" />
+		<script src="http://o.aolcdn.com/os/aol/jquery-1.8.1.min.js"></script>
+		<script src="js/main.js"></script>
 	</head>
 	<body>
 		<% if (!user) { %>
-			<p>
-			<a href="/">Home</a> | 
-			<a href="/login">Log In</a>
-			</p>
+			<p>Please login</p>
 		<% } else { %>
 			<p>
-			<a href="/">Home</a> | 
-			<a href="/account">Account</a> | 
 			<a href="/logout">Log Out</a>
 			</p>
+			
+			<% include user.ejs %>
 		<% } %>
+		
+		<% include login.ejs %>
 	</body>
 </html>
