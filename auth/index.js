@@ -1,6 +1,5 @@
 var passport = require('passport')
   , config = require('../conf/config')
-  , providers = require('./providers')
   , userAPI = require('../data/user');
 
 
@@ -21,16 +20,20 @@ passport.deserializeUser(function(obj, done) {
 
 
 var auth = {
+    
+  providers: [],
 
   // Initialize Passport!  Also use passport.session() middleware, to support
   // persistent login sessions (recommended).
   init: function(app) {
     app.use(passport.initialize());
     app.use(passport.session());
+    
+    this.loadProviders(app);
   },
   
   setRedirect: function(req) {
-      req.session.authredirect = '/';
+      req.session.authredirect = config.paths.authRedirect;
       if (req.param('r') != null) {
           req.session.authredirect = req.param('r');
       }
@@ -38,8 +41,8 @@ var auth = {
   
   authenticate: function(provider, options) {
    options = options || {};
-   options.successRedirect = options.successRedirect || '/';
-   options.failureRedirect = options.failureRedirect || '/login';
+   options.successRedirect = options.successRedirect || config.paths.authRedirect || '/';
+   options.failureRedirect = options.failureRedirect || config.paths.login || '/login';
   
    return function(req, res, next) {
        if (!req.isAuthenticated()) {
@@ -86,6 +89,56 @@ var auth = {
           res.redirect(req.session.authredirect);
       }
 
+    }
+  },
+  
+  getProviderLoginUrl: function(strategy) {
+    return config.paths.api + '/auth/' + String(strategy).toLowerCase();
+  },
+
+  getProviderCallbackUrl: function(strategy) {
+    return this.getProviderLoginUrl(strategy) + '/callback';
+  },
+  
+  getAuthzStrategy: function(strategy) {
+      return strategy + '-authz';
+  },
+  
+  addProvider: function(provider) {
+    var providerData = {
+        'provider': provider.strategy,
+        'loginUrl': this.getProviderLoginUrl(provider.strategy)
+    };
+    this.providers.push(providerData);
+  },
+  
+  loadProviders: function(app) {
+    var auth = this;
+    
+    if (config && config.providers) {
+      Object.keys(config.providers).forEach(function(key) {
+        var provider = require('./providers/' + String(key).toLowerCase()).provider;
+        if (provider) {
+          
+          // Add provider to list of available providers
+          auth.addProvider(provider);
+          
+          // Assign login and callback routes for provider
+          
+          app.get(auth.getProviderLoginUrl(provider.strategy),
+            function(req, res, next) {
+              auth.setRedirect(req);
+              next();
+            },
+            auth.authenticate(provider.strategy, { scope: provider.scope })
+          );
+    
+          app.get(auth.getProviderCallbackUrl(provider.strategy),
+            [auth.authenticate(provider.strategy, { scope: provider.scope, failureRedirect: config.paths.login }),
+             auth.associate()]
+          );
+        }
+      });
     }
   }
   

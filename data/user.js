@@ -1,7 +1,7 @@
 var mongoose = require('mongoose')
-    , config = require('../conf/config')
-    , Schemas = require('./schemas')
-    , uuid = require('node-uuid');
+  , config = require('../conf/config')
+  , Schemas = require('./schemas')
+  , uuid = require('node-uuid');
 
 
 var User = mongoose.model('User', Schemas.User, config.mongo.collection);
@@ -69,7 +69,9 @@ var userAPI = {
           var matchingProfile = findProfile(user, profile.provider, profile.id, authToken);
           if (matchingProfile != null) {
             matchingProfile.authToken = authToken;
-            user.markModified('authToken');
+            matchingProfile.modifiedDate = Date.now();
+            user.modifiedDate = Date.now();
+            user.markModified('profiles');
             user.save(function(err,doc){
               callback(doc);
             });
@@ -126,6 +128,7 @@ var userAPI = {
       function(u){
         var userProfile = buildUserProfile(profile, authToken);
         u.profiles.push(userProfile);
+        u.modifiedDate = Date.now();
         u.markModified('profiles');
         u.save(function(err,doc) {
             callback(doc);

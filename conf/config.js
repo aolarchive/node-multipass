@@ -1,6 +1,12 @@
 var config = {
     port: 3000,
-    baseUrl: 'http://devlocal.aol.com:3000',
+    paths: { 
+      base: 'http://devlocal.aol.com:3000',
+      api: '',
+      login: '/login',
+      logout: '/logout',
+      authRedirect: '/'
+    },
     providers: {
         //JJ Test App: https://developers.facebook.com/apps/105846932813376
         facebook: {
@@ -11,6 +17,10 @@ var config = {
         twitter: {
           consumerKey: "Kp2QGreXSz1qFoBic578g",
           consumerSecret: "fMwIyP0z2NZNBzuX4m0qnav1zr5HJyQSI6r5saeaebA"
+        },
+        aol: {
+          clientId : "ao1iDZvZUadYKQfY",
+          clientSecret : "s6a8aPuspUM3dEYa"
         }
     },
     mongo: {

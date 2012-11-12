@@ -1,5 +1,6 @@
-var config = require('./config'),
-	mongoose = require('mongoose');
+var config = require('./config')
+  ,	mongoose = require('mongoose');
+
 
 function init(app) {
 

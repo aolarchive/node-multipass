@@ -1,4 +1,5 @@
 var passport = require('passport')
+  , config = require('../conf/config')
   , auth = require('../auth')
   , userAPI = require('../data/user');
 
@@ -10,7 +11,7 @@ var passport = require('passport')
 //login page.
 function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) { return next(); }
-  res.redirect('/login')
+  res.redirect(config.paths.login);
 }
 
 module.exports = function(app){
@@ -19,33 +20,20 @@ module.exports = function(app){
     res.render('index', { user: req.user });
   });
   
-  app.get('/account', ensureAuthenticated, function(req, res){
+  app.get(config.paths.api + '/account', ensureAuthenticated, function(req, res){
     res.render('account', { user: req.user });
   });
   
-  app.get('/login', function(req, res){
+  app.get(config.paths.login, function(req, res){
     res.render('login', { user: req.user });
   });
   
-  app.get('/logout', function(req, res){
+  app.get(config.paths.logout, function(req, res){
     req.logout();
     res.redirect('/');
   });
   
-  app.get('/provider/:provider/:providerId', 
-    //ensureAuthenticated, 
-    function(req, res, next) {
-      var profile = {
-          provider: req.params.provider,
-          id: req.params.providerId
-      };
-      userAPI.findProfile(profile, function(doc){
-        res.json(doc);
-      });
-    }
-  );
-  
-  app.get('/user',
+  app.get(config.paths.api + '/user',
       ensureAuthenticated, 
       function(req, res){
         userAPI.getUser(req.user.userId,
@@ -59,52 +47,21 @@ module.exports = function(app){
         );
       }
   );
-  
-  // GET /auth/facebook
-  //   Use passport.authenticate() as route middleware to authenticate the
-  //   request.  The first step in Facebook authentication will involve
-  //   redirecting the user to facebook.com.  After authorization, Facebook will
-  //   redirect the user back to this application at /auth/facebook/callback
-  app.get('/auth/facebook',
+
+  app.get(config.paths.api + '/user/:provider/:providerId', 
+    ensureAuthenticated, 
     function(req, res, next) {
-        auth.setRedirect(req);
-        next();
-    },
-    auth.authenticate('facebook')
+      userAPI.getProfile(req.user, req.params.provider, req.params.providerId, function(doc){
+        res.json(doc);
+      });
+    }
   );
   
-  // GET /auth/facebook/callback
-  //   Use passport.authenticate() as route middleware to authenticate the
-  //   request.  If authentication fails, the user will be redirected back to the
-  //   login page.  Otherwise, the primary route function function will be called,
-  //   which, in this example, will redirect the user to the home page.
-  app.get('/auth/facebook/callback',
-    [auth.authenticate('facebook', { failureRedirect: '/login' }),
-    auth.associate()]
-  );
-  
-  
-  //GET /auth/twitter
-  //Use passport.authenticate() as route middleware to authenticate the
-  //request.  The first step in Twitter authentication will involve redirecting
-  //the user to twitter.com.  After authorization, the Twitter will redirect
-  //the user back to this application at /auth/twitter/callback
-  app.get('/auth/twitter',
+  app.get(config.paths.api + '/provider', 
+    //ensureAuthenticated, 
     function(req, res, next) {
-      auth.setRedirect(req);
-      next();
-    },
-    auth.authenticate('twitter')
-  );
-  
-  //GET /auth/twitter/callback
-  //Use passport.authenticate() as route middleware to authenticate the
-  //request.  If authentication fails, the user will be redirected back to the
-  //login page.  Otherwise, the primary route function function will be called,
-  //which, in this example, will redirect the user to the home page.
-  app.get('/auth/twitter/callback', 
-      [auth.authenticate('twitter', { failureRedirect: '/login' }),
-       auth.associate()]
+      res.json(auth.providers);
+    }
   );
   
 };

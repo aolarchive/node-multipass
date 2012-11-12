@@ -1,6 +1,6 @@
 var mongoose = require('mongoose')
-    , Schema = mongoose.Schema;
-
+  , Schema = mongoose.Schema;
+ 
 
 var UserProfile = new Schema({
   provider : {type: String, lowercase: true},

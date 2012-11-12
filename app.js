@@ -1,8 +1,7 @@
 var express = require('express')
   , util = require('util')
   , auth = require('./auth')
-  , config = require('./conf/config')
-  , mongoose = require('mongoose');
+  , config = require('./conf/config');
 
 
 var app = express();
