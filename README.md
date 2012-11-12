@@ -30,6 +30,53 @@ providers: {
 The app automatically configures itself for a particular provider based on what you add in the config file. It then tries to laod a corresponding provider strategy module from the `auth/providers/` folder. You can also add additional auth strategies by including them or writing your own. Each one just needs its own unique provider name.
 
 ## REST API
+The API allows method override, so for instance to perform a DELETE, you can use a POST and include `_method="delete"` in the post body.
+
+<table>
+  <tr>
+    <th>Method</th>
+    <th>Path</th>
+    <th>Parameters</th>
+    <th>Response</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>GET</td>
+    <td>/auth/providers</td>
+    <td>N/A</td>
+    <td></td>
+    <td>Returns a list of all available auth providers and their login URLs.</td>
+  </tr>
+  <tr>
+    <td>GET</td>
+    <td>/user</td>
+    <td>N/A</td>
+    <td></td>
+    <td>Returns complete user object for the currently-authenticated user.</td>
+  </tr>
+  <tr>
+    <td>DELETE</td>
+    <td>/user</td>
+    <td>N/A</td>
+    <td></td>
+    <td>Deletes the entire user object for the currently-authenticated user.</td>
+  </tr>
+  <tr>
+    <td>GET</td>
+    <td>/user/:provider/:providerId</td>
+    <td>N/A</td>
+    <td></td>
+    <td>Returns a particular auth profile for the currently-authenticated user, based the given 'provider' and 'providerId' values.
+    <br>For example, `/user/twitter/987654321`</td>
+  </tr>
+  <tr>
+    <td>DELETE</td>
+    <td>/user/:provider/:providerId</td>
+    <td>N/A</td>
+    <td></td>
+    <td>Deletes a particular auth profile for the currently-authenticated user, based the given 'provider' and 'providerId' values.</td>
+  </tr>
+</table>
 
 ## License
 Copyright (c) 2012 AOL, Inc.
