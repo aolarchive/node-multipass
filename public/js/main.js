@@ -2,6 +2,21 @@
   
   $(document).ready(function(){
     
+    $('a.user-logout').click(function(event){
+      event.preventDefault();
+      
+      var $this = $(this),
+        url = $this.data('url');
+      
+      $.ajax({
+        url: url,
+        type: 'get'
+      })
+      .done(function(data){
+        location.href = $this.attr('href');
+      });
+    });
+    
     $('.user-table a.user-remove').click(function(event){
       event.preventDefault();
       

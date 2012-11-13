@@ -3,9 +3,9 @@ var config = {
     paths: { 
       base: 'http://devlocal.aol.com:3000',
       api: '',
-      login: '/login',
       logout: '/logout',
-      authRedirect: '/'
+      authRedirect: '/',
+      failRedirect: '/'
     },
     providers: {
         //JJ Test App: https://developers.facebook.com/apps/105846932813376

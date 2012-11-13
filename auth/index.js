@@ -1,19 +1,30 @@
 var passport = require('passport')
   , config = require('../conf/config')
-  , userAPI = require('../data/user');
+  , userAPI = require('../data/user')
+  , ApiResponse = require('../data/apiresponse');
 
 
 // Passport session setup.
-//   To support persistent login sessions, Passport needs to be able to
-//   serialize users into and deserialize users out of the session.  Typically,
-//   this will be as simple as storing the user ID when serializing, and finding
-//   the user by ID when deserializing.  However, since this example does not
-//   have a database of user records, the complete Facebook profile is serialized
-//   and deserialized.
+// To support persistent login sessions, serialize the user by storing the 
+// userId in an object.
 passport.serializeUser(function(user, done) {
-  done(null, user);
+  var serializedData = {
+      userId: null
+  }
+  if (user instanceof ApiResponse) {
+    if (user.error) {
+      done(user.error, serializedData);
+    } else {
+      serializedData.userId = user.data.userId;
+      done(null, serializedData);
+    }
+  } else {
+    serializedData.userId = user.userId;
+    done(null, serializedData);
+  }
 });
 
+// Return user object persisted in the session.
 passport.deserializeUser(function(obj, done) {
   done(null, obj);
 });
@@ -42,7 +53,7 @@ var auth = {
   authenticate: function(provider, options) {
    options = options || {};
    options.successRedirect = options.successRedirect || config.paths.authRedirect || '/';
-   options.failureRedirect = options.failureRedirect || config.paths.login || '/login';
+   options.failureRedirect = options.failureRedirect || config.paths.failRedirect || '/';
   
    return function(req, res, next) {
        if (!req.isAuthenticated()) {
@@ -66,12 +77,16 @@ var auth = {
       var profile = req.account;
 
       if (user != null && profile != null) {
-          var profiles = user.profiles;
-          var bExists=false;
+        
+        userAPI.getUser(user.userId, function(apiRes) {
+          var data = apiRes.data,
+            profiles = data.profiles,
+            bExists = false;
+        
           //debugger;
           for (var i=0; i < profiles.length; i++) {
               if (profiles[i].provider == profile.provider && profiles[i].providerId == profile.id) {
-                  bExists=true;
+                  bExists = true;
                   break;
               }
           }
@@ -85,6 +100,8 @@ var auth = {
           } else {
               res.redirect(req.session.authredirect);
           }
+        });
+        
       } else {
           res.redirect(req.session.authredirect);
       }
@@ -98,7 +115,7 @@ var auth = {
   //the request will proceed.  Otherwise, a 401 status will be returned
   ensureAuthenticated: function(req, res, next) {
     if (req.isAuthenticated()) { return next(); }
-    //res.redirect(config.paths.login);
+    //res.redirect(config.paths.failRedirect);
     res.send(401);
   },
   
@@ -144,7 +161,7 @@ var auth = {
           );
     
           app.get(auth.getProviderCallbackUrl(provider.strategy),
-            [auth.authenticate(provider.strategy, { scope: provider.scope, failureRedirect: config.paths.login }),
+            [auth.authenticate(provider.strategy, { scope: provider.scope, failureRedirect: config.paths.failRedirect }),
              auth.associate()]
           );
         }
