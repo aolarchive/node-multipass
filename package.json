@@ -10,7 +10,8 @@
     "passport": ">= 0.0.0",
     "passport-facebook": ">= 0.0.0",
     "passport-twitter": ">= 0.0.0",
-    "passport-aol-oauth": ">= 0.0.0"
+    "passport-aol-oauth": ">= 0.0.0", 
+    "passport-linkedin": ">= 0.0.0"
   },
   "scripts": {"start": "node app.js"}
 }

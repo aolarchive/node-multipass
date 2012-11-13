@@ -18,6 +18,11 @@ var config = {
           consumerKey: "Kp2QGreXSz1qFoBic578g",
           consumerSecret: "fMwIyP0z2NZNBzuX4m0qnav1zr5HJyQSI6r5saeaebA"
         },
+        //JJ Test App: https://developer.linkedin.com/
+        linkedin: {
+          consumerKey: "eoirk2elkeeg",
+          consumerSecret: "Pwqxvz4vjiZ3MBUH"
+        },
         aol: {
           clientId : "ao1iDZvZUadYKQfY",
           clientSecret : "s6a8aPuspUM3dEYa"
