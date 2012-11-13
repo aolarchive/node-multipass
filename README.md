@@ -16,7 +16,7 @@ This app requires Node.js and MongoDB. It uses `node-passport` to handle authent
 * Run app - type `node app`
 
 ### Configuration
-Most configuration takes place in the `conf/config.js` file. 
+Most configuration takes place in the `conf/` folder. There are separate config files for different server enviroments (`dev.js`, `prod.js`, etc.), that are chosen based on the `NODE_ENV` environment variable, all managed by the special `conf/config.js` file. The default environment is "development".
 
 To setup a new auth provider, add it under the 'providers' object, with appropriate auth ids and secret info. 
 ```javascript
@@ -27,7 +27,7 @@ providers: {
   }
 }
 ```
-The app automatically configures itself for a particular provider based on what you add in the config file. It then tries to laod a corresponding provider strategy module from the `auth/providers/` folder. You can also add additional auth strategies by including them or writing your own. Each one just needs its own unique provider name.
+The app automatically configures itself for a particular provider based on what you add in the config file. It then tries to load a corresponding provider strategy module from the `auth/providers/` folder. You can also add additional auth strategies by including them or writing your own. Each one just needs its own unique provider name.
 
 ## REST API
 The API allows method override, so for instance to perform a DELETE, you can use a POST and include `_method="delete"` in the post body.
@@ -42,10 +42,24 @@ The API allows method override, so for instance to perform a DELETE, you can use
   </tr>
   <tr>
     <td>GET</td>
+    <td>/auth/:provider</td>
+    <td>N/A</td>
+    <td></td>
+    <td>Authentication path for each provider. Available values for :provider can be retreived via /auth/providers.</td>
+  </tr>
+  <tr>
+    <td>GET</td>
     <td>/auth/providers</td>
     <td>N/A</td>
     <td></td>
     <td>Returns a list of all available auth providers and their login URLs.</td>
+  </tr>
+  <tr>
+    <td>GET</td>
+    <td>/logout</td>
+    <td>N/A</td>
+    <td></td>
+    <td>Logout of the current session.</td>
   </tr>
   <tr>
     <td>GET</td>
