@@ -11,7 +11,7 @@
 			<p>Please login</p>
 		<% } else { %>
 			<p>
-			<a class="user-logout" data-url="/logout" href="/">Log Out</a>
+			<a class="user-logout" data-url="<%= config.paths.api %>/logout" href="/">Log Out</a>
 			</p>
 			
 			<% include user.ejs %>

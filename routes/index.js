@@ -11,13 +11,19 @@ module.exports = function(app){
   app.configure('development', function(){
     
     app.get('/', function(req, res){
+      
+      var renderPage = function(user) {
+        res.render('index', { user: user, providers: auth.providers, config: config });
+      };
+      
       if (!req.isAuthenticated()) {
-        res.render('index', { user: req.user, providers: auth.providers });
+        renderPage(req.user);
       } else {
         userAPI.getUser(req.user.userId, function(data) {
-          res.render('index', { user: data.data, providers: auth.providers });
+          renderPage(data.data);
         });
       }
+      
     });
     
   });
