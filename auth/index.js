@@ -94,18 +94,24 @@ var auth = {
           if (!bExists) {
               userAPI.addProfile(user, profile, profile.authToken,
                 function(u){
-                    res.redirect(req.session.authredirect);
+                  next();
                 }
               );
           } else {
-              res.redirect(req.session.authredirect);
+            next();
           }
         });
         
       } else {
-          res.redirect(req.session.authredirect);
+        next();
       }
 
+    }
+  },
+
+  authResponse: function() {
+    return function(req, res, next) {
+      res.redirect(req.session.authredirect);
     }
   },
   
@@ -162,7 +168,8 @@ var auth = {
     
           app.get(auth.getProviderCallbackUrl(provider.strategy),
             [auth.authenticate(provider.strategy, { scope: provider.scope, failureRedirect: config.paths.failRedirect }),
-             auth.associate()]
+             auth.associate(),
+             auth.authResponse()]
           );
         }
       });
