@@ -56,17 +56,23 @@ var HttpHelper = function(req, res) {
   this.responseData = null;
 };
 
+HttpHelper.errorHandler = function(err, req, res, next) {
+  var http = new HttpHelper(req, res);
+  var data = new ApiResponse({}, null, 500, 'Oops, appears we have a problem.');   
+  http.send(data);
+};
+
 HttpHelper.prototype.send = function(data) {
   
   if (data instanceof ApiResponse) {
     // If error response
     if (data.error) {
-      console.log(data.error);
-  
       if (this.status == null) {
         this.status = data.httpStatus || 500;
       }
       this.responseData = new ApiData(null, this.request, data);
+
+      console.error('Error ['+this.status+':'+this.responseData.getStatusCode()+']: ' + this.responseData.getStatusText());
     
     // If success response
     } else {

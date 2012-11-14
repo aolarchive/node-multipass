@@ -2,7 +2,7 @@ var config = {
     port: 3000,
     paths: { 
       base: 'http://devlocal.aol.com:3000',
-      api: '',
+      api: '/api',
       logout: '/logout',
       authRedirect: '/',
       failRedirect: '/'

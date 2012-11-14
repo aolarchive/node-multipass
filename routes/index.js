@@ -8,14 +8,18 @@ var passport = require('passport')
 
 module.exports = function(app){
   
-  app.get('/', function(req, res){
-    if (!req.isAuthenticated()) {
-      res.render('index', { user: req.user, providers: auth.providers });
-    } else {
-      userAPI.getUser(req.user.userId, function(data) {
-        res.render('index', { user: data.data, providers: auth.providers });
-      });
-    }
+  app.configure('development', function(){
+    
+    app.get('/', function(req, res){
+      if (!req.isAuthenticated()) {
+        res.render('index', { user: req.user, providers: auth.providers });
+      } else {
+        userAPI.getUser(req.user.userId, function(data) {
+          res.render('index', { user: data.data, providers: auth.providers });
+        });
+      }
+    });
+    
   });
 
   app.get(config.paths.api + config.paths.logout, function(req, res){
@@ -77,13 +81,10 @@ module.exports = function(app){
       http.send(data);
     }
   );
-  /*
-  app.get(config.paths.api + '/*', function(req, res) {
-    var http = new HttpHelper(req, res);
   
-    var err = new ApiResponse({}, null, 400, 'Invalid request');
-    
+  app.all(config.paths.api + '/*', function(req, res) {
+    var http = new HttpHelper(req, res);
+    var err = new ApiResponse({}, null, 400, 'Invalid request');   
     http.send(err);
   });
-  */
 };

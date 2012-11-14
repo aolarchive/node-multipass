@@ -1,7 +1,8 @@
 var express = require('express')
   , util = require('util')
   , auth = require('./auth')
-  , config = require('./conf/config');
+  , config = require('./conf/config')
+  , HttpHelper = require('./routes/httphelper');
 
 
 var app = express();
@@ -14,21 +15,28 @@ app.configure(function() {
   app.use(express.cookieParser());
   app.use(express.bodyParser());
   app.use(express.methodOverride());
-  app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
   app.use(express.session({ secret: config.session.secret }));
   auth.init(app);
   app.use(app.router);
   app.use(express.static(__dirname + '/public'));
+  // Log errors
+  app.use(function(err, req, res, next) {
+    console.error(err.stack);
+    next(err);
+  });
+  // Handle all other errors 
+  app.use(HttpHelper.errorHandler);
 });
 
 app.configure('production', 'stage', function(){
   var oneYear = 31557600000;
-  app.use(express.static(__dirname, 'public', { maxAge: oneYear }));
-  app.use(express.errorHandler()); 
+  app.use(express.static(__dirname + '/public', { maxAge: oneYear })); 
 });
 
 require('./routes/index')(app);
 require('./conf/initialize')(app);
+
+console.log('Environment is ' + app.get('env'));
 
 app.listen(config.port, function (){
   console.log('App listening on port '+config.port);
