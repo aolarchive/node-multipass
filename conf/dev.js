@@ -28,6 +28,9 @@ var config = {
           clientSecret : "s6a8aPuspUM3dEYa"
         }
     },
+    session: {
+      secret: 'Leeloo Minai Lekarariba-Lamina-Tchai Ekbat De Sebat' // Or, Leeloo, for short :)
+    },
     mongo: {
       connection : "mongodb://localhost:27017/multipass_dev",
       collection : 'users'

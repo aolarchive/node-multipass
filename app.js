@@ -14,10 +14,17 @@ app.configure(function() {
   app.use(express.cookieParser());
   app.use(express.bodyParser());
   app.use(express.methodOverride());
-  app.use(express.session({ secret: 'keyboard cat' }));
+  app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
+  app.use(express.session({ secret: config.session.secret }));
   auth.init(app);
   app.use(app.router);
   app.use(express.static(__dirname + '/public'));
+});
+
+app.configure('production', 'stage', function(){
+  var oneYear = 31557600000;
+  app.use(express.static(__dirname, 'public', { maxAge: oneYear }));
+  app.use(express.errorHandler()); 
 });
 
 require('./routes/index')(app);
