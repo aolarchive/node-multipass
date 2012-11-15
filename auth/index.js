@@ -1,6 +1,7 @@
 var passport = require('passport')
   , config = require('../conf/config')
   , userAPI = require('../data/user')
+  , HttpHelper = require('../routes/httphelper')
   , ApiResponse = require('../data/apiresponse');
 
 
@@ -44,7 +45,7 @@ var auth = {
   },
   
   setRedirect: function(req) {
-      req.session.authredirect = config.paths.authRedirect;
+      //req.session.authredirect = config.paths.authRedirect;
       if (req.param('r') != null) {
           req.session.authredirect = req.param('r');
       }
@@ -73,32 +74,40 @@ var auth = {
   associate: function() {
     return function(req, res, next) {
 
-      var user = req.user;
-      var profile = req.account;
+      var user = req.user,
+        profile = req.account;
 
       if (user != null && profile != null) {
         
         userAPI.getUser(user.userId, function(apiRes) {
-          var data = apiRes.data,
-            profiles = data.profiles,
-            bExists = false;
-        
-          //debugger;
-          for (var i=0; i < profiles.length; i++) {
-              if (profiles[i].provider == profile.provider && profiles[i].providerId == profile.id) {
-                  bExists = true;
-                  break;
-              }
-          }
-          //debugger;
-          if (!bExists) {
-              userAPI.addProfile(user, profile, profile.authToken,
-                function(u){
-                  next();
-                }
-              );
-          } else {
+          req.apiResponse = apiRes;
+          
+          if (apiRes.error) {
             next();
+          } else {
+            
+            var data = apiRes.data,
+              profiles = data.profiles,
+              bExists = false;
+          
+            //debugger;
+            for (var i=0; i < profiles.length; i++) {
+                if (profiles[i].provider == profile.provider && profiles[i].providerId == profile.id) {
+                    bExists = true;
+                    break;
+                }
+            }
+            //debugger;
+            if (!bExists) {
+                userAPI.addProfile(user, profile, profile.authToken,
+                  function(data){
+                    req.apiResponse = data;
+                    next();
+                  }
+                );
+            } else {
+              next();
+            }
           }
         });
         
@@ -109,9 +118,16 @@ var auth = {
     }
   },
 
-  authResponse: function() {
+  handleResponse: function() {
     return function(req, res, next) {
-      res.redirect(req.session.authredirect);
+      var http = new HttpHelper(req, res),
+        apiRes = req.apiResponse || new ApiResponse();
+      
+      if (req.session.authredirect) {
+        res.redirect(req.session.authredirect);
+      } else {
+        http.send(apiRes);
+      }
     }
   },
   
@@ -169,7 +185,7 @@ var auth = {
           app.get(auth.getProviderCallbackUrl(provider.strategy),
             [auth.authenticate(provider.strategy, { scope: provider.scope, failureRedirect: config.paths.failRedirect }),
              auth.associate(),
-             auth.authResponse()]
+             auth.handleResponse()]
           );
         }
       });

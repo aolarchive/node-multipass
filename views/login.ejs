@@ -5,6 +5,6 @@
 <% } %>
 <ul class="providers">
 	<% providers.forEach(function(provider){ %>
-		<li><a href="<%= provider.loginUrl %>"><%= provider.provider %></a></li>
+		<li><a href="<%= provider.loginUrl %>?r=/"><%= provider.provider %></a></li>
 	<% }) %>
 </ul>
