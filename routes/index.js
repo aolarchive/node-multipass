@@ -10,6 +10,12 @@ module.exports = function(app){
   
   app.configure('development', function(){
     
+    /**
+     * GET /
+     * 
+     * Shows simple dashboard page that shows user data, and has UI to 
+     * remove items, login/logout.
+     */
     app.get('/', function(req, res){
       
       var renderPage = function(user) {
@@ -28,12 +34,22 @@ module.exports = function(app){
     
   });
 
+  /**
+   * GET /api/logout
+   * 
+   * Logout the current user session.
+   */
   app.get(config.paths.api + config.paths.logout, function(req, res){
     req.logout();
     var http = new HttpHelper(req, res);
     http.send();
   });
   
+  /**
+   * GET /api/user
+   * 
+   * Gets the complete user object for current user, including all associated profiles.
+   */
   app.get(config.paths.api + '/user',
     auth.ensureAuthenticated, 
     function(req, res) {
@@ -45,6 +61,11 @@ module.exports = function(app){
     }
   );
   
+  /**
+   * DELETE /api/user
+   * 
+   * Remove all user data for current user, and logs out the current session.
+   */
   app.delete(config.paths.api + '/user',
     auth.ensureAuthenticated, 
     function(req, res) {
@@ -57,6 +78,11 @@ module.exports = function(app){
     }
   );
 
+  /**
+   * GET /api/user/:provider/:providerId
+   * 
+   * Get an auth profile for current user, by given provider name and id.
+   */
   app.get(config.paths.api + '/user/:provider/:providerId', 
     auth.ensureAuthenticated, 
     function(req, res, next) {
@@ -68,6 +94,11 @@ module.exports = function(app){
     }
   );
   
+  /**
+   * DELETE /api/user/:provider/:providerId
+   * 
+   * Remove an auth profile for current user, by given provider name and id.
+   */
   app.delete(config.paths.api + '/user/:provider/:providerId', 
     auth.ensureAuthenticated, 
     function(req, res, next) {
@@ -79,6 +110,11 @@ module.exports = function(app){
     }
   );
   
+  /**
+   * GET /api/auth/providers
+   * 
+   * Get list of available auth providers, and their login URLs.
+   */
   app.get(config.paths.api + '/auth/providers', 
     //auth.ensureAuthenticated, 
     function(req, res, next) {
@@ -88,9 +124,42 @@ module.exports = function(app){
     }
   );
   
+  /**
+   * [*] /api/*
+   * 
+   * Catch all other requests and return 400 error. 
+   */
   app.all(config.paths.api + '/*', function(req, res) {
     var http = new HttpHelper(req, res);
     var err = new ApiResponse({}, null, 400, 'Invalid request');   
     http.send(err);
   });
+  
+  /**
+   * Amend express.param() to accept second param as regexp.
+   * Skips to next route if regexp not matched.
+   */
+  app.param(function(name, fn){
+    if (fn instanceof RegExp) {
+      return function(req, res, next, val){
+        var captures;
+        if (captures = fn.exec(String(val))) {
+          req.params[name] = captures;
+          next();
+        } else {
+          next('route');
+        }
+      }
+    }
+  });
+  
+  /**
+   * Validate :provider param
+   */
+  app.param('provider', /^[\w-]+$/i);
+  
+  /**
+   * Validate :providerId param
+   */
+  app.param('providerId', /^[\w-]+$/i);
 };
