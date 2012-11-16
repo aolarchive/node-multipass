@@ -30,8 +30,6 @@ providers: {
 The app automatically configures itself for a particular provider based on what you add in the config file. It then tries to load a corresponding provider strategy module from the `auth/providers/` folder. You can also add additional auth strategies by including them or writing your own. Each one just needs its own unique provider name.
 
 ## REST API
-The API allows method override, so for instance to perform a DELETE, you can use a POST and include `_method="delete"` in the post body.
-
 <table>
   <tr>
     <th>Method</th>
@@ -43,7 +41,7 @@ The API allows method override, so for instance to perform a DELETE, you can use
   <tr>
     <td>GET</td>
     <td>/auth/:provider</td>
-    <td>N/A</td>
+    <td>[r] - optional redirect URL</td>
     <td></td>
     <td>Authentication path for each provider. Available values for :provider can be retreived via /auth/providers.</td>
   </tr>
@@ -91,6 +89,12 @@ The API allows method override, so for instance to perform a DELETE, you can use
     <td>Deletes a particular auth profile for the currently-authenticated user, based the given 'provider' and 'providerId' values.</td>
   </tr>
 </table>
+
+### Method Override
+The API allows method override with POST, so for instance to perform a DELETE, you can perform a POST and include `_method="delete"` in the post body.
+
+### JSONP
+JSONP support is enabled for all API methods, using the `callback` query param. Ex: `/api/user?callback=foo`
 
 ## License
 Copyright (c) 2012 AOL, Inc.
