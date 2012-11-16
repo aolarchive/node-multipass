@@ -102,7 +102,7 @@ HttpHelper.prototype.send = function(data) {
   
   this.response.set(this.headers);
   
-  this.response.send(this.status, this.responseData.output());
+  this.response.jsonp(this.status, this.responseData.output());
 };
 
 module.exports = HttpHelper;
