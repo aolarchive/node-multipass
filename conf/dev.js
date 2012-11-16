@@ -23,6 +23,16 @@ var config = {
           consumerKey: "eoirk2elkeeg",
           consumerSecret: "Pwqxvz4vjiZ3MBUH"
         },
+        //JJ Test App: https://manage.dev.live.com/Applications/Summary/4c0d972e
+        windowslive : {
+          clientId: "000000004C0D972E",
+          clientSecret: "4zeL16XsSVSwF6GjBqKYtdYXcEuGsRJi"
+        },
+        //JJ Test App: https://code.google.com/apis/console
+        google : {
+          clientId : "85151977732.apps.googleusercontent.com",
+          clientSecret : "iSpCrv9Cv4ACxgkInJ22ebfs"
+        },
         aol: {
           clientId : "ao1iDZvZUadYKQfY",
           clientSecret : "s6a8aPuspUM3dEYa"
