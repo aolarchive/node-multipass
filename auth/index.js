@@ -13,8 +13,8 @@ passport.serializeUser(function(user, done) {
       userId: null
   }
   if (user instanceof ApiResponse) {
-    if (user.error) {
-      done(user.error, serializedData);
+    if (user.isError()) {
+      done(user.getData(), serializedData);
     } else {
       serializedData.userId = user.data.userId;
       done(null, serializedData);
@@ -77,42 +77,38 @@ var auth = {
       var user = req.user,
         profile = req.account;
 
+      // Auth'ed already, associating profile with current user
       if (user != null && profile != null) {
-        
         userAPI.getUser(user.userId, function(apiRes) {
-          req.apiResponse = apiRes;
           
-          if (apiRes.error) {
-            next();
+          if (apiRes.isError()) {
+            req.apiResponse = apiRes; // Return error
+            next();  
           } else {
             
             var data = apiRes.data,
-              profiles = data.profiles,
-              bExists = false;
-          
-            //debugger;
-            for (var i=0; i < profiles.length; i++) {
-                if (profiles[i].provider == profile.provider && profiles[i].providerId == profile.id) {
-                    bExists = true;
-                    break;
-                }
-            }
-            //debugger;
-            if (!bExists) {
-                userAPI.addProfile(user, profile, profile.authToken,
-                  function(data){
-                    req.apiResponse = data;
+              matchingProfile = userAPI.findProfileByUser(data, profile.provider, profile.id);
+            
+            // If no matching profile exists, create one
+            if (!matchingProfile) {
+                userAPI.addProfile(data, profile, profile.authToken,
+                  function(profileRes){
+                    req.apiResponse = profileRes; // Return 201 + profile object, or error
                     next();
                   }
                 );
+            // Else profile already exists
             } else {
+              req.apiResponse = new ApiResponse(200, matchingProfile);  // Return 200 + profile object
               next();
             }
           }
         });
-        
+      
+      // Auth for first time, just uses existing user data
       } else {
-        next();
+        req.apiResponse = new ApiResponse(200); // Return 200 + no data
+        next(); 
       }
 
     }

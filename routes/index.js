@@ -79,6 +79,22 @@ module.exports = function(app){
   );
 
   /**
+   * GET /api/user/:userId
+   * 
+   * Gets the complete user object for the given userId, including all associated profiles.
+   */
+  app.get(config.paths.api + '/user/:userId',
+    auth.ensureAuthenticated, 
+    function(req, res) {
+      var http = new HttpHelper(req, res);
+      
+      userAPI.getUser(req.params.userId, function(data) {
+        http.send(data);
+      });
+    }
+  );
+
+  /**
    * GET /api/user/:provider/:providerId
    * 
    * Get an auth profile for current user, by given provider name and id.
@@ -119,7 +135,7 @@ module.exports = function(app){
     //auth.ensureAuthenticated, 
     function(req, res, next) {
       var http = new HttpHelper(req, res);
-      var data = new ApiResponse(null, auth.providers || []);
+      var data = new ApiResponse(auth.providers || []);
       http.send(data);
     }
   );
@@ -131,7 +147,7 @@ module.exports = function(app){
    */
   app.all(config.paths.api + '/*', function(req, res) {
     var http = new HttpHelper(req, res);
-    var err = new ApiResponse({}, null, 400, 'Invalid request');   
+    var err = new ApiResponse(400, Error('Invalid request'));
     http.send(err);
   });
   
@@ -162,4 +178,9 @@ module.exports = function(app){
    * Validate :providerId param
    */
   app.param('providerId', /^[\w-]+$/i);
+  
+  /**
+   * Validate :userId param
+   */
+  app.param('userId', /^[\w-]+$/i);
 };

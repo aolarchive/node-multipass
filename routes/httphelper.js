@@ -66,7 +66,7 @@ HttpHelper.prototype.send = function(data) {
   
   if (data instanceof ApiResponse) {
     // If error response
-    if (data.error) {
+    if (data.isError()) {
       if (this.status == null) {
         this.status = data.httpStatus || 500;
       }

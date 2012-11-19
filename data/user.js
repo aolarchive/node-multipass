@@ -42,19 +42,23 @@ function buildUserProfile(profile, authToken){
   return data;
 };
 
-function findProfile(user, provider, providerId, authToken) {
-  var profiles = user.profiles,
-    matchingProfile = null;
-  
-  for (var i=0; i < profiles.length; i++) {
-    if (profiles[i].provider == provider && profiles[i].providerId == providerId) {
-      matchingProfile = profiles[i];
-      break;
-    }
-  }
-  
-  return matchingProfile;
+function updateUserProfile(profile, authToken){
+  profile = profile || {};
+  var data = {
+      username : profile.username,
+      displayName : profile.displayName,
+      familyName : profile.familyName,
+      givenName : profile.givenName,
+      gender : profile.gender,
+      profileUrl : profile.profileUrl,
+      authToken : authToken,
+      emails : profile.emails,
+      modifiedDate : Date.now()
+  };
+  return data;
 };
+
+
 
 var userAPI = {
   
@@ -67,79 +71,77 @@ var userAPI = {
         
         // Error in the request
         if (err) {
-          res = new ApiResponse(err, null, 404, 'The profile cannot be found.');
+          res = new ApiResponse(500, err, 'Error retrieving the profile.');
           callback(res);
             
         // Matching user found, update the profile    
         } else if (user) {
-          var matchingProfile = findProfile(user, profile.provider, profile.id, authToken);
-          
-          // Matching profile found, update the authToken
-          if (matchingProfile != null) {
-            matchingProfile.authToken = authToken;
-            matchingProfile.modifiedDate = Date.now();
-            user.modifiedDate = Date.now();
-            user.markModified('profiles');
-            user.save(function(err,doc){
-              if (err) {
-                res = new ApiResponse(err, null, 500, 'Error updating the profile.');
-              } else {
-                res = new ApiResponse(null, doc);
-              }
-              callback(res);
-            });
-            
-          // No profile found, just return user
-          } else {
-            res = new ApiResponse(null, doc);
-            callback(res);
-          }
+          userAPI.updateProfileByUser(user, profile, authToken, callback);
           
         // No user found, create user  
         } else {
-          var newUser = buildUser(profile, authToken);
-          newUser.save(function(err,doc) {
-            if (err) {
-              res = new ApiResponse(err, null, 500, 'Error creating the user.');
-            } else {
-              res = new ApiResponse(null, doc, 201);
-            }
-            callback(res);
-          });
+          userAPI.addUser(profile, authToken, callback);
         }
       }
     );
   },
   
+  /**
+   * Responses:
+   *  success: [201] The user object that was added.
+   */
+  addUser : function(profile, authToken, callback) {
+    var newUser = buildUser(profile, authToken);
+    newUser.save(function(err,doc) {
+      var res = null;
+      if (err) {
+        res = new ApiResponse(500, err, 'Error creating the user.');
+      } else {
+        res = new ApiResponse(201, doc);
+      }
+      callback(res);
+    });
+  },
+  
+  /**
+   * Responses:
+   *  success: [200] The user object that was found.
+   */
   getUser : function(userId, callback) {
     User.findOne({'userId':userId},
       fieldInclusions,
       function(err, doc){
         var res = null;
         if (err) {
-          res = new ApiResponse(err, null, 404, 'The user cannot be found.');
+          res = new ApiResponse(500, err, 'Error retriving the user.');
+        } else if (!doc) {
+          res = new ApiResponse(404, Error('The user cannot be found.'));
         } else {
-          res = new ApiResponse(null, doc);
+          res = new ApiResponse(doc);
         }
         callback(res);
       }
     );
   },
   
+  /**
+   * Responses:
+   *  success: [200] The user object that was removed.
+   */
   removeUser : function(userId, callback) {
     User.findOne({'userId':userId},
       fieldInclusions,  
       function(err, doc){
         var res = null;
         if (err) {
-          res = new ApiResponse(err, null, 404, 'The user cannot be found.');
+          res = new ApiResponse(404, err, 'The user cannot be found.');
           callback(res);
         } else {
           doc.remove(function (err, removedDoc) {
             if (err) {
-              res = new ApiResponse(err, null, 500, 'Error deleting the user.');
+              res = new ApiResponse(500, err, 'Error deleting the user.');
             } else {
-              res = new ApiResponse(null, removedDoc);
+              res = new ApiResponse(removedDoc);
             }
             callback(res);
           });
@@ -148,19 +150,23 @@ var userAPI = {
     );
   },
   
+  /**
+   * Responses:
+   *  success: [200] The profile object that was found.
+   */
   getProfile : function(user, provider, providerId, callback) {
     this.getUser(user.userId,
       function(res){
-        if (res.error) {
+        if (res.isError()) {
           callback(res);
         } else {
           var u = res.data,
-            userProfile = findProfile(u, provider, providerId);
+            userProfile = userAPI.findProfileByUser(u, provider, providerId);
           
           if (!userProfile) {
-            res = new ApiResponse(res, null, 404, 'The profile cannot be found.');
+            res = new ApiResponse(404, res, 'The profile cannot be found.');
           } else {
-            res = new ApiResponse(null, userProfile);
+            res = new ApiResponse(userProfile);
           }
           callback(res);
         }
@@ -168,10 +174,14 @@ var userAPI = {
     );
   },
   
+  /**
+   * Responses:
+   *  success: [201] The profile object that was added.
+   */
   addProfile : function(user, profile, authToken, callback) {
     this.getUser(user.userId,
       function(res){
-        if (res.error) {
+        if (res.isError()) {
           callback(res);
         } else {
           var u = res.data,
@@ -182,9 +192,9 @@ var userAPI = {
           u.markModified('profiles');
           u.save(function(err,doc) {
             if (err) {
-              res = new ApiResponse(err, null, 500, 'Error creating the profile.');
+              res = new ApiResponse(500, err, 'Error creating the profile.');
             } else {
-              res = new ApiResponse(null, doc, 201);
+              res = new ApiResponse(201, userProfile);
             }
             callback(res);
           });
@@ -192,26 +202,30 @@ var userAPI = {
       }
     );
   },
-
+  
+  /**
+   * Responses:
+   *  success: [200] The profile object that was removed.
+   */
   removeProfile : function(user, provider, providerId, callback) {
     this.getUser(user.userId,
       function(res){
-        if (res.error) {
+        if (res.isError()) {
           callback(res);
         } else {
           var u = res.data,
-            matchingProfile = findProfile(u, provider, providerId);
+            matchingProfile = userAPI.findProfileByUser(u, provider, providerId);
           
           if (!matchingProfile) {
-            res = new ApiResponse(err, null, 404, 'The profile cannot be found.');
+            res = new ApiResponse(404, err, 'The profile cannot be found.');
             callback(res);
           } else {
             matchingProfile.remove();
             u.save(function(err,doc) {
               if (err) {
-                res = new ApiResponse(err, null, 500, 'Error deleting the profile.');
+                res = new ApiResponse(500, err, 'Error deleting the profile.');
               } else {
-                res = new ApiResponse(null, doc);
+                res = new ApiResponse(matchingProfile);
               }
               callback(res);
             });
@@ -219,6 +233,56 @@ var userAPI = {
         }
       }
     );
+  },
+  
+  /**
+   * @returns {UserProfile} The profile object that was found, or null.
+   */
+  findProfileByUser : function(user, provider, providerId, authToken) {
+    var profiles = user && user.profiles,
+      matchingProfile = null;
+    
+    if (profiles && profiles.length) {
+      for (var i=0; i < profiles.length; i++) {
+        if (profiles[i].provider == provider && profiles[i].providerId == providerId) {
+          matchingProfile = profiles[i];
+          break;
+        }
+      }
+    }
+    
+    return matchingProfile;
+  },
+  
+  /**
+   * Responses:
+   *  success: [200] The user object whose profile was updated.
+   */
+  updateProfileByUser : function(user, profile, authToken, callback) {
+    var matchingProfile = userAPI.findProfileByUser(user, profile.provider, profile.id, authToken),
+      res = null;
+    
+    // Matching profile found, update the profile
+    if (matchingProfile != null) {
+      
+      matchingProfile.set( updateUserProfile(profile, authToken) );
+      user.modifiedDate = Date.now();
+      user.markModified('profiles');
+      
+      user.save(function(err,doc){
+        if (err) {
+          res = new ApiResponse(500, err, 'Error updating the profile.');
+        } else {
+          res = new ApiResponse(doc);
+        }
+        callback(res);
+      });
+  
+    // No profile found, return error
+    } else {
+      res = new ApiResponse(404, Error('The profile cannot be found'));
+      callback(res);
+    }
   }
   
 };
