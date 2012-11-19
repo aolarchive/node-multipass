@@ -2,6 +2,7 @@ var express = require('express')
   , util = require('util')
   , auth = require('./auth')
   , config = require('./conf/config')
+  , sessionStore = require('./data/sessionstore')
   , HttpHelper = require('./routes/httphelper');
 
 
@@ -15,7 +16,15 @@ app.configure(function() {
   app.use(express.cookieParser());
   app.use(express.bodyParser());
   app.use(express.methodOverride());
-  app.use(express.session({ secret: config.session.secret }));
+  // Setup db session store
+  app.use(
+    express.session(
+      { 
+        secret: config.session.secret,
+        store: sessionStore.get()
+      }
+    )
+  );
   auth.init(app);
   app.use(app.router);
   app.use(express.static(__dirname + '/public'));
