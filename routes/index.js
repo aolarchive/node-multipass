@@ -8,7 +8,7 @@ var passport = require('passport')
 
 module.exports = function(app){
   
-  app.configure('development', function(){
+  app.configure('development', 'heroku', function(){
     
     /**
      * GET /
