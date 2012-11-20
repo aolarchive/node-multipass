@@ -14,7 +14,7 @@ passport.use(provider.strategy,
   new TwitterStrategy({
       consumerKey: config.providers.twitter.consumerKey,
       consumerSecret: config.providers.twitter.consumerSecret,
-      callbackURL: config.paths.base + auth.getProviderCallbackUrl(provider.strategy)
+      callbackURL: config.getBaseUrl() + auth.getProviderCallbackUrl(provider.strategy)
     },
     function(token, tokenSecret, profile, done) {
       // asynchronous verification, for effect...
@@ -35,7 +35,7 @@ passport.use(auth.getAuthzStrategy(provider.strategy),
   new TwitterStrategy({
       consumerKey: config.providers.twitter.consumerKey,
       consumerSecret: config.providers.twitter.consumerSecret,
-      callbackURL: config.paths.base + auth.getProviderCallbackUrl(provider.strategy)
+      callbackURL: config.getBaseUrl() + auth.getProviderCallbackUrl(provider.strategy)
     },
     function(token, tokenSecret, profile, done) {
       // asynchronous verification, for effect...

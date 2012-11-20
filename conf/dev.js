@@ -1,7 +1,7 @@
 var config = {
-    port: 3000,
+    port: process.env.PORT || 3000,
+    host: 'devlocal.aol.com',
     paths: { 
-      base: 'http://devlocal.aol.com:3000',
       api: '/api',
       logout: '/logout',
       authRedirect: '/',

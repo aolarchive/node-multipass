@@ -15,7 +15,7 @@ passport.use(provider.strategy,
   new GoogleStrategy({
       clientID: config.providers.google.clientId,
       clientSecret: config.providers.google.clientSecret,
-      callbackURL: config.paths.base + auth.getProviderCallbackUrl(provider.strategy)
+      callbackURL: config.getBaseUrl() + auth.getProviderCallbackUrl(provider.strategy)
     },
     function(accessToken, refreshToken, profile, done) {
       // asynchronous verification, for effect...
@@ -33,7 +33,7 @@ passport.use(auth.getAuthzStrategy(provider.strategy),
   new GoogleStrategy({
       clientID: config.providers.google.clientId,
       clientSecret: config.providers.google.clientSecret,
-      callbackURL: config.paths.base + auth.getProviderCallbackUrl(provider.strategy)
+      callbackURL: config.getBaseUrl() + auth.getProviderCallbackUrl(provider.strategy)
     },
     function(accessToken, refreshToken, profile, done) {
       // asynchronous verification, for effect...

@@ -14,7 +14,7 @@ passport.use(provider.strategy,
   new AOLStrategy({
       clientID: config.providers.aol.clientId,
       clientSecret: config.providers.aol.clientSecret,
-      callbackURL: config.paths.base + auth.getProviderCallbackUrl(provider.strategy)
+      callbackURL: config.getBaseUrl() + auth.getProviderCallbackUrl(provider.strategy)
     },
     function(accessToken, refreshToken, profile, done) {
       // asynchronous verification, for effect...
@@ -32,7 +32,7 @@ passport.use(auth.getAuthzStrategy(provider.strategy),
   new AOLStrategy({
       clientID: config.providers.aol.clientId,
       clientSecret: config.providers.aol.clientSecret,
-      callbackURL: config.paths.base + auth.getProviderCallbackUrl(provider.strategy)
+      callbackURL: config.getBaseUrl() + auth.getProviderCallbackUrl(provider.strategy)
     },
     function(accessToken, refreshToken, profile, done) {
       // asynchronous verification, for effect...
