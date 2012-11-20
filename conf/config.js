@@ -17,7 +17,10 @@ function getConfig() {
   }
   
   conf.getBaseUrl = function() {
-    return 'http://' + conf.host + ':' + conf.port;
+    var port = conf.portPublic || conf.port,
+      portStr = (!port || port == 80) ? '' : ':' + port;
+    
+    return 'http://' + conf.host + portStr;
   };
   
   return conf;

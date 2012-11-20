@@ -1,6 +1,7 @@
 var config = {
     port: process.env.PORT || 3000,
     host: 'multipass.herokuapp.com',
+    portPublic: 80,
     paths: { 
       api: '/api',
       logout: '/logout',
@@ -8,10 +9,10 @@ var config = {
       failRedirect: '/'
     },
     providers: {
-        //JJ Test App: https://developers.facebook.com/apps/105846932813376
+        //JJ Test App: https://developers.facebook.com/apps/307415842706720
         facebook: {
-          appId: "105846932813376",
-          appSecret: "117ddf4b3a250c722dcaeb51f39d1139"
+          appId: "307415842706720",
+          appSecret: "397f97341adbc9020c880f0a99d4d700"
         },
         //JJ Test App: https://dev.twitter.com/apps/3609768
         twitter: {
