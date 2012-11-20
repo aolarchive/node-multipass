@@ -72,8 +72,8 @@ module.exports = function(app){
       var http = new HttpHelper(req, res);
       
       userAPI.removeUser(req.user.userId, function(data) {
-        http.send(data);
         req.logout(); // Must logout so session data for this user doesn't persist
+        http.send(data);
       });
     }
   );
