@@ -8,6 +8,8 @@ var express = require('express')
 
 var app = express();
 
+console.log('Environment is ' + app.get('env'));
+
 // configure Express
 app.configure(function() {
   app.set('views', __dirname + '/views');
@@ -16,15 +18,9 @@ app.configure(function() {
   app.use(express.cookieParser());
   app.use(express.bodyParser());
   app.use(express.methodOverride());
-  // Setup db session store
-  app.use(
-    express.session(
-      { 
-        secret: config.session.secret,
-        store: sessionStore.get()
-      }
-    )
-  );
+  // Init session management
+  sessionStore.init(app);
+  // Init auth
   auth.init(app);
   app.use(app.router);
   app.use(express.static(__dirname + '/public'));
@@ -44,8 +40,6 @@ app.configure('production', 'stage', function(){
 
 require('./routes/index')(app);
 require('./conf/initialize')(app);
-
-console.log('Environment is ' + app.get('env'));
 
 app.listen(config.port, function (){
   console.log('App listening on port '+config.port);

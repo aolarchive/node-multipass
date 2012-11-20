@@ -40,9 +40,7 @@ var config = {
     },
     session: {
       secret: 'Leeloo Minai Lekarariba-Lamina-Tchai Ekbat De Sebat', // Or, Leeloo, for short :)
-      host: 'localhost',
-      port: 27017,
-      db : 'multipass_session'
+      connection : "mongodb://localhost:27017/multipass_session"
     },
     mongo: {
       connection : "mongodb://localhost:27017/multipass_dev",
