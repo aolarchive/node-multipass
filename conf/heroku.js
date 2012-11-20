@@ -24,10 +24,10 @@ var config = {
           consumerKey: "eoirk2elkeeg",
           consumerSecret: "Pwqxvz4vjiZ3MBUH"
         },
-        //JJ Test App: https://manage.dev.live.com/Applications/Summary/4c0d972e
+        //JJ Test App: https://manage.dev.live.com/Applications/Summary/000000004C0DA46F
         windowslive : {
-          clientId: "000000004C0D972E",
-          clientSecret: "4zeL16XsSVSwF6GjBqKYtdYXcEuGsRJi"
+          clientId: "000000004C0DA46F",
+          clientSecret: "Z-vvfxIft8XU1qMaDDjFnuekTYjl3VXZ"
         },
         //JJ Test App: https://code.google.com/apis/console
         google : {
