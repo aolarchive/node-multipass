@@ -164,7 +164,7 @@ var userAPI = {
             userProfile = userAPI.findProfileByUser(u, provider, providerId);
           
           if (!userProfile) {
-            res = new ApiResponse(404, res, 'The profile cannot be found.');
+            res = new ApiResponse(404, Error('The profile cannot be found.'));
           } else {
             res = new ApiResponse(userProfile);
           }
@@ -217,7 +217,7 @@ var userAPI = {
             matchingProfile = userAPI.findProfileByUser(u, provider, providerId);
           
           if (!matchingProfile) {
-            res = new ApiResponse(404, err, 'The profile cannot be found.');
+            res = new ApiResponse(404, Error('The profile cannot be found.'));
             callback(res);
           } else {
             matchingProfile.remove();
