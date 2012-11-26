@@ -19,7 +19,16 @@ This app requires Node.js and MongoDB. It uses `node-passport` to handle authent
 ### Configuration
 Most configuration takes place in the `conf/` folder. There are separate config files for different server enviroments (`dev.js`, `prod.js`, etc.), that are chosen based on the `NODE_ENV` environment variable, all managed by the special `conf/config.js` file. The default environment is "development".
 
-To setup a new auth provider, add it under the 'providers' object, with appropriate auth ids and secret info. 
+### Auth Providers
+The included set of auth providers are:
+* Facebook
+* Twitter
+* AOL
+* LinkedIn
+* Google
+* Windows Live
+
+To setup a new auth provider, add it under the 'providers' object in the config file, with appropriate auth ids and secret info. 
 ```javascript
 providers: {
   facebook: {
@@ -28,7 +37,7 @@ providers: {
   }
 }
 ```
-The app automatically configures itself for a particular provider based on what you add in the config file. It then tries to load a corresponding provider strategy module from the `auth/providers/` folder. You can also add additional auth strategies by including them or writing your own. Each one just needs its own unique provider name.
+The app automatically configures itself for a particular provider based on what you add in the config file. Then using the provider name you used in the providers object, like `'facebook'`, it then tries to load a corresponding provider strategy module with the same name from the `auth/providers/` folder, such as `facebook.js`. You can also add additional auth strategies by including them or writing your own. Each one just needs its own unique provider name.
 
 ## REST API
 <table>
@@ -113,10 +122,33 @@ The API allows method override with POST, so for instance to perform a DELETE, y
 ### JSONP
 JSONP support is enabled for all API methods, using the `callback` query param. Ex: `/api/user?callback=foo`
 
+### Success Response
+To check of the response was successful, first a successful HTTP status code will be returned, such as 200 or 201.
+
+And the response body will indicate a status of "Ok":
+```Javascript
+{
+  data: { ... },
+  status: "Ok"
+}
+```
+
+### Error Response
+When an error has occurred, the appropriate error HTTP status code will be returned, such as 400, 401, 404, or 500.
+
+Also the response body will indicate a status of "Error", and include a status text and status code:
+```Javascript
+{
+  data: null,
+  status: "Error",
+  statusText: "Invalid request",
+  statusCode: 1
+}
+```
+
 ## Credits
 * [Jeremy Jannotta](https://github.com/jeremyjannotta)
-
-Much of the multiauth code is copied/derived from the AOL [Stash server](https://github.com/aol/Stash) project, so many thanks goes to them for the inspiration and examples for this project.
+* [Stash server](https://github.com/aol/Stash) - Much of the multiauth code is copied/derived from the AOL Stash project, so many thanks goes to them for the inspiration and examples for this project.
 
 ## License
 Copyright (c) 2012 AOL, Inc.
