@@ -13,6 +13,7 @@ var UserProfile = new Schema({
   profileUrl : String,
   authToken : String,
   emails : [],
+  originalUserId: String,
   creationDate: Date,
   modifiedDate: Date
 });
@@ -20,6 +21,7 @@ var UserProfile = new Schema({
 var User = new Schema({
   userId : {type: String, unique: true},
   profiles : [UserProfile],
+  linkedUsers : [String],
   creationDate: Date,
   modifiedDate: Date
 });

@@ -58,25 +58,108 @@ function updateUserProfile(profile, authToken){
   return data;
 };
 
+/**
+ * Link multiple user accounts together that have the same auth profile.
+ * @param {Array} users Array of User documents that all contain the same auth profile. 
+ * @param {Function} callback Callback function called once completed linking requests. 
+ *   Returns array of ApiResponse objects, if applicable. 
+ */
+function linkUsers(users, callback) {
+  var responses = [];
+  users = users || [];
+  
+  // More than one user, link the accounts
+  if (users.length > 1) {
+    console.log('More than one matching user found! Linking the accounts...');
+    
+    users.forEach(function(user, i){
+      // Get list of all userIds to associate each user
+      var linkedUserIds = users.filter(function(value){
+        // Filter down to all users but current one
+        return value.userId !== user.userId;
+      })
+      .map(function(value){
+        // Copy profiles into this user
+        copyProfiles(value, user);
+
+        // Return only userIds
+        return value.userId;
+      });
+      
+      user.linkedUsers = linkedUserIds;
+      user.save(function(err,doc) {
+        var res = null;
+        if (err) {
+          res = new ApiResponse(500, err, 'Error updating the user.');
+        } else {
+          res = new ApiResponse(doc);
+        }
+        responses.push(res);
+        // Execute callback once collected all responses
+        if (responses.length == users.length) {
+          callback(responses);
+        }
+      });
+    });
+  // Only one user, do nothing
+  } else {
+    callback(responses);
+  }
+};
+
+/**
+ * Copy all profiles from sourceUser into targetUser, that targetUser doesn't already have. 
+ * The targetUser object will be marked modified, need to save elsewhere to keep changes.
+ * @param {User} sourceUser
+ * @param {User} targetUser
+ */
+function copyProfiles(sourceUser, targetUser) {
+  
+  // Generate Array of unique profiles to copy into targetUser
+  var toCopy = sourceUser.profiles.filter(function(srcValue, srcIndex){
+    var exists = targetUser.profiles.some(function(val, i){
+      return (val.provider == srcValue.provider && val.providerId == srcValue.providerId);
+    });
+    return (!exists);
+  });
+  
+  if (toCopy.length) {
+    toCopy.forEach(function(val, i){
+      var copiedProfile = val.toObject(); // Convert Document to plain object
+      delete copiedProfile._id; // Remove old _id, so new one will be generated
+      copiedProfile.originalUserId = sourceUser.userId; // Add originalUserId, so we know where this profile came from
+      
+      // Add copied profile to target user
+      targetUser.profiles.push(copiedProfile);
+    });
+  }
+};
 
 
 var userAPI = {
   
   addOrUpdateUser : function(profile, authToken, callback) {
     profile = profile || {};
-    User.findOne({'profiles.provider':profile.provider, 'profiles.providerId':profile.id},
+    User.find({'profiles.provider':profile.provider, 'profiles.providerId':profile.id},
       fieldInclusions,
-      function(err, user){
-        var res = null;
+      { sort:{ modifiedDate:-1 } },
+      function(err, users){
+        var res = null,
+          mostRecentUser = null;
         
         // Error in the request
         if (err) {
           res = new ApiResponse(500, err, 'Error retrieving the profile.');
           callback(res);
             
-        // Matching user found, update the profile    
-        } else if (user) {
-          userAPI.updateProfileByUser(user, profile, authToken, callback);
+        // Matching user(s) found, update the profile    
+        } else if (users && users.length) {
+          mostRecentUser = users[0];
+          
+          // Link users together, if more than one, then update profile
+          linkUsers(users, function(responses){
+            userAPI.updateProfileByUser(mostRecentUser, profile, authToken, callback);
+          });
           
         // No user found, create user  
         } else {
