@@ -36,6 +36,11 @@ var config = {
         aol: {
           clientId : "ao1iDZvZUadYKQfY",
           clientSecret : "s6a8aPuspUM3dEYa"
+        },
+        //JJ Test App: https://github.com/settings/applications/28082
+        github: {
+          clientId : "e2a289e2bdf370f8e9c5",
+          clientSecret : "63623224a31a43c4c5c33bcc7e5eeb212eb3f4b4"
         }
     },
     session: {

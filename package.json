@@ -28,7 +28,8 @@
     "passport-aol-oauth": ">= 0.1.0", 
     "passport-linkedin": ">= 0.1.0",
     "passport-google-oauth": ">= 0.1.0",
-    "passport-windowslive": ">= 0.1.0"
+    "passport-windowslive": ">= 0.1.0",
+    "passport-github": ">= 0.1.0"
   },
   "engines": {
   	"node": "0.8.x",
