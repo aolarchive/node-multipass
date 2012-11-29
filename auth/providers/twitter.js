@@ -1,7 +1,5 @@
-var passport = require('passport')
-  , config = require('../../conf/config')
+var config = require('../../conf/config')
   , auth = require('../index')
-  , userAPI = require('../../data/user')
   , TwitterStrategy = require('passport-twitter').Strategy;
 
 
@@ -10,44 +8,23 @@ var provider = {
   scope: null
 };
 
-passport.use(provider.strategy,
-  new TwitterStrategy({
-      consumerKey: config.providers.twitter.consumerKey,
-      consumerSecret: config.providers.twitter.consumerSecret,
-      callbackURL: config.getBaseUrl() + auth.getProviderCallbackUrl(provider.strategy)
-    },
-    function(token, tokenSecret, profile, done) {
-      // asynchronous verification, for effect...
-      process.nextTick(function () {
-        if (profile.displayName == null){
-            profile.displayName = profile.username;
-        }
-        profile.authToken=token;
-        userAPI.addOrUpdateUser(profile, token, function(obj){
-          return done(null, obj);
-        });
-      });
+auth.useOAuthStrategy(provider, TwitterStrategy, {
+    consumerKey: config.providers.twitter.consumerKey,
+    consumerSecret: config.providers.twitter.consumerSecret
+  },
+  function(req, token, tokenSecret, profile, done) {
+    // Normalize some data
+    if (profile.displayName == null){
+      profile.displayName = profile.username;
+    }   
+    // Not logged in. Load user.
+    if (!req.user) {
+      return auth.authVerify(provider, token, tokenSecret, profile, done);
+    // Logged in. Associate account with user.
+    } else {
+      return auth.authzVerify(provider, token, tokenSecret, profile, done);
     }
-  )
-);
-
-passport.use(auth.getAuthzStrategy(provider.strategy),
-  new TwitterStrategy({
-      consumerKey: config.providers.twitter.consumerKey,
-      consumerSecret: config.providers.twitter.consumerSecret,
-      callbackURL: config.getBaseUrl() + auth.getProviderCallbackUrl(provider.strategy)
-    },
-    function(token, tokenSecret, profile, done) {
-      // asynchronous verification, for effect...
-      process.nextTick(function () {
-        if (profile.displayName == null){
-            profile.displayName = profile.username;
-        }
-        profile.authToken=token;
-        return done(null, profile);
-      });
-    }
-  )
+  }
 );
 
 module.exports.provider = provider;

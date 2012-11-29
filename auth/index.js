@@ -1,4 +1,5 @@
 var passport = require('passport')
+  , _ = require('underscore')._
   , config = require('../conf/config')
   , userAPI = require('../data/user')
   , HttpHelper = require('../routes/httphelper')
@@ -66,7 +67,7 @@ var auth = {
            // using authorize causes passport to put it on req.account, and not touch the existing
            // user and session  - see here: http://passportjs.org/guide/authorize.html
            // we'll next out into `associate` middleware for app-specific logic
-           passport.authorize(provider + '-authz', { scope: options.scope })(req, res, next);
+           passport.authorize(provider, { scope: options.scope })(req, res, next);
        }
    }
   },
@@ -112,6 +113,91 @@ var auth = {
       }
 
     }
+  },
+  
+  /**
+   * Middleware to verify passport.authenticate when unauthed; loads user from records 
+   */
+  authVerify: function(provider, accessToken, refreshToken, profile, done){
+    profile.authToken = accessToken;
+    
+    userAPI.findOrAddUser(profile, accessToken, function(obj){
+      return done(null, obj);
+    });
+  },
+
+  /**
+   * Middleware to verify passport.authorize when already authed; for now just passes on profile
+   */
+  authzVerify: function(provider, accessToken, refreshToken, profile, done){
+    profile.authToken = accessToken;
+    
+    return done(null, profile);
+  },
+
+  /** 
+   * Generic utility to initialize and use different auth Strategies, called by
+   * each Strategy implementation.
+   */
+  useStrategy: function(provider, strategy, options, verify) {
+    passport.use(
+      provider.strategy,
+      new strategy(options, verify)
+    );
+  },
+
+  /**
+   * Wrapper for useStrategy() for OAuth Strategy implementations.
+   */
+  useOAuthStrategy: function(provider, strategy, options, verify) {
+    options = _.extend({
+      callbackURL: config.getBaseUrl() + auth.getProviderCallbackUrl(provider.strategy),
+      passReqToCallback: true
+    }, options);
+    
+    verify = verify || function(req, accessToken, refreshToken, profile, done) {
+      // Invalid signature
+      if (arguments.length != 5 || !req || typeof(req) != 'object') {
+        return done(Error('Invalid signature in verify strategy.'), false);
+      
+      // Not logged in. Load user.
+      } else if (!req.user) {
+        return auth.authVerify(provider, accessToken, refreshToken, profile, done);
+    
+      // Logged in. Associate account with user.
+      } else {
+        return auth.authzVerify(provider, accessToken, refreshToken, profile, done);
+      }
+    }
+    
+    auth.useStrategy(provider, strategy, options, verify);
+  },
+
+  /**
+   * Wrapper for useStrategy() for OpenID Strategy implementations.
+   */
+  useOpenIDStrategy: function(provider, strategy, options, verify) {
+    options = _.extend({
+      returnURL: config.getBaseUrl() + auth.getProviderCallbackUrl(provider.strategy),
+      passReqToCallback: true
+    }, options);
+    
+    verify = verify || function(req, identifier, profile, done) {
+      // Invalid signature
+      if (arguments.length != 4 || !req || typeof(req) != 'object') {
+        return done(Error('Invalid signature in verify strategy.'), false);
+      
+      // Not logged in. Load user.
+      } else if (!req.user) {
+        return auth.authVerify(provider, identifier, null, profile, done);
+    
+      // Logged in. Associate account with user.
+      } else {
+        return auth.authzVerify(provider, identifier, null, profile, done);
+      }
+    }
+    
+    auth.useStrategy(provider, strategy, options, verify);
   },
 
   handleResponse: function() {
