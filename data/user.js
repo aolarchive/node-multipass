@@ -138,26 +138,30 @@ function copyProfiles(sourceUser, targetUser) {
 
 var userAPI = {
   
-  addOrUpdateUser : function(profile, authToken, callback) {
+  /**
+   * Responses:
+   *  success: [200] {User} The updated User object, if user found and profile updated.
+   *  success: [201] {User} The User object that was added, if didn't exist exists.
+   *  error:   [404] If user found, but profile was not found.
+   *  error:   [500] If there were any system errors.
+   */
+  findOrAddUser : function(profile, authToken, callback) {
     profile = profile || {};
-    User.find({'profiles.provider':profile.provider, 'profiles.providerId':profile.id},
-      fieldInclusions,
-      { sort:{ modifiedDate:-1 } },
-      function(err, users){
-        var res = null,
+    
+    this.findUsersByProfile(profile, authToken, function(apiRes){
+      if (apiRes.isError()) {
+        callback(apiRes);
+      } else {
+        var users = apiRes.getData(),
           mostRecentUser = null;
         
-        // Error in the request
-        if (err) {
-          res = new ApiResponse(500, err, 'Error retrieving the profile.');
-          callback(res);
-            
-        // Matching user(s) found, update the profile    
-        } else if (users && users.length) {
+        // Matching user(s) found, update the profile
+        if (users && users.length) {
           mostRecentUser = users[0];
           
-          // Link users together, if more than one, then update profile
+          // Link users together, if more than one
           linkUsers(users, function(responses){
+            // Update profile with latest data
             userAPI.updateProfileByUser(mostRecentUser, profile, authToken, callback);
           });
           
@@ -165,6 +169,29 @@ var userAPI = {
         } else {
           userAPI.addUser(profile, authToken, callback);
         }
+      }
+    });
+  },
+  
+  /**
+   * Responses:
+   *  success: [200] An Array of User objects that match the profile.
+   */
+  findUsersByProfile : function(profile, authToken, callback) {
+    profile = profile || {};
+    User.find({'profiles.provider':profile.provider, 'profiles.providerId':profile.id},
+      fieldInclusions,
+      { sort:{ modifiedDate:-1 } }, // Sort by modifiedDate, DESC
+      function(err, users){
+        var res = null;
+        // Error in the request
+        if (err) {
+          res = new ApiResponse(500, err, 'Error finding the users.');
+        // Return array of users - may be empty  
+        } else {
+          res = new ApiResponse(users); 
+        }
+        callback(res);
       }
     );
   },
