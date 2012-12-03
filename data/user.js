@@ -148,7 +148,7 @@ var userAPI = {
   findOrAddUser : function(profile, authToken, callback) {
     profile = profile || {};
     
-    this.findUsersByProfile(profile, authToken, function(apiRes){
+    this.findUsersByProfile(profile, function(apiRes){
       if (apiRes.isError()) {
         callback(apiRes);
       } else {
@@ -177,7 +177,7 @@ var userAPI = {
    * Responses:
    *  success: [200] An Array of User objects that match the profile.
    */
-  findUsersByProfile : function(profile, authToken, callback) {
+  findUsersByProfile : function(profile, callback) {
     profile = profile || {};
     User.find({'profiles.provider':profile.provider, 'profiles.providerId':profile.id},
       fieldInclusions,
