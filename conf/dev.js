@@ -7,6 +7,7 @@ var config = {
       authRedirect: '/',
       failRedirect: '/'
     },
+    https: true,
     providers: {
         //JJ Test App: https://developers.facebook.com/apps/105846932813376
         facebook: {

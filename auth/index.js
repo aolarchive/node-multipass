@@ -272,6 +272,10 @@ var auth = {
         }
       });
     }
+  },
+  
+  validateApp: function(req, res, next){
+    next();
   }
   
 };

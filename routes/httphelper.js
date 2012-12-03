@@ -58,8 +58,33 @@ var HttpHelper = function(req, res) {
 
 HttpHelper.errorHandler = function(err, req, res, next) {
   var http = new HttpHelper(req, res);
-  var data = new ApiResponse({}, null, 500, 'Oops, appears we have a problem.');   
+  var data = new ApiResponse(500, Error('Oops, appears we have a problem.'));   
   http.send(data);
+};
+
+/**
+ * Check whether request is secure, and only allow HTTPS or HTTP based on 
+ * config.https value, but don't allow both at same time.
+ */
+HttpHelper.sslHandler = function(req, res, next) {
+  var http = new HttpHelper(req, res);
+  
+  // Must be secure HTTPS
+  if (config.https && !http.isSecure()) {
+    var err = new ApiResponse(400, Error('Only HTTPS protocol is allowed.'));
+    http.send(err);
+  // Must be plain ol' HTTP
+  } else if (!config.https && http.isSecure()) {
+    var err = new ApiResponse(400, Error('Only HTTP protocol is allowed.'));
+    http.send(err);
+  // We're good, continue onto next route
+  } else {
+    next();
+  }
+};
+
+HttpHelper.prototype.isSecure = function() {
+  return (this.request.secure || this.request.get('x-forwarded-proto') == 'https');
 };
 
 HttpHelper.prototype.send = function(data) {

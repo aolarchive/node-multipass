@@ -7,6 +7,18 @@ var passport = require('passport')
 
 
 module.exports = function(app){
+
+  /**
+   * [*] /*
+   * 
+   * Process all requests for initial validation or normalization tasks:
+   * * Detect if SSL; return error is sslRequired and not https
+   * * Validate app credentials
+   */
+  app.all('/*', 
+    HttpHelper.sslHandler,
+    auth.validateApp
+  );
   
   app.configure('development', 'heroku', function(){
     
