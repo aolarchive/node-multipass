@@ -1,5 +1,7 @@
 var config = {
     port: process.env.PORT || 3000,
+    portPublic: 3443,
+    https: true,
     host: 'devlocal.aol.com',
     paths: { 
       api: '/api',
@@ -7,7 +9,6 @@ var config = {
       authRedirect: '/',
       failRedirect: '/'
     },
-    https: true,
     providers: {
         //JJ Test App: https://developers.facebook.com/apps/105846932813376
         facebook: {
@@ -59,6 +60,7 @@ var config = {
       connection : "mongodb://localhost:27017/multipass_session"
     },
     mongo: {
+      secret: 'Jean-Baptiste Emanuel Zorg',
       connection : "mongodb://localhost:27017/multipass_dev",
       collection : 'users'
     }

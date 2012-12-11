@@ -1,7 +1,8 @@
 var config = {
     port: process.env.PORT || 3000,
+    portPublic: 443,
+    https: true,
     host: 'multipass.herokuapp.com',
-    portPublic: 80,
     paths: { 
       api: '/api',
       logout: '/logout',
@@ -44,6 +45,7 @@ var config = {
       connection: process.env.MONGOLAB_URI || "mongodb://localhost:27017/multipass_session"
     },
     mongo: {
+      secret: 'Jean-Baptiste Emanuel Zorg',
       connection : process.env.MONGOLAB_URI || "mongodb://localhost:27017/multipass_dev",
       collection : 'users'
     }

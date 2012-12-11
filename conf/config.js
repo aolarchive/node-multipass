@@ -20,7 +20,7 @@ function getConfig() {
     var port = conf.portPublic || conf.port,
       portStr = (!port || port == 80 || port == 443) ? '' : ':' + port;
     
-    return 'http://' + conf.host + portStr;
+    return (conf.https ? 'https' : 'http') + '://' + conf.host + portStr;
   };
   
   return conf;
