@@ -70,11 +70,11 @@ HttpHelper.sslHandler = function(req, res, next) {
   var http = new HttpHelper(req, res);
   
   // Must be secure HTTPS
-  if (config.https && !http.isSecure()) {
+  if (config.getProxy().https && !http.isSecure()) {
     var err = new ApiResponse(400, Error('Only HTTPS protocol is allowed.'));
     http.send(err);
   // Must be plain ol' HTTP
-  } else if (!config.https && http.isSecure()) {
+  } else if (!config.getProxy().https && http.isSecure()) {
     var err = new ApiResponse(400, Error('Only HTTP protocol is allowed.'));
     http.send(err);
   // We're good, continue onto next route

@@ -41,6 +41,6 @@ app.configure('production', 'stage', function(){
 require('./routes/index')(app);
 require('./conf/initialize')(app);
 
-app.listen(config.port, function (){
-  console.log('App listening on port '+config.port);
+app.listen(config.getServer().port, function (){
+  console.log('App listening on port '+config.getServer().port);
 });

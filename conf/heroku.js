@@ -1,8 +1,12 @@
 var config = {
-    port: process.env.PORT || 3000,
-    portPublic: 443,
-    https: true,
-    host: 'multipass.herokuapp.com',
+    server: {
+      port: process.env.PORT || 3000
+    },
+    proxy: {
+      port: 443,
+      host: 'multipass.herokuapp.com',
+      https: true
+    },
     paths: { 
       api: '/api',
       logout: '/logout',

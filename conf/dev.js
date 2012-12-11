@@ -1,8 +1,12 @@
 var config = {
-    port: process.env.PORT || 3000,
-    portPublic: 3443,
-    https: true,
-    host: 'devlocal.aol.com',
+    server: {
+      port: process.env.PORT || 3000
+    },
+    proxy: {
+      port: 3443,
+      host: 'devlocal.aol.com',
+      https: true
+    },
     paths: { 
       api: '/api',
       logout: '/logout',
