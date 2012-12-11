@@ -1,5 +1,7 @@
 var mongoose = require('mongoose')
-  , Schema = mongoose.Schema;
+  , Schema = mongoose.Schema
+  , encryption = require('./encryption')
+  , config = require('../conf/config');
  
 
 var UserProfile = new Schema({
@@ -16,6 +18,13 @@ var UserProfile = new Schema({
   originalUserId: String,
   creationDate: Date,
   modifiedDate: Date
+});
+
+UserProfile.plugin(encryption, { 
+  fields: ['authToken'], 
+  key: config.mongo.secret, 
+  input: 'utf8',
+  output: 'base64' 
 });
 
 var User = new Schema({
