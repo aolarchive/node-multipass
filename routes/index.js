@@ -3,7 +3,8 @@ var passport = require('passport')
   , auth = require('../auth')
   , userAPI = require('../data/user')
   , HttpHelper = require('./httphelper')
-  , ApiResponse = require('../data/apiresponse');
+  , ApiResponse = require('../data/apiresponse')
+  , appRoutes = require('./app');
 
 
 module.exports = function(app){
@@ -17,6 +18,16 @@ module.exports = function(app){
   app.all('/*', 
     HttpHelper.sslHandler
   );
+  
+  /**
+   * [*] /api/*
+   * 
+   * Process all requests under the API:
+   * * Validate app credentials
+   */
+  //app.all(config.paths.api + '/*', 
+  //  auth.appAuthHandler
+  //);
   
   app.configure('development', 'heroku', function(){
     
@@ -41,19 +52,22 @@ module.exports = function(app){
       }
       
     });
-    
+        
   });
-
+  
   /**
    * GET /api/logout
    * 
    * Logout the current user session.
    */
-  app.get(config.paths.api + config.paths.logout, function(req, res){
-    req.logout();
-    var http = new HttpHelper(req, res);
-    http.send();
-  });
+  app.get(config.paths.api + config.paths.logout, 
+    auth.appAuthHandler,
+    function(req, res){
+      req.logout();
+      var http = new HttpHelper(req, res);
+      http.send();
+    }
+  );
   
   /**
    * GET /api/user
@@ -61,6 +75,7 @@ module.exports = function(app){
    * Gets the complete user object for current user, including all associated profiles.
    */
   app.get(config.paths.api + '/user',
+    auth.appAuthHandler,
     auth.ensureAuthenticated, 
     function(req, res) {
       var http = new HttpHelper(req, res);
@@ -77,6 +92,7 @@ module.exports = function(app){
    * Remove all user data for current user, and logs out the current session.
    */
   app.delete(config.paths.api + '/user',
+    auth.appAuthHandler,
     auth.ensureAuthenticated, 
     function(req, res) {
       var http = new HttpHelper(req, res);
@@ -94,6 +110,7 @@ module.exports = function(app){
    * Gets the complete user object for the given userId, including all associated profiles.
    */
   app.get(config.paths.api + '/user/:userId',
+    auth.appAuthHandler,
     auth.ensureAuthenticated, 
     function(req, res) {
       var http = new HttpHelper(req, res);
@@ -110,6 +127,7 @@ module.exports = function(app){
    * Get an auth profile for current user, by given provider name and id.
    */
   app.get(config.paths.api + '/user/:provider/:providerId', 
+    auth.appAuthHandler,
     auth.ensureAuthenticated, 
     function(req, res, next) {
       var http = new HttpHelper(req, res);
@@ -126,6 +144,7 @@ module.exports = function(app){
    * Remove an auth profile for current user, by given provider name and id.
    */
   app.delete(config.paths.api + '/user/:provider/:providerId', 
+    auth.appAuthHandler,
     auth.ensureAuthenticated, 
     function(req, res, next) {
       var http = new HttpHelper(req, res);
@@ -141,7 +160,8 @@ module.exports = function(app){
    * 
    * Get list of available auth providers, and their login URLs.
    */
-  app.get(config.paths.api + '/auth/providers', 
+  app.get(config.paths.api + '/auth/providers',
+    auth.appAuthHandler,
     //auth.ensureAuthenticated, 
     function(req, res, next) {
       var http = new HttpHelper(req, res);
@@ -150,16 +170,24 @@ module.exports = function(app){
     }
   );
   
+  
+  /* Pull in App API routes */
+  appRoutes(app);
+  
+  
   /**
    * [*] /api/*
    * 
    * Catch all other requests and return 400 error. 
    */
-  app.all(config.paths.api + '/*', function(req, res) {
-    var http = new HttpHelper(req, res);
-    var err = new ApiResponse(400, Error('Invalid request'));
-    http.send(err);
-  });
+  app.all(config.paths.api + '/*', 
+    auth.appAuthHandler,
+    function(req, res) {
+      var http = new HttpHelper(req, res);
+      var err = new ApiResponse(400, Error('Invalid request'));
+      http.send(err);
+    }
+  );
   
   /**
    * Amend express.param() to accept second param as regexp.

@@ -7,7 +7,7 @@
 		<th>Actions</th>
 	</tr>
 	<tr>
-		<td><a href="<%= config.paths.api %>/user"><%= user.userId %></a></td>
+		<td><a class="user-read" href="<%= config.paths.api %>/user"><%= user.userId %></a></td>
 		<td><%= (new Date(user.modifiedDate)).toString() %></td>
 		<td><a class="user-remove" data-url="<%= config.paths.api %>/user" href="/">Remove User</a></td>
 	</tr>
@@ -27,7 +27,7 @@
 	<% user.profiles.forEach(function(profile){ %>
 		<tr>
 			<td><%= profile.provider %></td>
-			<td><a href="<%= config.paths.api %>/user/<%= profile.provider %>/<%= profile.providerId %>"><%= profile.providerId %></a></td>
+			<td><a class="profile-read" href="<%= config.paths.api %>/user/<%= profile.provider %>/<%= profile.providerId %>"><%= profile.providerId %></a></td>
 			<td><%= profile.username %></td>
 			<td><%= profile.displayName %></td>
 			<td><%= (new Date(profile.modifiedDate)).toString() %></td>
