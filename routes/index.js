@@ -13,11 +13,9 @@ module.exports = function(app){
    * 
    * Process all requests for initial validation or normalization tasks:
    * * Detect if SSL; return error is sslRequired and not https
-   * * Validate app credentials
    */
   app.all('/*', 
-    HttpHelper.sslHandler,
-    auth.validateApp
+    HttpHelper.sslHandler
   );
   
   app.configure('development', 'heroku', function(){

@@ -3,7 +3,8 @@ var passport = require('passport')
   , config = require('../conf/config')
   , userAPI = require('../data/user')
   , HttpHelper = require('../routes/httphelper')
-  , ApiResponse = require('../data/apiresponse');
+  , ApiResponse = require('../data/apiresponse')
+  , appAuth = require('./app');
 
 
 // Passport session setup.
@@ -35,13 +36,16 @@ passport.deserializeUser(function(obj, done) {
 var auth = {
     
   providers: [],
-
+  
+  _appAuthHandler: null,
+  
   // Initialize Passport!  Also use passport.session() middleware, to support
   // persistent login sessions (recommended).
   init: function(app) {
     app.use(passport.initialize());
     app.use(passport.session());
-    
+
+    appAuth(auth);
     this.loadProviders(app);
   },
   
@@ -273,9 +277,41 @@ var auth = {
       });
     }
   },
+
+  appAuthHandler: function(req, res, next){
+    
+    // Use custom app auth handler if defined
+    if (auth._appAuthHandler) {
+      
+      auth._appAuthHandler(req, res, function(err, data) {
+        var http = new HttpHelper(req, res),
+          errRes = new ApiResponse(401, Error('Invalid appId.')),
+          appId = null;
+        
+        if (err || !data) {
+          // Unauthorized
+          http.send(errRes);
+        } else {
+          // Auth successful, so do something with credentials
+          appId = typeof data == 'string' ? data : data.appId;
+          if (!appId) {
+            http.send(errRes);
+          } else {
+            console.log('Authorized: ...' + appId.substr(-6));
+            req.appUser = { 'appId': appId };
+            next();
+          }
+        }
+      });
+      
+    // Else continue without authenticating app
+    } else {
+      next(); 
+    }
+  },
   
-  validateApp: function(req, res, next){
-    next();
+  setAppAuthHandler: function(func) {
+    this._appAuthHandler = func;
   }
   
 };

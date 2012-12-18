@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>App Management: node-multipass</title>
+		<link rel="stylesheet" href="css/main.css" />
+		<script src="https://o.aolcdn.com/os/aol/jquery-1.8.1.min.js"></script>
+		<script src="js/main.js"></script>
+	</head>
+	<body>
+		<h1>App Management</h1>
+		
+		<h2>Summary</h2>
+		<div>
+			<p>UserId: <%= userId || '' %><p>
+		</div>
+		
+		<h2>Apps</h2>
+		<ul class="apps">
+			<% apps.forEach(function(app){ %>
+				<li><a href="/app?action=edit&appId=<%= app.appId || '' %>"><%= app.name %></a></li>
+			<% }) %>
+		</ul>
+		
+		<p><a href="/app?action=create">Create App</a></p>
+		
+	</body>
+</html>

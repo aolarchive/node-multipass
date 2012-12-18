@@ -35,6 +35,24 @@ var User = new Schema({
   modifiedDate: Date
 });
 
+var App = new Schema({
+  appId: {type: String, unique: true},
+  secret: String,
+  hosts: [String],
+  userId: String,
+  name: String,
+  description: String,
+  creationDate: Date,
+  modifiedDate: Date
+});
+
+App.plugin(encryption, { 
+  fields: ['appId', 'secret'], 
+  key: config.mongo.secret, 
+  input: 'utf8',
+  output: 'base64' 
+});
 
 exports.User = User;
 exports.UserProfile = UserProfile;
+exports.App = App;
