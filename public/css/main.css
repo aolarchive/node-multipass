@@ -13,3 +13,7 @@ td, th {
 	border: 1px solid #CCC;
 	padding: 10px;
 }
+
+.ui-dialog .ui-dialog-content {
+	/*line-height: 1.5em;*/
+}

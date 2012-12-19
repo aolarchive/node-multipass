@@ -1,4 +1,8 @@
 (function($) {
+
+  /*
+   * Set up configuration items and global functions
+   */
   
   var options = {
     userId: 'multipass-user',
@@ -11,8 +15,26 @@
       'Authorization': 'Basic ' + btoa(options.appId + ':' + options.appSecret)
     }
   });
+
+  function showResponse(data) {
+    data = JSON.stringify(data);
+    var content = (js_beautify && js_beautify(data, { indent_size:2 })) || data;
+    
+    $('.response-dialog').html(content).dialog({
+      width: '50%'
+    }).show();
+  }
+  
+  /*
+   * Set up event listeners and code on DOM ready
+   */
   
   $(document).ready(function(){
+    
+    /*
+     * Auth Profile Management
+     * URL: /
+     */
     
     $('a.user-logout').click(function(event){
       event.preventDefault();
@@ -25,7 +47,11 @@
         type: 'get'
       })
       .done(function(data){
-        location.href = $this.attr('href');
+        if (data.status == 'Ok') {
+          location.href = $this.attr('href');
+        } else {
+          showResponse(data);
+        }
       });
     });
 
@@ -40,7 +66,7 @@
         type: 'get'
       })
       .done(function(data){
-        //location.href = $this.attr('href');
+        showResponse(data);
       });
     });
     
@@ -56,7 +82,11 @@
         data: { '_method': 'delete' }
       })
       .done(function(data){
-        location.href = $this.attr('href');
+        if (data.status == 'Ok') {
+          location.href = $this.attr('href');
+        } else {
+          showResponse(data);
+        }
       });
     });
 
@@ -71,7 +101,7 @@
         type: 'get'
       })
       .done(function(data){
-        //location.href = $this.attr('href');
+        showResponse(data);
       });
     });
     
@@ -87,12 +117,17 @@
         data: { '_method': 'delete' }
       })
       .done(function(data){
-        location.href = $this.attr('href');
+        if (data.status == 'Ok') {
+          location.href = $this.attr('href');
+        } else {
+          showResponse(data);
+        }
       });
     });
     
-    /**
+    /*
      * App Management
+     * URL: /app
      */
       
     $('#app-submit').click(function(event){
