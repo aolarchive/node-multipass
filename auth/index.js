@@ -125,7 +125,7 @@ var auth = {
   authVerify: function(provider, accessToken, refreshToken, profile, done){
     profile.authToken = accessToken;
     
-    userAPI.findOrAddUser(profile, accessToken, function(obj){
+    userAPI.findOrAddUser(profile, function(obj){
       return done(null, obj);
     });
   },
