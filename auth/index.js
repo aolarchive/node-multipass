@@ -96,7 +96,7 @@ var auth = {
             
             // If no matching profile exists, create one
             if (!matchingProfile) {
-                userAPI.addProfile(data, profile, profile.authToken,
+                userAPI.addProfile(data, profile,
                   function(profileRes){
                     req.apiResponse = profileRes; // Return 201 + profile object, or error
                     next();

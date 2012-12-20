@@ -9,9 +9,9 @@ var User = mongoose.model('User', Schemas.User, config.mongo.collection);
 
 var fieldInclusions = { '__v':0 };  // 0==exclude, 1==include
 
-function buildUser(profile, authToken) {
+function buildUser(profile) {
   profile = profile || {};
-  var userProfile = buildUserProfile(profile, authToken);
+  var userProfile = buildUserProfile(profile);
 
   var user = new User({
     userId : uuid.v4(),
@@ -23,7 +23,7 @@ function buildUser(profile, authToken) {
   return user;
 };
 
-function buildUserProfile(profile, authToken){
+function buildUserProfile(profile){
   profile = profile || {};
   var data = { 
       provider : profile.provider,
@@ -34,7 +34,7 @@ function buildUserProfile(profile, authToken){
       givenName : profile.givenName,
       gender : profile.gender,
       profileUrl : profile.profileUrl,
-      authToken : authToken,
+      authToken : profile.authToken,
       emails : profile.emails,
       creationDate : Date.now(),
       modifiedDate : Date.now()
@@ -42,7 +42,7 @@ function buildUserProfile(profile, authToken){
   return data;
 };
 
-function updateUserProfile(profile, authToken){
+function updateUserProfile(profile){
   profile = profile || {};
   var data = {
       username : profile.username,
@@ -51,7 +51,7 @@ function updateUserProfile(profile, authToken){
       givenName : profile.givenName,
       gender : profile.gender,
       profileUrl : profile.profileUrl,
-      authToken : authToken,
+      authToken : profile.authToken,
       emails : profile.emails,
       modifiedDate : Date.now()
   };
@@ -145,7 +145,7 @@ var userAPI = {
    *  error:   [404] If user found, but profile was not found.
    *  error:   [500] If there were any system errors.
    */
-  findOrAddUser : function(profile, authToken, callback) {
+  findOrAddUser : function(profile, callback) {
     profile = profile || {};
     
     this.findUsersByProfile(profile, function(apiRes){
@@ -162,12 +162,12 @@ var userAPI = {
           // Link users together, if more than one
           linkUsers(users, function(responses){
             // Update profile with latest data
-            userAPI.updateProfileByUser(mostRecentUser, profile, authToken, callback);
+            userAPI.updateProfileByUser(mostRecentUser, profile, callback);
           });
           
         // No user found, create user  
         } else {
-          userAPI.addUser(profile, authToken, callback);
+          userAPI.addUser(profile, callback);
         }
       }
     });
@@ -200,8 +200,8 @@ var userAPI = {
    * Responses:
    *  success: [201] The user object that was added.
    */
-  addUser : function(profile, authToken, callback) {
-    var newUser = buildUser(profile, authToken);
+  addUser : function(profile, callback) {
+    var newUser = buildUser(profile);
     newUser.save(function(err,doc) {
       var res = null;
       if (err) {
@@ -288,14 +288,14 @@ var userAPI = {
    * Responses:
    *  success: [201] The profile object that was added.
    */
-  addProfile : function(user, profile, authToken, callback) {
+  addProfile : function(user, profile, callback) {
     this.getUser(user.userId,
       function(res){
         if (res.isError()) {
           callback(res);
         } else {
           var u = res.data,
-            userProfile = buildUserProfile(profile, authToken);
+            userProfile = buildUserProfile(profile);
           
           u.profiles.push(userProfile);
           u.modifiedDate = Date.now();
@@ -348,7 +348,7 @@ var userAPI = {
   /**
    * @returns {UserProfile} The profile object that was found, or null.
    */
-  findProfileByUser : function(user, provider, providerId, authToken) {
+  findProfileByUser : function(user, provider, providerId) {
     var profiles = user && user.profiles,
       matchingProfile = null;
     
@@ -368,14 +368,14 @@ var userAPI = {
    * Responses:
    *  success: [200] The user object whose profile was updated.
    */
-  updateProfileByUser : function(user, profile, authToken, callback) {
-    var matchingProfile = userAPI.findProfileByUser(user, profile.provider, profile.id, authToken),
+  updateProfileByUser : function(user, profile, callback) {
+    var matchingProfile = userAPI.findProfileByUser(user, profile.provider, profile.id),
       res = null;
     
     // Matching profile found, update the profile
     if (matchingProfile != null) {
       
-      matchingProfile.set( updateUserProfile(profile, authToken) );
+      matchingProfile.set( updateUserProfile(profile) );
       user.modifiedDate = Date.now();
       user.markModified('profiles');
       
