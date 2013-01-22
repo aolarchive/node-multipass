@@ -12,6 +12,7 @@ table {
 td, th {
 	border: 1px solid #CCC;
 	padding: 10px;
+	text-align: left;
 }
 
 .ui-dialog .ui-dialog-content {

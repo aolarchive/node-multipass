@@ -20,10 +20,6 @@ var twitterActor = {
       );
     }()),
     
-    getProfile: function(context, providerId, callback) {
-      userAPI.getProfile(context, twitterActor.provider, providerId, callback);
-    },
-    
     getTokens: function(context, providerId, callback) {
       userAPI.getProfile(context, twitterActor.provider, providerId, function(res){
         if (res.isError()) {
@@ -44,7 +40,7 @@ var twitterActor = {
     
       twitterActor.getTokens(context, providerId, function(data){
         if (!data) {
-          callback(new ApiResponse(500, Error('Error retrieving twitter auth token.')));
+          callback(new ApiResponse(500, new Error('Error retrieving twitter auth token.')));
         } else {
           var body = {'status': status},
             out;
@@ -55,7 +51,7 @@ var twitterActor = {
                 if (error) {
                   var errorData = JSON.parse(error.data);
                   console.log('Error: Something is wrong.\n'+JSON.stringify(error)+'\n');
-                  callback(new ApiResponse(500, Error(errorData), 'Error updating twitter status.'));
+                  callback(new ApiResponse(500, new Error(errorData), 'Error updating twitter status.'));
                   /*for (i in response2) {
                     out = i + ' : ';
                     try {
@@ -80,7 +76,7 @@ var twitterActor = {
       
       twitterActor.getTokens(context, providerId, function(data){
         if (!data) {
-          callback(new ApiResponse(500, Error('Error retrieving twitter auth token.')));
+          callback(new ApiResponse(500, new Error('Error retrieving twitter auth token.')));
         } else {
           var out;
 
@@ -90,7 +86,7 @@ var twitterActor = {
                 if (error) {
                   var errorData = JSON.parse(error.data);
                   console.log('Error: Something is wrong.\n'+JSON.stringify(error)+'\n');
-                  callback(new ApiResponse(500, Error(errorData), 'Error getting twitter timeline.'));
+                  callback(new ApiResponse(500, new Error(errorData), 'Error getting twitter timeline.'));
                   /*for (i in response2) {
                     out = i + ' : ';
                     try {

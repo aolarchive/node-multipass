@@ -92,8 +92,13 @@ var auth = {
       var user = req.user,
         profile = req.account;
 //debugger;
+      // Return error if missing provider name or id; won't be able access it otherwise 
+      if (!profile.provider || !profile.id) {
+        req.apiResponse = new ApiResponse(500, new Error('Profile not associated. Missing provider name or id.'));
+        next(); 
+        
       // Auth'ed already, associating profile with current user
-      if (user != null && profile != null) {
+      } else if (user != null && profile != null) {
         userAPI.getUser(user, true, function(apiRes) {
           
           if (apiRes.isError()) {
@@ -151,6 +156,11 @@ var auth = {
     console.log('auth.authVerify');
     profile.authToken = accessToken;
     profile.authTokenSecret = refreshToken;
+    
+    if (!profile.id) {
+      profile.id = profile.username || profile.displayName || null;
+    }
+    
     var context = req.user || {};
     
     userAPI.findOrAddUser(context, profile, function(obj){
@@ -165,6 +175,10 @@ var auth = {
     console.log('auth.authzVerify');
     profile.authToken = accessToken;
     profile.authTokenSecret = refreshToken;
+    
+    if (!profile.id) {
+      profile.id = profile.username || profile.displayName || null;
+    }
     
     return done(null, profile);
   },

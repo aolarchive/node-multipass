@@ -33,6 +33,7 @@
     "passport-yahoo-oauth": ">= 0.1.0",
     "passport-github": ">= 0.1.0",
     "passport-dropbox": ">= 0.1.0",
+    "passport-tumblr": ">= 0.1.0",
     "oauth": ">= 0.1.0"
   },
   "engines": {
