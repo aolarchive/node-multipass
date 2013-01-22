@@ -43,15 +43,15 @@ var config = {
           clientId : "ao1iDZvZUadYKQfY",
           clientSecret : "s6a8aPuspUM3dEYa"
         },
-        //JJ Test App: http://developer.apps.yahoo.com/projects/CpvuiS7i
+        //JJ Test App: https://developer.apps.yahoo.com/projects/dKoQ6x4k
         yahoo: {
-          consumerKey: "dj0yJmk9OXNrRkxmTUtUOVdTJmQ9WVdrOVEzQjJkV2xUTjJrbWNHbzlNVEV3TmpneU1qUTJNZy0tJnM9Y29uc3VtZXJzZWNyZXQmeD02Ng--",
-          consumerSecret: "4dad7ccde5ccc7223f704d34e8acca8778bac6d0"
+          consumerKey: "dj0yJmk9cW95cDhQWG9uTUhEJmQ9WVdrOVpFdHZVVFo0TkdzbWNHbzlOelE1TWprNU5UWXkmcz1jb25zdW1lcnNlY3JldCZ4PThl",
+          consumerSecret: "5e95e0b09390095a9fb243cc570de39521a1e562"
         },
         //JJ Test App: https://github.com/settings/applications/28082
         github: {
-          clientId : "e2a289e2bdf370f8e9c5",
-          clientSecret : "63623224a31a43c4c5c33bcc7e5eeb212eb3f4b4"
+          clientId : "61f5263989c63542b6e7",
+          clientSecret : "78bfbc0552f62a424fb6f245040c3f80b6add763"
         },
         //JJ Test App: https://www.dropbox.com/developers/app_info/119959
         dropbox: {
