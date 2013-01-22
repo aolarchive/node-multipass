@@ -17,3 +17,12 @@ td, th {
 .ui-dialog .ui-dialog-content {
 	/*line-height: 1.5em;*/
 }
+
+.mp-twitter-dialog .mp-dialog {
+	text-align: center;
+}
+
+.mp-twitter-field {
+	width: 90%;
+	margin: 0 auto;
+}

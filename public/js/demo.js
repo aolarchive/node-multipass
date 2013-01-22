@@ -62,6 +62,16 @@
       
       var authWin = window.open(url, 'multipass-auth', 'width=800,height=600');
     },
+
+    updateTwitterStatus: function(providerId, status, callback) {
+      var options = {
+        url: this.options.apiBaseUrl + '/api/actors/twitter/' + providerId + '/status',
+        type: 'post',
+        data: JSON.stringify({ 'status': status })
+      };
+      
+      this.apiRequest(options, callback);
+    },
     
     initUi: function() {
       
@@ -89,7 +99,8 @@
       });
       
       this.getProfiles(function(data){
-        var $profiles = $('.mp-profiles tbody');
+        var $profiles = $('.mp-profiles tbody'),
+          actionsCell;
         //$profiles.find('tr').remove();
         
         $.each(data, function(i, profile){
@@ -100,7 +111,7 @@
                 'class': 'mp-profile-read',
                 href: '#',
                 text: profile.providerId,
-                click: function() {
+                click: function(event) {
                   event.preventDefault();
                   var providerFull = $(event.target).closest('tr').data('providerId').split(':'),
                     provider = providerFull[0],
@@ -111,14 +122,15 @@
                   });
                 }
               })),
-              $('<td/>').append(profile.username),
-              $('<td/>').append(profile.displayName),
-              $('<td/>').append((new Date(profile.modifiedDate)).toString()),
-              $('<td/>').append($('<a/>', {
+              $('<td/>').append(                  
+                profile.displayName + (profile.username ? ' ('+profile.username+')' : '')
+              ),
+              //$('<td/>').append((new Date(profile.modifiedDate)).toString()),
+              actionsCell = $('<td/>').append($('<a/>', {
                 'class': 'mp-profile-remove',
                 href: '#',
-                text: 'Remove Profile',
-                click: function() {
+                text: 'Remove',
+                click: function(event) {
                   event.preventDefault();
                   var providerFull = $(event.target).closest('tr').data('providerId').split(':'),
                     provider = providerFull[0],
@@ -135,6 +147,51 @@
             .addClass('mp-profile-'+profile._id)
             .data('providerId', profile.provider + ':' + profile.providerId)
           );
+          
+          if (profile.provider == 'twitter') {
+            actionsCell.append(' | ',
+              $('<a/>', {
+                'class': 'mp-profile-tweet',
+                href: '#',
+                text: 'Send Tweet',
+                click: function(event) {
+                  event.preventDefault();
+                  var providerFull = $(event.target).closest('tr').data('providerId').split(':'),
+                    provider = providerFull[0],
+                    providerId = providerFull[1],
+                    content = '<textarea class="mp-twitter-field" rows="3" maxlength="140"></textarea>',
+                    twitterHandle = '@' + profile.username;
+                  
+                  $('.mp-dialog').html(content).dialog({
+                    title: 'Send tweet as ' + twitterHandle,
+                    dialogClass: 'mp-twitter-dialog',
+                    width: 500,
+                    maxWidth: 500,
+                    modal: true,
+                    buttons: {
+                      Submit: function() {
+                        var status = $('.mp-twitter-field').val();
+                        if (status.length) {
+                          $('.mp-dialog').dialog( "option", "buttons", null );
+                          
+                          multipass.updateTwitterStatus(providerId, status, function(data){
+                            $('.mp-dialog').html('<p>Tweet sent successfully!</p>').dialog({
+                              Cancel: function() {
+                                $( this ).dialog( "destroy" );
+                              }
+                            });
+                          });
+                        }
+                      },
+                      Cancel: function() {
+                        $( this ).dialog( "destroy" );
+                      }
+                    }
+                  }).show();
+                }
+              })
+            );
+          }
         });
       });
       
@@ -155,8 +212,13 @@
       
       content = '<p>'+url+'</p>' + content;
       
-      $('.response-dialog').html(content).dialog({
-        width: '50%'
+      $('.mp-dialog').html(content).dialog({
+        width: '50%',
+        dialogClass: 'mp-response-dialog',
+        title: 'API Response',
+        close: function() {
+          $( this ).dialog( "destroy" );
+        }
       }).show();
     },
     
