@@ -5,14 +5,15 @@
    */
   
   var options = {
-    userId: 'multipass-user',
+    userId: 'multipass:test',
     appId: 'bcca4c62-dbbc-4b22-a3c5-7bdb96fca106',
     appSecret: '3470a522d81c77f9b48133df779841f1'
   };
   
   $.ajaxSetup({
     headers: {
-      'Authorization': 'Basic ' + btoa(options.appId + ':' + options.appSecret)
+      'Authorization': 'Basic ' + btoa(options.appId + ':' + options.appSecret),
+      'X-Multipass-User': options.userId
     }
   });
 
