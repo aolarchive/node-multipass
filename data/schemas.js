@@ -14,6 +14,7 @@ var UserProfile = new Schema({
   gender : String,
   profileUrl : String,
   authToken : String,
+  authTokenSecret : String,
   emails : [],
   originalUserId: String,
   creationDate: Date,
@@ -21,7 +22,7 @@ var UserProfile = new Schema({
 });
 
 UserProfile.plugin(encryption, { 
-  fields: ['authToken'], 
+  fields: ['authToken', 'authTokenSecret'], 
   key: config.mongo.secret, 
   input: 'utf8',
   output: 'base64' 

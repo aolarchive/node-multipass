@@ -36,6 +36,7 @@ function buildUserProfile(profile){
       gender : profile.gender,
       profileUrl : profile.profileUrl,
       authToken : profile.authToken,
+      authTokenSecret : profile.authTokenSecret,
       emails : profile.emails,
       creationDate : Date.now(),
       modifiedDate : Date.now()
@@ -53,6 +54,7 @@ function updateUserProfile(profile){
       gender : profile.gender,
       profileUrl : profile.profileUrl,
       authToken : profile.authToken,
+      authTokenSecret : profile.authTokenSecret,
       emails : profile.emails,
       modifiedDate : Date.now()
   };

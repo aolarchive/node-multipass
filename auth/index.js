@@ -150,6 +150,7 @@ var auth = {
   authVerify: function(req, provider, accessToken, refreshToken, profile, done){
     console.log('auth.authVerify');
     profile.authToken = accessToken;
+    profile.authTokenSecret = refreshToken;
     var context = req.user || {};
     
     userAPI.findOrAddUser(context, profile, function(obj){
@@ -163,6 +164,7 @@ var auth = {
   authzVerify: function(req, provider, accessToken, refreshToken, profile, done){
     console.log('auth.authzVerify');
     profile.authToken = accessToken;
+    profile.authTokenSecret = refreshToken;
     
     return done(null, profile);
   },
