@@ -9,12 +9,13 @@ var User = mongoose.model('User', Schemas.User, config.mongo.collection);
 
 var fieldInclusions = { '__v':0 };  // 0==exclude, 1==include
 
-function buildUser(profile) {
+function buildUser(context, profile) {
   profile = profile || {};
   var userProfile = buildUserProfile(profile);
 
   var user = new User({
-    userId : uuid.v4(),
+    userId : context.userId || uuid.v4(),
+    appId : context.appId,
     creationDate : Date.now(),
     modifiedDate : Date.now()
   });
@@ -145,10 +146,10 @@ var userAPI = {
    *  error:   [404] If user found, but profile was not found.
    *  error:   [500] If there were any system errors.
    */
-  findOrAddUser : function(profile, callback) {
+  findOrAddUser : function(context, profile, callback) {
     profile = profile || {};
     
-    this.findUsersByProfile(profile, function(apiRes){
+    this.findUsersByProfile(context, profile, function(apiRes){
       if (apiRes.isError()) {
         callback(apiRes);
       } else {
@@ -160,14 +161,14 @@ var userAPI = {
           mostRecentUser = users[0];
           
           // Link users together, if more than one
-          linkUsers(users, function(responses){
+        //  linkUsers(users, function(responses){
             // Update profile with latest data
             userAPI.updateProfileByUser(mostRecentUser, profile, callback);
-          });
+        //  });
           
         // No user found, create user  
         } else {
-          userAPI.addUser(profile, callback);
+          userAPI.addUser(context, profile, callback);
         }
       }
     });
@@ -177,9 +178,9 @@ var userAPI = {
    * Responses:
    *  success: [200] An Array of User objects that match the profile.
    */
-  findUsersByProfile : function(profile, callback) {
+  findUsersByProfile : function(context, profile, callback) {
     profile = profile || {};
-    User.find({'profiles.provider':profile.provider, 'profiles.providerId':profile.id},
+    User.find({'appId':context.appId, 'userId':context.userId, 'profiles.provider':profile.provider, 'profiles.providerId':profile.id},
       fieldInclusions,
       { sort:{ modifiedDate:-1 } }, // Sort by modifiedDate, DESC
       function(err, users){
@@ -200,8 +201,9 @@ var userAPI = {
    * Responses:
    *  success: [201] The user object that was added.
    */
-  addUser : function(profile, callback) {
-    var newUser = buildUser(profile);
+  addUser : function(context, profile, callback) {
+    console.log('userAPI.addUser');
+    var newUser = buildUser(context, profile);
     newUser.save(function(err,doc) {
       var res = null;
       if (err) {
@@ -217,14 +219,14 @@ var userAPI = {
    * Responses:
    *  success: [200] The user object that was found.
    */
-  getUser : function(userId, callback) {
-    User.findOne({'userId':userId},
+  getUser : function(context, allowEmptyResult, callback) {
+    User.findOne({'appId':context.appId, 'userId':context.userId},
       fieldInclusions,
       function(err, doc){
         var res = null;
         if (err) {
           res = new ApiResponse(500, err, 'Error retriving the user.');
-        } else if (!doc) {
+        } else if (!doc && !allowEmptyResult) {
           res = new ApiResponse(404, Error('The user cannot be found.'));
         } else {
           res = new ApiResponse(doc);
@@ -238,8 +240,8 @@ var userAPI = {
    * Responses:
    *  success: [200] The user object that was removed.
    */
-  removeUser : function(userId, callback) {
-    User.findOne({'userId':userId},
+  removeUser : function(context, callback) {
+    User.findOne({'appId':context.appId, 'userId':context.userId},
       fieldInclusions,  
       function(err, doc){
         var res = null;
@@ -264,8 +266,8 @@ var userAPI = {
    * Responses:
    *  success: [200] The profile object that was found.
    */
-  getProfile : function(user, provider, providerId, callback) {
-    this.getUser(user.userId,
+  getProfile : function(context, provider, providerId, callback) {
+    this.getUser(context, false,
       function(res){
         if (res.isError()) {
           callback(res);
@@ -288,8 +290,9 @@ var userAPI = {
    * Responses:
    *  success: [201] The profile object that was added.
    */
-  addProfile : function(user, profile, callback) {
-    this.getUser(user.userId,
+  addProfile : function(context, profile, callback) {
+    console.log('userAPI.addProfile');
+    this.getUser(context, false,
       function(res){
         if (res.isError()) {
           callback(res);
@@ -317,8 +320,8 @@ var userAPI = {
    * Responses:
    *  success: [200] The profile object that was removed.
    */
-  removeProfile : function(user, provider, providerId, callback) {
-    this.getUser(user.userId,
+  removeProfile : function(context, provider, providerId, callback) {
+    this.getUser(context, false,
       function(res){
         if (res.isError()) {
           callback(res);
@@ -369,6 +372,7 @@ var userAPI = {
    *  success: [200] The user object whose profile was updated.
    */
   updateProfileByUser : function(user, profile, callback) {
+    console.log('userAPI.updateProfileByUser');
     var matchingProfile = userAPI.findProfileByUser(user, profile.provider, profile.id),
       res = null;
     
@@ -393,6 +397,41 @@ var userAPI = {
       res = new ApiResponse(404, Error('The profile cannot be found'));
       callback(res);
     }
+  },
+  
+  /**
+   * Associate a profile with a user.
+   * If the user doesn't exist 
+   */
+  associateProfile : function(context, profile, callback) {
+    this.getUser(context, true, function(apiRes) {
+      var data, matchingProfile;
+      
+      if (apiRes.isError()) {
+        callback(apiRes);
+        
+      } else {
+        data = apiRes.getData();
+        
+        // User exists
+        if (data) {
+          matchingProfile = userAPI.findProfileByUser(data, profile.provider, profile.id);
+          
+          // If no matching profile exists, add profile
+          if (!matchingProfile) {
+            userAPI.addProfile(context, profile, callback);
+            
+          // Else profile already exists, update profile
+          } else {
+            userAPI.updateProfileByUser(data, profile, callback);
+          }
+          
+        // No user exists, so create it
+        } else {
+          userAPI.addUser(context, profile, callback);
+        }
+      }
+    });
   }
   
 };
