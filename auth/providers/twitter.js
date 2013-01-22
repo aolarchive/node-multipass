@@ -18,12 +18,12 @@ auth.useOAuthStrategy(provider, TwitterStrategy, {
       profile.displayName = profile.username;
     }   
     // Not logged in. Load user.
-    if (!req.user) {
-      return auth.authVerify(provider, token, tokenSecret, profile, done);
+//    if (!req.user) {
+//      return auth.authVerify(req, provider, token, tokenSecret, profile, done);
     // Logged in. Associate account with user.
-    } else {
-      return auth.authzVerify(provider, token, tokenSecret, profile, done);
-    }
+//    } else {
+      return auth.authzVerify(req, provider, token, tokenSecret, profile, done);
+//    }
   }
 );
 

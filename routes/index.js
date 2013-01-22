@@ -46,7 +46,7 @@ module.exports = function(app){
       if (!req.isAuthenticated()) {
         renderPage(req.user);
       } else {
-        userAPI.getUser(req.user.userId, function(data) {
+        userAPI.getUser(req.user.userId, false, function(data) {
           renderPage(data.data);
         });
       }
@@ -75,12 +75,14 @@ module.exports = function(app){
    * Gets the complete user object for current user, including all associated profiles.
    */
   app.get(config.paths.api + '/user',
-    auth.appAuthHandler,
-    auth.ensureAuthenticated, 
+    //auth.appAuthHandler,
+    //auth.loadUser,
+    auth.authenticateApp(),
+    //auth.ensureAuthenticated, 
     function(req, res) {
       var http = new HttpHelper(req, res);
       
-      userAPI.getUser(req.user.userId, function(data) {
+      userAPI.getUser(req.user, false, function(data) {
         http.send(data);
       });
     }
@@ -111,11 +113,13 @@ module.exports = function(app){
    */
   app.get(config.paths.api + '/user/:userId',
     auth.appAuthHandler,
-    auth.ensureAuthenticated, 
+    auth.loadUser,
+    //auth.ensureAuthenticated, 
     function(req, res) {
-      var http = new HttpHelper(req, res);
+      var http = new HttpHelper(req, res),
+        userId = req.params.userId && req.params.userId[0];
       
-      userAPI.getUser(req.params.userId, function(data) {
+      userAPI.getUser(userId, false, function(data) {
         http.send(data);
       });
     }
@@ -127,8 +131,10 @@ module.exports = function(app){
    * Get an auth profile for current user, by given provider name and id.
    */
   app.get(config.paths.api + '/user/:provider/:providerId', 
-    auth.appAuthHandler,
-    auth.ensureAuthenticated, 
+    auth.authenticateApp(),
+    //auth.appAuthHandler,
+    //auth.loadUser,
+    //auth.ensureAuthenticated, 
     function(req, res, next) {
       var http = new HttpHelper(req, res);
       
@@ -144,8 +150,9 @@ module.exports = function(app){
    * Remove an auth profile for current user, by given provider name and id.
    */
   app.delete(config.paths.api + '/user/:provider/:providerId', 
-    auth.appAuthHandler,
-    auth.ensureAuthenticated, 
+    auth.authenticateApp(),
+    //auth.appAuthHandler,
+    //auth.ensureAuthenticated, 
     function(req, res, next) {
       var http = new HttpHelper(req, res);
     
@@ -161,7 +168,7 @@ module.exports = function(app){
    * Get list of available auth providers, and their login URLs.
    */
   app.get(config.paths.api + '/auth/providers',
-    auth.appAuthHandler,
+    auth.authenticateApp(),
     //auth.ensureAuthenticated, 
     function(req, res, next) {
       var http = new HttpHelper(req, res);
