@@ -4,7 +4,7 @@ node-multipass
 Multiauth identity server using Node.js and MongoDB.
 
 ## Overview
-node-multipass is a RESTful web service that authenticates users with various accounts (Facebook, Twitter, Aol, etc), and associates the credentials obtained within a session with one user account.
+node-multipass is a RESTful web service that authenticates users with various accounts (Facebook, Twitter, Aol, etc), and associates the credentials obtained with one user account.
 The REST API provides access to the credentials, and ability to delete existing profiles and users.
 
 This app requires Node.js and MongoDB. It uses `node-passport` to handle authentication, and `mongoose` for database access.
@@ -27,6 +27,10 @@ The included set of auth providers are:
 * LinkedIn
 * Google
 * Windows Live
+* DropBox
+* GitHub
+* Tumblr
+* Yahoo
 
 To setup a new auth provider, add it under the 'providers' object in the config file, with appropriate auth ids and secret info. 
 ```javascript
@@ -46,7 +50,7 @@ The app automatically configures itself for a particular provider based on what 
     <th>Path</th>
     <th>Parameters</th>
     <th>Response</th>
-    <th>Auth Req.</th>
+    <th>User Context Req.</th>
     <th>Description</th>
   </tr>
   <tr>
@@ -54,7 +58,7 @@ The app automatically configures itself for a particular provider based on what 
     <td>/api/auth/:provider</td>
     <td>[r] - optional redirect URL</td>
     <td></td>
-    <td>N</td>
+    <td>Y</td>
     <td>Authentication path for each provider. Available values for :provider can be retreived via /auth/providers.</td>
   </tr>
   <tr>
@@ -64,14 +68,6 @@ The app automatically configures itself for a particular provider based on what 
     <td></td>
     <td>N</td>
     <td>Returns a list of all available auth providers and their login URLs.</td>
-  </tr>
-  <tr>
-    <td>GET</td>
-    <td>/api/logout</td>
-    <td>N/A</td>
-    <td></td>
-    <td>N</td>
-    <td>Logout of the current session.</td>
   </tr>
   <tr>
     <td>GET</td>
@@ -91,14 +87,6 @@ The app automatically configures itself for a particular provider based on what 
   </tr>
   <tr>
     <td>GET</td>
-    <td>/api/user/:userId</td>
-    <td>N/A</td>
-    <td></td>
-    <td>Y</td>
-    <td>Returns complete user object for the given userId.</td>
-  </tr>
-  <tr>
-    <td>GET</td>
     <td>/api/user/:provider/:providerId</td>
     <td>N/A</td>
     <td></td>
@@ -115,6 +103,20 @@ The app automatically configures itself for a particular provider based on what 
     <td>Deletes a particular auth profile for the currently-authenticated user, based the given 'provider' and 'providerId' values.</td>
   </tr>
 </table>
+
+### Authentication
+#### API Authentication
+All requests to the API require authentication via an appId and appSecret. These are included in the request with a standard HTTP basic Authorization header. 
+The appId and apPSecret are managed by a separate app included with Multipass.
+
+Ex: `Authorization: basic base64{appId:appSecret}`
+
+#### UserId
+Most requests also require a userId (unless noted otherwise) which can be any string provided by the end user. The userId is unique per appId. It is included in the request with a custom header, `X-Multipass-User`.
+
+Ex: `X-Multipass-User: KorbenDallas`
+
+The user context is the combination of an appId and userId, i.e. `{ appId:'', userId:'' }`, and used to identify a unique user object.
 
 ### Method Override
 The API allows method override with POST, so for instance to perform a DELETE, you can perform a POST and include `_method="delete"` in the post body.
@@ -151,6 +153,6 @@ Also the response body will indicate a status of "Error", and include a status t
 * [Stash server](https://github.com/aol/Stash) - Much of the multiauth code is copied/derived from the AOL Stash project, so many thanks goes to them for the inspiration and examples for this project.
 
 ## License
-Copyright (c) 2012 AOL, Inc.
+Copyright (c) 2013 AOL, Inc.
 All rights reserved.
 https://github.com/aol/node-multipass/blob/master/LICENSE-BSD
