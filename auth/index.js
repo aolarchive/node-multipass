@@ -4,15 +4,12 @@ var passport = require('passport')
   , userAPI = require('../data/user')
   , HttpHelper = require('../routes/httphelper')
   , ApiResponse = require('../data/apiresponse');
-  //, appAuth = require('./app');
 
 
 // Passport session setup.
 // To support persistent login sessions, serialize the user by storing the 
 // userId in an object.
 passport.serializeUser(function(user, done) {
-  console.log('passport.serializeUser');
-  
   var serializedData = {
       appId: null,
       userId: null
@@ -34,7 +31,6 @@ passport.serializeUser(function(user, done) {
 
 // Return user object persisted in the session.
 passport.deserializeUser(function(obj, done) {
-  console.log('passport.deserializeUser');
   done(null, obj);
 });
 
@@ -42,8 +38,6 @@ passport.deserializeUser(function(obj, done) {
 var auth = {
     
   providers: [],
-  
-  _appAuthHandler: null,
   
   _appAuthStrategy: null,
   
@@ -53,7 +47,6 @@ var auth = {
     app.use(passport.initialize());
     app.use(passport.session());
 
-    //appAuth(auth);
     this.loadAppProvider('app');
     this.loadProviders(app);
   },
@@ -72,17 +65,7 @@ var auth = {
   
    return function(req, res, next) {
      console.log('auth.authenticateProvider');
-       //if (!req.isAuthenticated()) {
-           // not authenticated, this is an initial sign on.  If its the first time we've seen this particular
-           // third-party account, a local "user" record will be created for associating with it
-       //    passport.authenticate(provider, { session:true, scope: options.scope })(req, res, next);
-       //} else {
-           // already authenticated.  this user is "connecting" another third party account
-           // using authorize causes passport to put it on req.account, and not touch the existing
-           // user and session  - see here: http://passportjs.org/guide/authorize.html
-           // we'll next out into `associate` middleware for app-specific logic
-           passport.authorize(provider, { session:false, scope: options.scope })(req, res, next);
-       //}
+     passport.authorize(provider, { session:false, scope: options.scope })(req, res, next);
    }
   },
   
@@ -150,26 +133,8 @@ var auth = {
   },
   
   /**
-   * Middleware to verify passport.authenticate when unauthed; loads user from records 
-   */
-  authVerify: function(req, provider, accessToken, refreshToken, profile, done){
-    console.log('auth.authVerify');
-    profile.authToken = accessToken;
-    profile.authTokenSecret = refreshToken;
-    
-    if (!profile.id) {
-      profile.id = profile.username || profile.displayName || null;
-    }
-    
-    var context = req.user || {};
-    
-    userAPI.findOrAddUser(context, profile, function(obj){
-      return done(null, obj);
-    });
-  },
-
-  /**
-   * Middleware to verify passport.authorize when already authed; for now just passes on profile
+   * Middleware to verify passport.authorize and make any changes to the profile 
+   * before passing it on; assumes already authed
    */
   authzVerify: function(req, provider, accessToken, refreshToken, profile, done){
     console.log('auth.authzVerify');
@@ -206,13 +171,9 @@ var auth = {
     verify = verify || function(req, accessToken, refreshToken, profile, done) {
       // Invalid signature
       if (arguments.length != 5 || !req || typeof(req) != 'object') {
-        return done(Error('Invalid signature in verify strategy.'), false);
+        return done(new Error('Invalid signature in verify strategy.'), false);
       
-      // Not logged in. Load user.
-      //} else if (!req.user) {
-      //  return auth.authVerify(req, provider, accessToken, refreshToken, profile, done);
-    
-      // Logged in. Associate account with user.
+      // Associate account with user.
       } else {
         return auth.authzVerify(req, provider, accessToken, refreshToken, profile, done);
       }
@@ -233,13 +194,9 @@ var auth = {
     verify = verify || function(req, identifier, profile, done) {
       // Invalid signature
       if (arguments.length != 4 || !req || typeof(req) != 'object') {
-        return done(Error('Invalid signature in verify strategy.'), false);
-      
-      // Not logged in. Load user.
-      //} else if (!req.user) {
-      //  return auth.authVerify(req, provider, identifier, null, profile, done);
+        return done(new Error('Invalid signature in verify strategy.'), false);
     
-      // Logged in. Associate account with user.
+      // Associate account with user.
       } else {
         return auth.authzVerify(req, provider, identifier, null, profile, done);
       }
@@ -260,16 +217,6 @@ var auth = {
         http.send(apiRes);
       }
     }
-  },
-  
-  //Simple route middleware to ensure user is authenticated.
-  //Use this route middleware on any resource that needs to be protected.  If
-  //the request is authenticated (typically via a persistent login session),
-  //the request will proceed.  Otherwise, a 401 status will be returned
-  ensureAuthenticated: function(req, res, next) {
-    if (req.isAuthenticated()) { return next(); }
-    //res.redirect(config.paths.failRedirect);
-    res.send(401);
   },
   
   getProviderLoginUrl: function(strategy) {
@@ -324,45 +271,7 @@ var auth = {
       });
     }
   },
-/*
-  appAuthHandler: function(req, res, next){
-    
-    // Use custom app auth handler if defined
-    if (auth._appAuthHandler) {
-      
-      auth._appAuthHandler(req, res, function(err, data) {
-        var http = new HttpHelper(req, res),
-          errRes = new ApiResponse(401, Error('Invalid appId.')),
-          appId = null;
-        
-        if (err || !data) {
-          // Unauthorized
-          http.send(errRes);
-        } else {
-          // Auth successful, so do something with credentials
-          appId = typeof data == 'string' ? data : data.appId;
-          if (!appId) {
-            http.send(errRes);
-          } else {
-            console.log('Authorized: ...' + appId.substr(-6));
-            req.user = req.user || {};
-            req.user['appId'] = appId;
-            next();
-          }
-        }
-      });
-      
-    // Else continue without authenticating app
-    } else {
-      next(); 
-    }
-  },
-  
-  setAppAuthHandler: function(func) {
-    this._appAuthHandler = func;
-  },
-  */
-  
+
   authenticateApp: function(options){
     options = _.extend({
       session: true,    // Store auth credentials in session
@@ -387,26 +296,7 @@ var auth = {
     var provider = require('./providers/' + String(strategy).toLowerCase()).provider;
     if (provider) console.log('Using app auth provider "'+strategy+'"');
     else console.log('Error loading app auth provider "'+strategy+'"');
-  },
-  /*
-  loadUser: function(req, res, next) {
-    var http = new HttpHelper(req, res),
-      userId = null;
-      
-    if (req.user) {
-      userId = req.params.userId || req.get('x-multipass-user') || null;
-      if (userId) {
-        req.user.userId = userId;
-        next();
-      } else {
-        http.send( new ApiResponse(400, Error('Invalid userId')) );
-      }
-      
-    } else {
-      // Error, not authorized
-      http.send( new ApiResponse(401, Error('Not authorized')) );
-    }
-  }*/
+  }
   
 };
 

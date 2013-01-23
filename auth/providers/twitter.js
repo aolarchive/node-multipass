@@ -17,13 +17,9 @@ auth.useOAuthStrategy(provider, TwitterStrategy, {
     if (profile.displayName == null){
       profile.displayName = profile.username;
     }   
-    // Not logged in. Load user.
-//    if (!req.user) {
-//      return auth.authVerify(req, provider, token, tokenSecret, profile, done);
-    // Logged in. Associate account with user.
-//    } else {
-      return auth.authzVerify(req, provider, token, tokenSecret, profile, done);
-//    }
+    
+    // Associate account with user.
+    return auth.authzVerify(req, provider, token, tokenSecret, profile, done);
   }
 );
 

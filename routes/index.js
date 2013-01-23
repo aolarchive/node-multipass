@@ -14,7 +14,7 @@ module.exports = function(app){
    * [*] /*
    * 
    * Process all requests for initial validation or normalization tasks:
-   * * Detect if SSL; return error is sslRequired and not https
+   * Detect if SSL; return error is sslRequired and not https
    */
   app.all('/*', 
     HttpHelper.sslHandler
@@ -56,19 +56,6 @@ module.exports = function(app){
         
   });
   
-  /**
-   * GET /api/logout
-   * 
-   * Logout the current user session.
-   */
-  app.get(config.paths.api + config.paths.logout, 
-    auth.appAuthHandler,
-    function(req, res){
-      req.logout();
-      var http = new HttpHelper(req, res);
-      http.send();
-    }
-  );
   
   /**
    * GET /api/user
@@ -76,10 +63,7 @@ module.exports = function(app){
    * Gets the complete user object for current user, including all associated profiles.
    */
   app.get(config.paths.api + '/user',
-    //auth.appAuthHandler,
-    //auth.loadUser,
     auth.authenticateApp(),
-    //auth.ensureAuthenticated, 
     function(req, res) {
       var http = new HttpHelper(req, res);
       
@@ -95,32 +79,12 @@ module.exports = function(app){
    * Remove all user data for current user, and logs out the current session.
    */
   app.delete(config.paths.api + '/user',
-    auth.appAuthHandler,
-    auth.ensureAuthenticated, 
+    auth.authenticateApp(), 
     function(req, res) {
       var http = new HttpHelper(req, res);
       
-      userAPI.removeUser(req.user.userId, function(data) {
+      userAPI.removeUser(req.user, function(data) {
         req.logout(); // Must logout so session data for this user doesn't persist
-        http.send(data);
-      });
-    }
-  );
-
-  /**
-   * GET /api/user/:userId
-   * 
-   * Gets the complete user object for the given userId, including all associated profiles.
-   */
-  app.get(config.paths.api + '/user/:userId',
-    auth.appAuthHandler,
-    auth.loadUser,
-    //auth.ensureAuthenticated, 
-    function(req, res) {
-      var http = new HttpHelper(req, res),
-        userId = req.params.userId && req.params.userId[0];
-      
-      userAPI.getUser(userId, false, function(data) {
         http.send(data);
       });
     }
@@ -133,9 +97,6 @@ module.exports = function(app){
    */
   app.get(config.paths.api + '/user/:provider/:providerId', 
     auth.authenticateApp(),
-    //auth.appAuthHandler,
-    //auth.loadUser,
-    //auth.ensureAuthenticated, 
     function(req, res, next) {
       var http = new HttpHelper(req, res);
       
@@ -152,8 +113,6 @@ module.exports = function(app){
    */
   app.delete(config.paths.api + '/user/:provider/:providerId', 
     auth.authenticateApp(),
-    //auth.appAuthHandler,
-    //auth.ensureAuthenticated, 
     function(req, res, next) {
       var http = new HttpHelper(req, res);
     
@@ -170,7 +129,6 @@ module.exports = function(app){
    */
   app.get(config.paths.api + '/auth/providers',
     auth.authenticateApp(),
-    //auth.ensureAuthenticated, 
     function(req, res, next) {
       var http = new HttpHelper(req, res);
       var data = new ApiResponse(auth.providers || []);

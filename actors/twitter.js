@@ -51,19 +51,13 @@ var twitterActor = {
                 if (error) {
                   var errorData = JSON.parse(error.data);
                   console.log('Error: Something is wrong.\n'+JSON.stringify(error)+'\n');
+                  
                   callback(new ApiResponse(500, new Error(errorData), 'Error updating twitter status.'));
-                  /*for (i in response2) {
-                    out = i + ' : ';
-                    try {
-                      out+=response2[i];
-                    } catch(err) {}
-                    
-                    out += '/n';
-                    console.log(out);
-                  }*/
+                  
                 } else {
                   console.log('Twitter status updated.\n');
                   console.log(response2+'\n');
+                  
                   callback(new ApiResponse(JSON.parse(data)));
                 }
           });
@@ -86,19 +80,13 @@ var twitterActor = {
                 if (error) {
                   var errorData = JSON.parse(error.data);
                   console.log('Error: Something is wrong.\n'+JSON.stringify(error)+'\n');
+                  
                   callback(new ApiResponse(500, new Error(errorData), 'Error getting twitter timeline.'));
-                  /*for (i in response2) {
-                    out = i + ' : ';
-                    try {
-                      out+=response2[i];
-                    } catch(err) {}
-                    
-                    out += '/n';
-                    console.log(out);
-                  }*/
+                  
                 } else {
                   console.log('Twitter timeline retrieved.\n');
                   console.log(response2+'\n');
+                  
                   callback(new ApiResponse(JSON.parse(data)));
                 }
           });
