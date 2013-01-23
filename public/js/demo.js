@@ -83,6 +83,24 @@
       this.apiRequest(options, callback);
     },
     
+    getTumblrBlogs: function(providerId, callback) {
+      var options = {
+        url: this.options.apiBaseUrl + '/api/actors/tumblr/' + providerId + '/user/blogs'
+      };
+      
+      this.apiRequest(options, callback);
+    },
+    
+    submitTumblrBlogPost: function(providerId, hostname, title, body, callback) {
+      var options = {
+        url: this.options.apiBaseUrl + '/api/actors/tumblr/' + providerId + '/user/blogs/' + encodeURIComponent(hostname) + '/post',
+        type: 'post',
+        data: JSON.stringify({ 'title': title, 'body': body })
+      };
+      
+      this.apiRequest(options, callback);
+    },
+    
     initUi: function() {
       
       $('.mp-userId').text(multipass.options.userId);
@@ -133,7 +151,7 @@
                 }
               })),
               $('<td/>').append(                  
-                profile.displayName + (profile.username ? ' ('+profile.username+')' : '')
+                (profile.displayName || '') + (profile.username ? ' ('+profile.username+')' : '')
               ),
               //$('<td/>').append((new Date(profile.modifiedDate)).toString()),
               actionsCell = $('<td/>').append($('<a/>', {
@@ -161,7 +179,7 @@
           if (profile.provider == 'twitter') {
             actionsCell.append(' | ',
               $('<a/>', {
-                'class': 'mp-profile-tweet',
+                'class': 'mp-twitter-update',
                 href: '#',
                 text: 'Send Tweet',
                 click: function(event) {
@@ -169,12 +187,12 @@
                   var providerFull = $(event.target).closest('tr').data('providerId').split(':'),
                     provider = providerFull[0],
                     providerId = providerFull[1],
-                    content = '<textarea class="mp-twitter-field" rows="3" maxlength="140"></textarea>',
+                    content = '<textarea class="mp-twitter-field" rows="3" maxlength="140" title="Status update"></textarea>',
                     twitterHandle = '@' + profile.username;
                   
                   $('.mp-dialog').html(content).dialog({
                     title: 'Send tweet as ' + twitterHandle,
-                    dialogClass: 'mp-twitter-dialog',
+                    dialogClass: 'mp-form-dialog',
                     width: 500,
                     maxWidth: 500,
                     modal: true,
@@ -198,6 +216,61 @@
                       }
                     }
                   }).show();
+                }
+              })
+            );
+          } else if (profile.provider == 'tumblr') {
+            actionsCell.append(' | ',
+              $('<a/>', {
+                'class': 'mp-tumblr-post',
+                href: '#',
+                text: 'Submit Post',
+                click: function(event) {
+                  event.preventDefault();
+                  var providerFull = $(event.target).closest('tr').data('providerId').split(':'),
+                    provider = providerFull[0],
+                    providerId = providerFull[1],
+                    content = '';
+                  
+                  multipass.getTumblrBlogs(providerId, function(data){
+                    content += '<select class="mp-tumblr-blog" title="Choose a blog">';
+                    $.each(data, function(i, blog){
+                      content += '<option value="'+blog.baseHostname+'">'+blog.baseHostname+'</option>';
+                    });
+                    content += '</select>'
+                      +'<input type="text" class="mp-tumblr-title" title="Post title" />'
+                      + '<textarea class="mp-tumblr-body" rows="6" title="Post body"></textarea>';
+                    
+                    $('.mp-dialog').html(content).dialog({
+                      title: 'Submit Tumblr post as ' + profile.username,
+                      dialogClass: 'mp-form-dialog',
+                      width: 500,
+                      maxWidth: 500,
+                      modal: true,
+                      buttons: {
+                        Submit: function() {
+                          var body = $('.mp-tumblr-body').val(),
+                            title = $('.mp-tumblr-title').val(),
+                            hostname = $('.mp-tumblr-blog').val();
+                          
+                          if (body.length) {
+                            $('.mp-dialog').dialog( "option", "buttons", null );
+                            
+                            multipass.submitTumblrBlogPost(providerId, hostname, title, body, function(data){
+                              $('.mp-dialog').html('<p>Post submitted successfully!</p>').dialog({
+                                Cancel: function() {
+                                  $( this ).dialog( "destroy" );
+                                }
+                              });
+                            });
+                          }
+                        },
+                        Cancel: function() {
+                          $( this ).dialog( "destroy" );
+                        }
+                      }
+                    }).show();
+                  });
                 }
               })
             );

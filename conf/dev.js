@@ -14,15 +14,20 @@ var config = {
       failRedirect: '/'
     },
     providers: {
+      //JJ Test App: https://dev.twitter.com/apps/3609768
+        twitter: {
+          consumerKey: "Kp2QGreXSz1qFoBic578g",
+          consumerSecret: "fMwIyP0z2NZNBzuX4m0qnav1zr5HJyQSI6r5saeaebA"
+        },  
         //JJ Test App: https://developers.facebook.com/apps/105846932813376
         facebook: {
           appId: "105846932813376",
           appSecret: "117ddf4b3a250c722dcaeb51f39d1139"
         },
-        //JJ Test App: https://dev.twitter.com/apps/3609768
-        twitter: {
-          consumerKey: "Kp2QGreXSz1qFoBic578g",
-          consumerSecret: "fMwIyP0z2NZNBzuX4m0qnav1zr5HJyQSI6r5saeaebA"
+        //JJ Test App: http://www.tumblr.com/oauth/apps
+        tumblr: {
+          consumerKey: "afaLCAqqi5ITZVlB0Qb2R82h3lsxxlkmol7jfdMncqcC9dN6Xn",
+          consumerSecret: "Cq8BA2OzVbVowyHGQNFDEAsSUacrM32gXwhkBDPe9ZuUoduQck"
         },
         //JJ Test App: https://developer.linkedin.com/
         linkedin: {
@@ -57,11 +62,6 @@ var config = {
         dropbox: {
           consumerKey: "vdon89t4whsq7x9",
           consumerSecret: "b6jkyap4a0r6f6m"
-        },
-        //JJ Test App: http://www.tumblr.com/oauth/apps
-        tumblr: {
-          consumerKey: "afaLCAqqi5ITZVlB0Qb2R82h3lsxxlkmol7jfdMncqcC9dN6Xn",
-          consumerSecret: "Cq8BA2OzVbVowyHGQNFDEAsSUacrM32gXwhkBDPe9ZuUoduQck"
         }
     },
     session: {

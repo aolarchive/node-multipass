@@ -19,11 +19,15 @@ td, th {
 	/*line-height: 1.5em;*/
 }
 
-.mp-twitter-dialog .mp-dialog {
+.mp-form-dialog .mp-dialog {
 	text-align: center;
 }
 
-.mp-twitter-field {
+.mp-dialog input[type='text'],
+.mp-dialog textarea,
+.mp-dialog select {
 	width: 90%;
 	margin: 0 auto;
+	display: block;
+	margin-bottom: 10px;
 }
