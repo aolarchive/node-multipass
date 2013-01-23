@@ -57,6 +57,16 @@
       this.apiRequest(options, callback);
     },
     
+    removeUser: function(callback) {
+      var options = {
+        url: this.options.apiBaseUrl + '/api/user',
+        type: 'post',
+        data: JSON.stringify({ '_method': 'delete' })
+      };
+      
+      this.apiRequest(options, callback);
+    },
+    
     loginAuthProvider: function(loginUrl) {
       var url = this.options.apiBaseUrl + loginUrl + '?r=auth.html';
       
@@ -257,6 +267,17 @@
     } else if ($('.mp-auth').length) {
       multipass.initAuth();
     }
+    
+    $('.mp-user-remove').click(function(event){
+      event.preventDefault();
+      
+      if (window.confirm("Are you sure you want to remove this user and all its profiles?")) {
+        multipass.removeUser(function(data, options){
+          location.reload();
+        });
+      }
+    });
+    
   });
   
   return multipass;

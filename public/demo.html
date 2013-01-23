@@ -12,16 +12,23 @@
 	<body class="mp-demo">
 		<h1>Multipass Demo</h1>
 		
-		<h2>User Summary</h2>
-		<div>
-			<p>UserId: <span class="mp-userId"></span><p>
-			<p>AppId: <span class="mp-appId"></span></p>
-		</div>
+		<h2>User Context</h2>
+		<table cellspacing="0" cellpadding="0" border="0" class="mp-user">
+			<tr>
+				<td width="120">UserId</td>
+				<td class="mp-userId">UserId</td>
+			</tr>
+			<tr>
+				<td>AppId</td>
+				<td class="mp-appId">AppId</td>
+			</tr>
+		</table>
+		<a class="mp-user-remove" href="#">Remove User</a>
 		
 		<h3>User Profiles</h3>
 		<table cellspacing="0" cellpadding="0" border="0" class="mp-profiles">
 			<tr>
-				<th>Provider</th>
+				<th width="120">Provider</th>
 				<th>Provider Id</th>
 				<th>Display Name</th>
 				<!--<th>Last Updated</th>-->
