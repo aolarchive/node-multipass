@@ -141,9 +141,10 @@
                 text: profile.providerId,
                 click: function(event) {
                   event.preventDefault();
-                  var providerFull = $(event.target).closest('tr').data('providerId').split(':'),
-                    provider = providerFull[0],
-                    providerId = providerFull[1];
+                  
+                  var providerData = $(event.target).closest('tr').data(),
+                    provider = providerData.provider,
+                    providerId = providerData.providerId;
                   
                   multipass.getProfile(provider, providerId, function(data, options) {
                     multipass.showResponse(options.url, data);
@@ -160,9 +161,10 @@
                 text: 'Remove',
                 click: function(event) {
                   event.preventDefault();
-                  var providerFull = $(event.target).closest('tr').data('providerId').split(':'),
-                    provider = providerFull[0],
-                    providerId = providerFull[1];
+                  
+                  var providerData = $(event.target).closest('tr').data(),
+                    provider = providerData.provider,
+                    providerId = providerData.providerId;
                   
                   if (window.confirm("Are you sure you want to remove providerId '"+provider+':'+providerId+"'?")) {
                     multipass.removeProfile(provider, providerId, function(data) {
@@ -173,7 +175,11 @@
               }))
             )
             .addClass('mp-profile-'+profile._id)
-            .data('providerId', profile.provider + ':' + profile.providerId)
+            .toggleClass('mp-post-enabled', (profile.provider == 'twitter' || profile.provider == 'tumblr'))
+            .data({
+              provider: profile.provider,
+              providerId: profile.providerId
+            })
           );
           
           if (profile.provider == 'twitter') {
@@ -184,9 +190,10 @@
                 text: 'Send Tweet',
                 click: function(event) {
                   event.preventDefault();
-                  var providerFull = $(event.target).closest('tr').data('providerId').split(':'),
-                    provider = providerFull[0],
-                    providerId = providerFull[1],
+                  
+                  var providerData = $(event.target).closest('tr').data(),
+                    provider = providerData.provider,
+                    providerId = providerData.providerId,
                     content = '<textarea class="mp-twitter-field" rows="3" maxlength="140" title="Status update"></textarea>',
                     twitterHandle = '@' + profile.username;
                   
@@ -227,9 +234,10 @@
                 text: 'Submit Post',
                 click: function(event) {
                   event.preventDefault();
-                  var providerFull = $(event.target).closest('tr').data('providerId').split(':'),
-                    provider = providerFull[0],
-                    providerId = providerFull[1],
+                  
+                  var providerData = $(event.target).closest('tr').data(),
+                    provider = providerData.provider,
+                    providerId = providerData.providerId,
                     content = '';
                   
                   multipass.getTumblrBlogs(providerId, function(data){
