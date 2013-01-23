@@ -38,7 +38,7 @@ module.exports = function(app){
      * Shows simple dashboard page that shows user data, and has UI to 
      * remove items, login/logout.
      */
-    app.get('/', function(req, res){
+    /*app.get('/', function(req, res){
       
       var renderPage = function(user) {
         res.render('index', { user: user, providers: auth.providers, config: config });
@@ -52,7 +52,7 @@ module.exports = function(app){
         });
       }
       
-    });
+    });*/
         
   });
   
