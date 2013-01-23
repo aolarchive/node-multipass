@@ -101,6 +101,74 @@
       this.apiRequest(options, callback);
     },
     
+    openCrossPost: function() {
+      var providerData = {};
+      
+      // Collect provider data from post-enabled profiles
+      $('.mp-profiles tr').each(function(i, el){
+        if (i > 0) {
+          var $el = $(el),
+            data;
+        
+          if ($el.hasClass('mp-post-enabled')) {
+            data = $el.data();
+            providerData[data.provider] = data;
+          }
+        }
+      });
+      
+      multipass.getTumblrBlogs(providerData.tumblr.providerId, function(data){
+        var content = '<select class="mp-tumblr-blog" title="Choose a blog">';
+        $.each(data, function(i, blog){
+          content += '<option value="'+blog.baseHostname+'">'+blog.baseHostname+'</option>';
+        });
+        content += '</select>'
+          +'<input type="text" class="mp-tumblr-title" title="Post title" />'
+          + '<textarea class="mp-tumblr-body" rows="6" title="Post body"></textarea>';
+        
+        $('.mp-dialog').html(content).dialog({
+          title: 'Send cross post',
+          dialogClass: 'mp-form-dialog',
+          width: 500,
+          maxWidth: 500,
+          modal: true,
+          buttons: {
+            Submit: function() {
+              var body = $('.mp-tumblr-body').val(),
+                title = $('.mp-tumblr-title').val(),
+                hostname = $('.mp-tumblr-blog').val();
+              
+              if (body.length) {
+                $('.mp-dialog').dialog( "option", "buttons", null );
+                
+                multipass.submitTumblrBlogPost(providerData.tumblr.providerId, hostname, title, body, function(data){
+                  // Add short delay between posts
+                  setTimeout(function(){
+                    var status = title + ' - ' + body;
+                    
+                    // Send same post to Twitter
+                    multipass.updateTwitterStatus(providerData.twitter.providerId, status, function(data){
+                      $('.mp-dialog').html('<p>Cross post sent successfully to Tumblr and Twitter.</p>').dialog({
+                        Cancel: function() {
+                          $( this ).dialog( "destroy" );
+                        }
+                      });
+                    });
+                    
+                  }, 500);
+                  
+                });
+              }
+            },
+            Cancel: function() {
+              $( this ).dialog( "destroy" );
+            }
+          }
+        })
+        .show();
+      });
+    },
+    
     initUi: function() {
       
       $('.mp-userId').text(multipass.options.userId);
@@ -342,22 +410,30 @@
    */
   $(document).ready(function(){
     
+    // Demo app
     if ($('.mp-demo').length) {
       multipass.initUi();
+
+      $('.mp-user-remove').click(function(event){
+        event.preventDefault();
+        
+        if (window.confirm("Are you sure you want to remove this user and all its profiles?")) {
+          multipass.removeUser(function(data, options){
+            location.reload();
+          });
+        }
+      });
       
+      $('.mp-profiles-cross-post').click(function(event){
+        event.preventDefault();
+        
+        multipass.openCrossPost();
+      });
+    
+    // Auth handler window
     } else if ($('.mp-auth').length) {
       multipass.initAuth();
     }
-    
-    $('.mp-user-remove').click(function(event){
-      event.preventDefault();
-      
-      if (window.confirm("Are you sure you want to remove this user and all its profiles?")) {
-        multipass.removeUser(function(data, options){
-          location.reload();
-        });
-      }
-    });
     
   });
   
