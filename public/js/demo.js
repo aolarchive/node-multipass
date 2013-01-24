@@ -202,11 +202,10 @@
         $.each(data, function(i, profile){
           $profiles.append(
             $('<tr/>').append(
-              $('<td/>').append(profile.provider),
-              $('<td/>').append($('<a/>', {
+              $('<td/>').append($('<span class="mp-icon mp-'+profile.provider+'" />'), $('<a/>', {
                 'class': 'mp-profile-read',
                 href: '#',
-                text: profile.providerId,
+                text: profile.provider,
                 click: function(event) {
                   event.preventDefault();
                   
@@ -222,7 +221,6 @@
               $('<td/>').append(                  
                 (profile.displayName || '') + (profile.username ? ' ('+profile.username+')' : '')
               ),
-              //$('<td/>').append((new Date(profile.modifiedDate)).toString()),
               actionsCell = $('<td/>').append($('<a/>', {
                 'class': 'mp-profile-remove',
                 href: '#',

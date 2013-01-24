@@ -31,3 +31,43 @@ td, th {
 	display: block;
 	margin-bottom: 10px;
 }
+
+.mp-icon {
+	background: url('/images/social_icons.png') no-repeat 0px 0px;
+	display: inline-block;
+	vertical-align: middle;
+	width: 24px;
+	height: 24px;
+	margin-right: 10px;
+}
+
+.mp-icon.mp-aol {
+	background-position: 0px -24px;
+}
+.mp-icon.mp-facebook {
+	background-position: 0px -48px;
+}
+.mp-icon.mp-google {
+	background-position: 0px -72px;
+}
+.mp-icon.mp-linkedin {
+	background-position: 0px -96px;
+}
+.mp-icon.mp-tumblr {
+	background-position: 0px -120px;
+}
+.mp-icon.mp-twitter {
+	background-position: 0px -144px;
+}
+.mp-icon.mp-windowslive {
+	background-position: 0px -168px;
+}
+.mp-icon.mp-yahoo {
+	background-position: 0px -192px;
+}
+.mp-icon.mp-github {
+	background-position: 0px -216px;
+}
+.mp-icon.mp-dropbox {
+	background-position: 0px -240px;
+}
