@@ -6,7 +6,8 @@
       apiBaseUrl: 'https://devlocal.aol.com:3443',
       userId: 'multipass:demo',
       appId: 'bcca4c62-dbbc-4b22-a3c5-7bdb96fca106',
-      appSecret: '3470a522d81c77f9b48133df779841f1'
+      appSecret: '3470a522d81c77f9b48133df779841f1',
+      authCallback: '_multipassCallback_'
     },
       
     init: function(customOptions) {
@@ -19,6 +20,8 @@
           'X-Multipass-User': multipass.options.userId
         }
       });
+      
+      window[this.options.authCallback] = $.proxy(multipass.initUi, multipass);
     },
     
     getProviders: function(callback) {
@@ -169,36 +172,15 @@
       });
     },
     
-    initUi: function() {
-      
-      $('.mp-userId').text(multipass.options.userId);
-      $('.mp-appId').text(multipass.options.appId);
-      
-      this.getProviders(function(data){
-        var $providers = $('.mp-providers').empty();
-        
-        $.each(data, function(i, value){
-          $providers.append(
-            $('<li/>').append(
-              $('<a/>', {
-                'data-url': value.loginUrl,
-                href: '#',
-                text: value.provider,
-                click: function(event) {
-                  event.preventDefault();
-                  multipass.loginAuthProvider($(event.target).data('url'));
-                }
-              })
-            )  
-          );
-        });
-      });
-      
+    buildProfiles: function() {
       this.getProfiles(function(data){
         var $profiles = $('.mp-profiles tbody'),
           actionsCell;
-        //$profiles.find('tr').remove();
         
+        // Remove any exisiting profile rows
+        $profiles.find('tr.mp-profile').remove();
+        
+        // Build each profile row from data
         $.each(data, function(i, profile){
           $profiles.append(
             $('<tr/>').append(
@@ -234,13 +216,13 @@
                   
                   if (window.confirm("Are you sure you want to remove providerId '"+provider+':'+providerId+"'?")) {
                     multipass.removeProfile(provider, providerId, function(data) {
-                      location.reload();
+                      multipass.buildProfiles();
                     });
                   }
                 }
               }))
             )
-            .addClass('mp-profile-'+profile._id)
+            .addClass('mp-profile')
             .toggleClass('mp-post-enabled', (profile.provider == 'twitter' || profile.provider == 'tumblr'))
             .data({
               provider: profile.provider,
@@ -248,6 +230,7 @@
             })
           );
           
+          // If twitter provider, add tweet button
           if (profile.provider == 'twitter') {
             actionsCell.append(' | ',
               $('<a/>', {
@@ -292,6 +275,7 @@
                 }
               })
             );
+          // If Tumblr provider, add post button
           } else if (profile.provider == 'tumblr') {
             actionsCell.append(' | ',
               $('<a/>', {
@@ -351,6 +335,34 @@
           }
         });
       });
+    },
+    
+    initUi: function() {
+      
+      $('.mp-userId').text(multipass.options.userId);
+      $('.mp-appId').text(multipass.options.appId);
+      
+      this.getProviders(function(data){
+        var $providers = $('.mp-providers').empty();
+        
+        $.each(data, function(i, value){
+          $providers.append(
+            $('<li/>').append(
+              $('<a/>', {
+                'data-url': value.loginUrl,
+                href: '#',
+                text: value.provider,
+                click: function(event) {
+                  event.preventDefault();
+                  multipass.loginAuthProvider($(event.target).data('url'));
+                }
+              })
+            )  
+          );
+        });
+      });
+      
+      this.buildProfiles();
       
     },
     
@@ -358,7 +370,7 @@
       var parent = window.opener || window.parent;
       
       if (window != parent) {
-        parent.location.reload();
+        parent[this.options.authCallback] && parent[this.options.authCallback]();
         window.close();
       }
     },
@@ -417,7 +429,7 @@
         
         if (window.confirm("Are you sure you want to remove this user and all its profiles?")) {
           multipass.removeUser(function(data, options){
-            location.reload();
+            multipass.initUi();
           });
         }
       });
