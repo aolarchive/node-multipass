@@ -3,7 +3,7 @@
   var multipass = {
 
     options: {
-      apiBaseUrl: 'https://devlocal.aol.com:3443',
+      apiBaseUrl: location.protocol + '//' + location.host,
       userId: 'multipass:demo',
       appId: 'bcca4c62-dbbc-4b22-a3c5-7bdb96fca106',
       appSecret: '3470a522d81c77f9b48133df779841f1',
