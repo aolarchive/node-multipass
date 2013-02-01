@@ -150,7 +150,7 @@ module.exports = function(app){
    * Catch all other requests and return 400 error. 
    */
   app.all(config.paths.api + '/*', 
-    auth.appAuthHandler,
+    auth.authenticateApp(),
     function(req, res) {
       var http = new HttpHelper(req, res);
       var err = new ApiResponse(400, Error('Invalid request'));
