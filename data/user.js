@@ -149,7 +149,7 @@ var userAPI = {
         if (err) {
           res = new ApiResponse(500, err, 'Error retriving the user.');
         } else if (!doc && !allowEmptyResult) {
-          res = new ApiResponse(404, Error('The user cannot be found.'));
+          res = new ApiResponse(404, new Error('The user cannot be found.'));
         } else {
           res = new ApiResponse(doc);
         }
@@ -168,7 +168,10 @@ var userAPI = {
       function(err, doc){
         var res = null;
         if (err) {
-          res = new ApiResponse(404, err, 'The user cannot be found.');
+          res = new ApiResponse(500, err, 'Error retriving the user.');
+          callback(res);
+        } else if (!doc) {
+          res = new ApiResponse(404, new Error('The user cannot be found.'));
           callback(res);
         } else {
           doc.remove(function (err, removedDoc) {
@@ -198,7 +201,7 @@ var userAPI = {
             userProfile = userAPI.findProfileByUser(u, provider, providerId);
           
           if (!userProfile) {
-            res = new ApiResponse(404, Error('The profile cannot be found.'));
+            res = new ApiResponse(404, new Error('The profile cannot be found.'));
           } else {
             res = new ApiResponse(userProfile);
           }
@@ -252,7 +255,7 @@ var userAPI = {
             matchingProfile = userAPI.findProfileByUser(u, provider, providerId);
           
           if (!matchingProfile) {
-            res = new ApiResponse(404, Error('The profile cannot be found.'));
+            res = new ApiResponse(404, new Error('The profile cannot be found.'));
             callback(res);
           } else {
             matchingProfile.remove();
@@ -316,7 +319,7 @@ var userAPI = {
   
     // No profile found, return error
     } else {
-      res = new ApiResponse(404, Error('The profile cannot be found'));
+      res = new ApiResponse(404, new Error('The profile cannot be found'));
       callback(res);
     }
   },
