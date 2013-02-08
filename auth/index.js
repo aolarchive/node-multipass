@@ -174,10 +174,15 @@ var auth = {
     return function(req, res, next) {
       console.log('auth.handleResponse');
       var http = new HttpHelper(req, res),
-        apiRes = req.apiResponse || new ApiResponse();
+        apiRes = req.apiResponse || new ApiResponse(),
+        redirectParams = '';
       
+      // TODO: Find better way to pass success and error responses back with redirect url
       if (req.session && req.session.authredirect) {
-        res.redirect(req.session.authredirect);
+        if (apiRes.isError()) {
+          redirectParams = '?multipass_error=' + JSON.stringify( {message: apiRes.message, status: apiRes.getHTTPStatus()} );
+        }
+        res.redirect(req.session.authredirect + redirectParams);
       } else {
         http.send(apiRes);
       }

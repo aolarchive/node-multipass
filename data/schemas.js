@@ -29,7 +29,7 @@ UserProfile.plugin(encryption, {
 });
 
 var User = new Schema({
-  userId : {type: String, unique: true},
+  userId : {type: String},
   appId: String,
   profiles : [UserProfile],
   creationDate: Date,
