@@ -82,45 +82,10 @@ var auth = {
         
       // Auth'ed already, associating profile with current user
       } else if (user != null && profile != null) {
-        userAPI.getUser(user, true, function(apiRes) {
-          
-          if (apiRes.isError()) {
-            req.apiResponse = apiRes; // Return error
-            next();
-            
-          } else {
-            var data = apiRes.data, matchingProfile;
-            
-            // User exists
-            if (data) {
-              matchingProfile = userAPI.findProfileByUser(data, profile.provider, profile.id);
-              
-              // If no matching profile exists, add profile
-              if (!matchingProfile) {
-                userAPI.addProfile(user, profile,
-                  function(profileRes){
-                    req.apiResponse = profileRes; // Return 201 + profile object, or error
-                    next();
-                  }
-                );
-              // Else profile already exists, update profile
-              } else {
-                userAPI.updateProfileByUser(data, profile, 
-                  function(updateRes){
-                    req.apiResponse = updateRes;
-                    next();
-                  }
-                );
-              }
-              
-            // No user exists, so create it
-            } else {
-              userAPI.addUser(user, profile, function(addRes){
-                req.apiResponse = addRes;
-                next();
-              });
-            }
-          }
+        
+        userAPI.associateProfile(user, profile, function(apiRes){
+          req.apiResponse = apiRes; // Return APIResponse
+          next();
         });
       
       // Missing user or profile data, 
@@ -279,7 +244,7 @@ var auth = {
     }, options);
     
     return function(req, res, next){
-      console.log('authenticateApp', req.user);
+      //console.log('authenticateApp', req.user);
       if (!req.isAuthenticated() || options.forceAuth) {
         console.log('authenticateApp: forceAuth');
         passport.authenticate(auth._appAuthStrategy, options)(req, res, next);

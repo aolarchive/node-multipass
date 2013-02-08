@@ -66,43 +66,11 @@ var userAPI = {
   
   /**
    * Responses:
-   *  success: [200] {User} The updated User object, if user found and profile updated.
-   *  success: [201] {User} The User object that was added, if didn't exist exists.
-   *  error:   [404] If user found, but profile was not found.
-   *  error:   [500] If there were any system errors.
-   */
-  findOrAddUser : function(context, profile, callback) {
-    profile = profile || {};
-    
-    this.findUsersByProfile(context, profile, function(apiRes){
-      if (apiRes.isError()) {
-        callback(apiRes);
-      } else {
-        var users = apiRes.getData(),
-          mostRecentUser = null;
-        
-        // Matching user(s) found, update the profile
-        if (users && users.length) {
-          mostRecentUser = users[0];
-
-          // Update profile with latest data
-          userAPI.updateProfileByUser(mostRecentUser, profile, callback);
-          
-        // No user found, create user  
-        } else {
-          userAPI.addUser(context, profile, callback);
-        }
-      }
-    });
-  },
-  
-  /**
-   * Responses:
    *  success: [200] An Array of User objects that match the profile.
    */
   findUsersByProfile : function(context, profile, callback) {
     profile = profile || {};
-    User.find({'appId':context.appId, 'userId':context.userId, 'profiles.provider':profile.provider, 'profiles.providerId':profile.id},
+    User.find({'appId':context.appId, 'profiles.provider':profile.provider, 'profiles.providerId':profile.id},
       fieldInclusions,
       { sort:{ modifiedDate:-1 } }, // Sort by modifiedDate, DESC
       function(err, users){
@@ -325,38 +293,75 @@ var userAPI = {
   },
   
   /**
+   * Responses:
+   *  success: [200] {User} The updated User object, if user found and profile updated.
+   *  success: [201] {User} The User object that was added, if didn't already exist.
+   *  error:   [404] If user found, but profile was not found.
+   *  error:   [500] If there were any system errors.
+   */
+  updateOrAddUser : function(context, profile, user, callback) {
+    var matchingProfile;
+        
+    // User exists
+    if (user) {
+      matchingProfile = userAPI.findProfileByUser(user, profile.provider, profile.id);
+      
+      // If no matching profile exists, add profile
+      if (!matchingProfile) {
+        userAPI.addProfile(context, profile, callback);
+        
+      // Else profile already exists, update profile
+      } else {
+        userAPI.updateProfileByUser(user, profile, callback);
+      }
+      
+    // No user exists, so create it
+    } else {
+      userAPI.addUser(context, profile, callback);
+    }
+  },
+  
+  /**
    * Associate a profile with a user.
-   * If the user doesn't exist, create it with give profile data.
+   * If the user doesn't exist, create it with given profile data.
    */
   associateProfile : function(context, profile, callback) {
-    this.getUser(context, true, function(apiRes) {
-      var data, matchingProfile;
+    context = context || {};
+    profile = profile || {};
+    
+    // If a userId was provided, retrieve user
+    if (context.userId) {
       
-      if (apiRes.isError()) {
-        callback(apiRes);
+      this.getUser(context, true, function(apiRes) {
+        var user;
         
-      } else {
-        data = apiRes.getData();
-        
-        // User exists
-        if (data) {
-          matchingProfile = userAPI.findProfileByUser(data, profile.provider, profile.id);
+        if (apiRes.isError()) {
+          callback(apiRes);
           
-          // If no matching profile exists, add profile
-          if (!matchingProfile) {
-            userAPI.addProfile(context, profile, callback);
-            
-          // Else profile already exists, update profile
-          } else {
-            userAPI.updateProfileByUser(data, profile, callback);
-          }
-          
-        // No user exists, so create it
         } else {
-          userAPI.addUser(context, profile, callback);
+          user = apiRes.getData();
+          
+          userAPI.updateOrAddUser(context, profile, user, callback);
         }
-      }
-    });
+      });
+      
+    // If no userId provided, find the most recent user by profile
+    } else {
+      
+      this.findUsersByProfile(context, profile, function(apiRes){
+        var users, mostRecentUser;
+        
+        if (apiRes.isError()) {
+          callback(apiRes);
+        
+        } else {
+          users = apiRes.getData();
+          mostRecentUser = users && users.length ? users[0] : null;
+          
+          userAPI.updateOrAddUser(context, profile, mostRecentUser, callback);
+        }
+      });
+    }
   }
   
 };
