@@ -12,33 +12,45 @@
 	<body class="mp-demo">
 		<h1>Multipass Demo</h1>
 		
-		<h2>User Context</h2>
-		<table cellspacing="0" cellpadding="0" border="0" class="mp-user">
-			<tr>
-				<td width="150">UserId</td>
-				<td class="mp-userId">UserId</td>
-			</tr>
-			<tr>
-				<td>AppId</td>
-				<td class="mp-appId">AppId</td>
-			</tr>
-		</table>
-		<a class="mp-user-remove" href="#">Remove User</a>
+    <form class="mp-user-form" onsubmit="return false;">
+      <input type="text" id="mp-userId-input" placeholder="Enter a userId"/>
+      <input type="button" id="mp-submit" name="mp-submit" value="Update"/>
+    </form>
+    
+    <div class="mp-user-container">
+        
+  		<h2>User</h2>
+  		<table cellspacing="0" cellpadding="0" border="0" class="mp-user">
+  			<tr>
+  				<td width="150">UserId</td>
+  				<td class="mp-userId"></td>
+  				<td width="300">
+            <a class="mp-user-remove" href="#">Remove User</a>
+            <span class="mp-user-empty"><em>User not found</em></span>
+  				</td>
+  			</tr>
+  		</table>
 		
-		<h3>User Profiles</h3>
-		<table cellspacing="0" cellpadding="0" border="0" class="mp-profiles">
-			<tr>
-				<th width="150">Provider</th>
-				<th>Display Name (Username)</th>
-				<th>Actions</th>
-			</tr>
-		</table>
-		<a class="mp-profiles-cross-post" href="#">Cross Post</a>
+			<h3>User Profiles</h3>
+			<div class="mp-profiles-list">
+  			<table cellspacing="0" cellpadding="0" border="0" class="mp-profiles">
+  				<tr>
+  					<th width="150">Provider</th>
+  					<th>Display Name (Username)</th>
+  					<th width="300">Actions</th>
+  				</tr>
+  			</table>
+			 <a class="mp-profiles-cross-post mp-button" href="#">Cross Post</a>
+			</div> 
+			<div class="mp-profiles-empty">
+			  <em>No profiles found</em>
+			</div>
+			
+			<h2>Associate account</h2>
+			<ul class="mp-providers">
+			</ul>
+		</div>
 		
-		<h2>Associate account</h2>
-		<ul class="mp-providers">
-		</ul>
-
 		<pre class="mp-dialog"></pre>
 		
 	</body>

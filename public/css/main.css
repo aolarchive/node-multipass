@@ -15,6 +15,51 @@ td, th {
 	text-align: left;
 }
 
+input[type='text']{
+  border: 1px solid #CCC;
+  padding: 4px 8px;
+  font-size: 1em;
+}
+
+.mp-button,
+input[type='button'],
+input[type='submit'] {
+  border: 1px solid #CCC;
+  background-color: #DDD;
+  padding: 5px 10px;
+  font-size: 1em;
+  border-radius: 5px;
+  transition: 0.1s;
+  -webkit-transition: 0.1s;
+  -moz-transition: 0.1s;
+  cursor: pointer;
+  text-decoration: none;
+  color: #000;
+}
+
+.mp-button:hover,
+input[type='button']:hover,
+input[type='submit']:hover {
+  background-color: #d9208a;
+  color: #FFF;
+}
+
+.mp-user-container {
+	display: none;
+}
+
+#mp-userId-input {
+  width: 150px;
+}
+
+.mp-user-remove {
+  display: none;
+}
+
+.mp-profiles-list {
+  display: none;
+}
+
 .ui-dialog .ui-dialog-content {
 	/*line-height: 1.5em;*/
 }
