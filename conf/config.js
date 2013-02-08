@@ -48,6 +48,10 @@ function getConfig() {
     return _.extend(conf.getServer(), conf.proxy);
   };
   
+  conf.hasProxy = function() {
+    return (conf.proxy && conf.getProxy().port != conf.getServer().port);
+  };
+  
   return conf;
 }
 

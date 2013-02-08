@@ -18,6 +18,10 @@ app.configure(function() {
   app.use(express.cookieParser());
   app.use(express.bodyParser());
   app.use(express.methodOverride());
+  // Trust proxy if exists
+  if (config.hasProxy()) {
+    app.enable('trust proxy');
+  }
   // Init session management
   sessionStore.init(app);
   // Init auth
