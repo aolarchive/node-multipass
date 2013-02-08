@@ -3,12 +3,12 @@ var config = require('./config')
 
 
 function init(app) {
-
+  
 	mongoose.connect(config.mongo.connection);
 	
-	mongoose.connection.on('error', console.error.bind(console, 'connection error:'));
+	mongoose.connection.on('error', console.error.bind(console, 'Data connection error:'));
 	mongoose.connection.once('open', function () {
-		console.log('Connection successful to '+config.mongo.connection);
+		console.log('Data connection successful to '+config.mongo.connection);
 	});
 
 }

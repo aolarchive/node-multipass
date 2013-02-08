@@ -19,7 +19,13 @@ var sessionStore = {
   },
   
   init : function(app) {
-    console.log('SessionStore connection successful to mongodb://'+sessionStore.config.host+':'+sessionStore.config.port+'/'+sessionStore.config.db);
+    
+    sessionStore.db.once('error', function(event){
+      console.log('SessionStore connection error: ['+event.toString()+']');
+    });
+    sessionStore.db.once('open', function(event){
+      console.log('SessionStore connection successful to mongodb://'+sessionStore.config.host+':'+sessionStore.config.port+'/'+sessionStore.config.db);
+    });
     
     app.use(
       express.session(
