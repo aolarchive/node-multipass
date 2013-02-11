@@ -66,7 +66,7 @@ module.exports = function(app){
     }
   );
   
-  app.configure('development', 'heroku', function(){
+  app.configure('development', function(){
     
     app.get('/app', function(req, res){
 

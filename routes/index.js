@@ -30,33 +30,6 @@ module.exports = function(app){
   //  auth.appAuthHandler
   //);
   
-  app.configure('development', 'heroku', function(){
-    
-    /**
-     * GET /
-     * 
-     * Shows simple dashboard page that shows user data, and has UI to 
-     * remove items, login/logout.
-     */
-    /*app.get('/', function(req, res){
-      
-      var renderPage = function(user) {
-        res.render('index', { user: user, providers: auth.providers, config: config });
-      };
-      
-      if (!req.isAuthenticated()) {
-        renderPage(req.user);
-      } else {
-        userAPI.getUser(req.user.userId, false, function(data) {
-          renderPage(data.data);
-        });
-      }
-      
-    });*/
-        
-  });
-  
-  
   /**
    * GET /api/user
    * 
