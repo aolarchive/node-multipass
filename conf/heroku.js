@@ -43,15 +43,15 @@ var config = {
           clientId : "ao1iDZvZUadYKQfY",
           clientSecret : "s6a8aPuspUM3dEYa"
         },
-        //JJ Test App: https://developer.apps.yahoo.com/projects/dKoQ6x4k
+        //JJ Test App: https://developer.apps.yahoo.com/projects/4xFuZk3c
         yahoo: {
-          consumerKey: "dj0yJmk9cW95cDhQWG9uTUhEJmQ9WVdrOVpFdHZVVFo0TkdzbWNHbzlOelE1TWprNU5UWXkmcz1jb25zdW1lcnNlY3JldCZ4PThl",
-          consumerSecret: "5e95e0b09390095a9fb243cc570de39521a1e562"
+          consumerKey: "dj0yJmk9WWwwcUxtY214Q2VIJmQ9WVdrOU5IaEdkVnByTTJNbWNHbzlNVEUyTlRNeE1EWXkmcz1jb25zdW1lcnNlY3JldCZ4PTI4",
+          consumerSecret: "1ae1ce89ea6a12cee82f40e838e6d693be6e16ae"
         },
-        //JJ Test App: https://github.com/settings/applications/28082
+        //JJ Test App: https://github.com/settings/applications/34966
         github: {
-          clientId : "61f5263989c63542b6e7",
-          clientSecret : "78bfbc0552f62a424fb6f245040c3f80b6add763"
+          clientId : "36bf9e63b170a5068349",
+          clientSecret : "d94c944c40629f906d1d211926a7d32be0b8c53a"
         },
         //JJ Test App: https://www.dropbox.com/developers/app_info/119959
         dropbox: {
@@ -60,8 +60,8 @@ var config = {
         },
         //JJ Test App: http://www.tumblr.com/oauth/apps
         tumblr: {
-          consumerKey: "afaLCAqqi5ITZVlB0Qb2R82h3lsxxlkmol7jfdMncqcC9dN6Xn",
-          consumerSecret: "Cq8BA2OzVbVowyHGQNFDEAsSUacrM32gXwhkBDPe9ZuUoduQck"
+          consumerKey: "XCLbMJlflgBETUjt3WnEXaXAqu0LRqIiHqa9I1EA3XVhd1k6Q8",
+          consumerSecret: "Oa1q7wwJWRpQo2EfWTMTckRLIzebUdIhDA1qHqbEZbFCyjkesO"
         }
     },
     session: {
