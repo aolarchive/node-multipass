@@ -3,22 +3,35 @@ var _ = require('underscore')._;
 
 function getConfig() {
   var env = process.env.NODE_ENV || "development",
+    confOverride = process.env.MULTIPASS_CONF || '',
+    confFile = '',
     conf = {};
   
   /**
    * Pull in config based on current environment
    */
-  if (env == "development"){
-      conf = require('./dev.js');
-  }
-  else if (env == "stage"){
-      conf = require('./stage.js');
-  }
-  else if (env == "production"){
-      conf = require('./prod.js');
-  }
-  else if (env == "heroku"){
-    conf = require('./heroku.js');
+  try {
+    if (confOverride) {
+      confFile = confOverride;
+    }
+    else if (env == "development"){
+      confFile = './dev.js';
+    }
+    else if (env == "stage"){
+      confFile = './stage.js';
+    }
+    else if (env == "production"){
+      confFile = './prod.js';
+    }
+    
+    if (confFile) {
+      conf = require(confFile);
+      console.log('Using config file at ' + confFile);
+    } else {
+      throw new Error('No config file specified.');
+    }
+  } catch (e) {
+    throw new Error('Error loading config file at ' + confFile);
   }
   
   /**
