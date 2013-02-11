@@ -5,8 +5,8 @@
     options: {
       apiBaseUrl: location.protocol + '//' + location.host,
       userId: '',
-      appId: 'bcca4c62-dbbc-4b22-a3c5-7bdb96fca106',
-      appSecret: '3470a522d81c77f9b48133df779841f1',
+      appId: 'my-app-id',
+      appSecret: 'my-app-secret',
       authCallback: '_multipassCallback_'
     },
       
@@ -469,8 +469,24 @@
     }
   
   };
-
-  multipass.init();
+  
+  var options = {};
+  
+  // Config for Heroku app
+  if (location.hostname.indexOf('herokuapp.com') != -1) {
+    options = {
+      appId: '7978ae06-7af7-4574-8720-c84be06bf1a9',
+      appSecret: '74f603ca38453a544b1044a5e12d405e'
+    };
+  // Config for local app
+  } else {
+    options = {
+      appId: 'bcca4c62-dbbc-4b22-a3c5-7bdb96fca106',
+      appSecret: '3470a522d81c77f9b48133df779841f1'
+    };
+  }
+  
+  multipass.init(options);
   
   /*
    * Set up event listeners and code on DOM ready
