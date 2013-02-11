@@ -45,8 +45,8 @@ var config = {
         },
         //JJ Test App: https://developer.apps.yahoo.com/projects/4xFuZk3c
         yahoo: {
-          consumerKey: "dj0yJmk9WWwwcUxtY214Q2VIJmQ9WVdrOU5IaEdkVnByTTJNbWNHbzlNVEUyTlRNeE1EWXkmcz1jb25zdW1lcnNlY3JldCZ4PTI4",
-          consumerSecret: "1ae1ce89ea6a12cee82f40e838e6d693be6e16ae"
+          consumerKey: "dj0yJmk9MERXamdhWmFtbmFWJmQ9WVdrOU5IaEdkVnByTTJNbWNHbzlNVEUyTlRNeE1EWXkmcz1jb25zdW1lcnNlY3JldCZ4PTgy",
+          consumerSecret: "5a4e2ff74c754a6eed736f3e55b8e8f2f41f1bac"
         },
         //JJ Test App: https://github.com/settings/applications/34966
         github: {
