@@ -9,11 +9,13 @@ var twitterActor = {
     provider: 'twitter',
     
     oauth: (function() {
+      var localConfig = (config.providers && config.providers.twitter) || {};
+      
       return new OAuth(
         "https://api.twitter.com/oauth/request_token",
         "https://api.twitter.com/oauth/access_token",
-        config.providers.twitter.consumerKey,
-        config.providers.twitter.consumerSecret,
+        localConfig.consumerKey,
+        localConfig.consumerSecret,
         "1.0",
         null,
         "HMAC-SHA1"

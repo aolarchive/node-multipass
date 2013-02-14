@@ -62,7 +62,10 @@ function getConfig() {
   };
   
   conf.hasProxy = function() {
-    return (conf.proxy && conf.getProxy().port != conf.getServer().port);
+    var server = conf.getServer(),
+      proxy = conf.getProxy();
+      
+    return (conf.proxy && (proxy.port != server.port || proxy.host != server.host));
   };
   
   return conf;

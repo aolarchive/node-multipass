@@ -10,11 +10,13 @@ var tumblrActor = {
     provider: 'tumblr',
     
     oauth: (function() {
+      var localConfig = (config.providers && config.providers.tumblr) || {};
+      
       return new OAuth(
         "http://www.tumblr.com/oauth/request_token",
         "http://www.tumblr.com/oauth/access_token",
-        config.providers.tumblr.consumerKey,
-        config.providers.tumblr.consumerSecret,
+        localConfig.consumerKey,
+        localConfig.consumerSecret,
         "1.0",
         null,
         "HMAC-SHA1"
