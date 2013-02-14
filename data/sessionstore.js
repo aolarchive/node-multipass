@@ -14,6 +14,7 @@ var sessionStore = {
     host: config.session.host || null,
     port: config.session.port || null,
     db: config.session.db || null,
+    collection: config.session.collection || null,
     username: config.session.username || null,
     password: config.session.password || null
   },
@@ -33,6 +34,7 @@ var sessionStore = {
           secret: config.session.secret,
           store: new mongoStore({
             db: sessionStore.db,
+            collection : sessionStore.config.collection,
             username: sessionStore.config.username,
             password: sessionStore.config.password
           })

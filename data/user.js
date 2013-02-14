@@ -5,7 +5,7 @@ var mongoose = require('mongoose')
   , ApiResponse = require('./apiresponse');
 
 
-var User = mongoose.model('User', Schemas.User, config.mongo.collection);
+var User = mongoose.model('User', Schemas.User, (config.mongo.collection || 'users'));
 
 var fieldInclusions = { '__v':0 };  // 0==exclude, 1==include
 
