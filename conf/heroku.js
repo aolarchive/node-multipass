@@ -9,7 +9,6 @@ var config = {
     },
     paths: { 
       api: '/api',
-      logout: '/logout',
       authRedirect: '/',
       failRedirect: '/'
     },
@@ -70,8 +69,7 @@ var config = {
     },
     mongo: {
       secret: 'Jean-Baptiste Emanuel Zorg',
-      connection : process.env.MONGOLAB_URI || "mongodb://localhost:27017/multipass_dev",
-      collection : 'users'
+      connection : process.env.MONGOLAB_URI || "mongodb://localhost:27017/multipass_dev"
     }
 };
 
