@@ -17,7 +17,21 @@ This app requires Node.js and MongoDB. It uses `node-passport` to handle authent
 * Run app - type `node app`
 
 ### Configuration
-Most configuration takes place in the `conf/` folder. There are separate config files for different server enviroments (`dev.js`, `prod.js`, etc.), that are chosen based on the `NODE_ENV` environment variable, all managed by the special `conf/config.js` file. The default environment is "development".
+Most configuration takes place in the `conf/` folder, managed by the special `conf/config.js` file. 
+
+#### Environment ####
+The server environment is determined by the `NODE_ENV` environment variable, one of ('development', 'stage', 'production'), and defaults to 'development'.
+```
+NODE_ENV=stage
+```
+
+There are separate config files corresponding to each server enviroment (`dev.js`, `stage.js`, `prod.js`), that are chosen based on the `NODE_ENV` variable. To get started, look at `dev.js`, which has a basic skeleton in place.
+
+#### Custom Config File ####
+If you don't want to use the config files under `conf/`, you may specify a path to your own file by setting its filepath to the `MULTIPASS_CONF` environment variable.
+```
+MULTIPASS_CONF=/etc/multipass/config.js
+```
 
 ### Auth Providers
 The included set of auth providers are:
@@ -41,6 +55,8 @@ providers: {
   }
 }
 ```
+NOTE: The provider config properties are unique to the corresponding auth strategy ('appId' vs. 'consumerKey', etc.), so you must use those properties to set up providers. See https://github.com/jaredhanson/passport#strategies-1 for documentation on available strategies.
+
 The app automatically configures itself for a particular provider based on what you add in the config file. Then using the provider name you used in the providers object, like `'facebook'`, it then tries to load a corresponding provider strategy module with the same name from the `auth/providers/` folder, such as `facebook.js`. You can also add additional auth strategies by including them or writing your own. Each one just needs its own unique provider name.
 
 ## REST API
