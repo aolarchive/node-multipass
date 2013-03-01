@@ -65,23 +65,27 @@ The app automatically configures itself for a particular provider based on what 
     <th>Method</th>
     <th>Path</th>
     <th>Parameters</th>
-    <th>Response</th>
     <th>User Context Req.</th>
     <th>Description</th>
   </tr>
   <tr>
     <td>GET</td>
     <td>/api/auth/:provider</td>
-    <td>[r] - optional redirect URL</td>
-    <td></td>
+    <td width="150">[r] - redirect URL<br>[scope] - oauth scope</td>
     <td>Y</td>
     <td>Authentication path for each provider. Available values for :provider can be retreived via /auth/providers.</td>
   </tr>
   <tr>
     <td>GET</td>
+    <td>/api/auth/:provider/callback</td>
+    <td>N/A</td>
+    <td>Y</td>
+    <td>Authentication callback path for each provider. This is the endpoint automatically passed to auth strategies as the redirect URL, and processes the result of the auth call. Used internally, do not use this path directly.</td>
+  </tr>
+  <tr>
+    <td>GET</td>
     <td>/api/auth/providers</td>
     <td>N/A</td>
-    <td></td>
     <td>N</td>
     <td>Returns a list of all available auth providers and their login URLs.</td>
   </tr>
@@ -89,7 +93,6 @@ The app automatically configures itself for a particular provider based on what 
     <td>GET</td>
     <td>/api/user</td>
     <td>N/A</td>
-    <td></td>
     <td>Y</td>
     <td>Returns complete user object for the currently-authenticated user.</td>
   </tr>
@@ -97,7 +100,6 @@ The app automatically configures itself for a particular provider based on what 
     <td>DELETE</td>
     <td>/api/user</td>
     <td>N/A</td>
-    <td></td>
     <td>Y</td>
     <td>Deletes the entire user object for the currently-authenticated user.</td>
   </tr>
@@ -105,7 +107,6 @@ The app automatically configures itself for a particular provider based on what 
     <td>GET</td>
     <td>/api/user/:provider/:providerId</td>
     <td>N/A</td>
-    <td></td>
     <td>Y</td>
     <td>Returns a particular auth profile for the currently-authenticated user, based the given 'provider' and 'providerId' values.
     <br>For example, `/user/twitter/987654321`</td>
@@ -114,7 +115,6 @@ The app automatically configures itself for a particular provider based on what 
     <td>DELETE</td>
     <td>/api/user/:provider/:providerId</td>
     <td>N/A</td>
-    <td></td>
     <td>Y</td>
     <td>Deletes a particular auth profile for the currently-authenticated user, based the given 'provider' and 'providerId' values.</td>
   </tr>
