@@ -51,6 +51,27 @@ var auth = {
     this.loadProviders(app);
   },
   
+  /**
+   * Generate validate rules object, for HttpHelper.validate middleware.
+   * 
+   * @param {Object} req The current request object
+   * @returns {Object} Rules object to use  
+   */
+  validateRules: function (req) {
+    return [
+      {
+        name: 'scope',
+        value: req.query.scope,
+        pattern: /^[\w.,-]+$/i
+      },
+      {
+        name: 'r',
+        value: req.query.r,
+        pattern: /^.+$/i
+      }
+    ];
+  },
+  
   setRedirect: function(req) {
       //req.session.authredirect = config.paths.authRedirect;
       if (req.param('r') != null && req.session) {
@@ -223,6 +244,7 @@ var auth = {
           // Assign login and callback routes for provider
           
           app.get(auth.getProviderLoginUrl(provider.strategy),
+            HttpHelper.validate(auth.validateRules),
             auth.authenticateApp({ session:false, forceAuth:false }),
             function(req, res, next) {
               auth.setRedirect(req);
@@ -232,7 +254,8 @@ var auth = {
           );
     
           app.get(auth.getProviderCallbackUrl(provider.strategy),
-            [auth.authenticateApp({ forceAuth:false }),
+            [HttpHelper.validate(auth.validateRules),
+             auth.authenticateApp({ forceAuth:false }),
              auth.authenticateProvider(provider.strategy, { scope: provider.scope, failureRedirect: config.paths.failRedirect }),
              auth.associate(),
              auth.handleResponse()]

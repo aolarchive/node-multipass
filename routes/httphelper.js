@@ -1,4 +1,5 @@
 var config = require('../conf/config')
+  , _ = require('underscore')._
   , ApiResponse = require('../data/apiresponse');
  
 
@@ -80,6 +81,49 @@ HttpHelper.sslHandler = function(req, res, next) {
   // We're good, continue onto next route
   } else {
     next();
+  }
+};
+
+/**
+ * Middleware to validate request with given validation rules. The getRules 
+ * function should have the signature getRules(req), and return an array of 
+ * rule objects.
+ *  
+ * Example rules array:
+ * [
+ *   { name:'foo', value:req.query.foo, pattern:/^.+$/i }
+ * ]
+ * 
+ * @param {Function} getRules Function to return array of rule objects.
+ * @param {Array|null} required Optional array of param names, that should be required.
+ * @returns {Function} The middleware function.
+ */
+HttpHelper.validate = function(getRules, required) {
+  required = (required && (util.isArray(required) ? required : [required])) ||  [];
+  
+  var test = function(name, value, regexp){
+    if (value || _.contains(required, name)) {
+      return regexp.test(value);
+    }
+    return true;
+  };
+  
+  return function(req, res, next){
+    var valid = true,
+      rules = (getRules && getRules(req)) || [];
+    
+    rules.forEach(function(rule){
+      valid &= test(rule.name, rule.value, rule.pattern);
+    });
+    
+    // Request is invalid, skip to next route
+    if (!valid) {
+      next('route');
+
+    // Request is valid, continue
+    } else {
+      next();  
+    }
   }
 };
 
