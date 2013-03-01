@@ -86,7 +86,10 @@ var auth = {
   
    return function(req, res, next) {
      console.log('auth.authenticateProvider');
-     passport.authorize(provider, { session:false, scope: options.scope })(req, res, next);
+     
+     var scope = req.query.scope || options.scope || '';
+     
+     passport.authorize(provider, { session: false, scope: scope })(req, res, next);
    }
   },
   
