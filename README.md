@@ -71,7 +71,7 @@ The app automatically configures itself for a particular provider based on what 
   <tr>
     <td>GET</td>
     <td>/api/auth/:provider</td>
-    <td width="150">[r] - redirect URL<br>[scope] - oauth scope</td>
+    <td width="150">[r] - redirect URL<br>[scope] - oauth scope<br>[state] - oauth state</td>
     <td>Y</td>
     <td>Authentication path for each provider. Available values for :provider can be retreived via /auth/providers.</td>
   </tr>
