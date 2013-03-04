@@ -68,6 +68,11 @@ var auth = {
         name: 'r',
         value: req.query.r,
         pattern: /^.+$/i
+      },
+      {
+        name: 'state',
+        value: req.query.state,
+        pattern: /^.+$/i
       }
     ];
   },
@@ -81,15 +86,17 @@ var auth = {
   
   authenticateProvider: function(provider, options) {
    options = options || {};
-   options.successRedirect = options.successRedirect || config.paths.authRedirect || '/';
-   options.failureRedirect = options.failureRedirect || config.paths.failRedirect || '/';
-  
+   
    return function(req, res, next) {
      console.log('auth.authenticateProvider');
      
-     var scope = req.query.scope || options.scope || '';
+     var authOptions = _.extend({}, options, {
+       session: false,
+       scope: req.query.scope || options.scope || '',
+       state: req.query.state || options.state || ''
+     });
      
-     passport.authorize(provider, { session: false, scope: scope })(req, res, next);
+     passport.authorize(provider, authOptions)(req, res, next);
    }
   },
   
@@ -98,7 +105,7 @@ var auth = {
       console.log('auth.associate');
       var user = req.user,
         profile = req.account;
-//debugger;
+
       // Return error if missing provider name or id; won't be able access it otherwise 
       if (!profile.provider || !profile.id) {
         req.apiResponse = new ApiResponse(500, new Error('Profile not associated. Missing provider name or id.'));
@@ -253,13 +260,13 @@ var auth = {
               auth.setRedirect(req);
               next();
             },
-            auth.authenticateProvider(provider.strategy, { scope: provider.scope })
+            auth.authenticateProvider(provider.strategy, provider)
           );
     
           app.get(auth.getProviderCallbackUrl(provider.strategy),
             [HttpHelper.validate(auth.validateRules),
              auth.authenticateApp({ forceAuth:false }),
-             auth.authenticateProvider(provider.strategy, { scope: provider.scope, failureRedirect: config.paths.failRedirect }),
+             auth.authenticateProvider(provider.strategy, provider),
              auth.associate(),
              auth.handleResponse()]
           );
