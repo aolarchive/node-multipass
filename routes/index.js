@@ -116,6 +116,17 @@ module.exports = function(app){
   /* Pull in Actor routes */
   actorRoutes(app);
   
+  /* Pull in plugin routes */
+  if (app.get('plugins')) {
+    var plugin, pluginName;
+    for (pluginName in app.get('plugins')) {
+      plugin = app.get('plugins')[pluginName];
+      if (plugin.routes) {
+        plugin.routes(app);
+      }
+    }
+  }
+  
   
   /**
    * [*] /api/*

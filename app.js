@@ -42,7 +42,6 @@ app.configure('production', 'stage', function(){
   app.use(express.static(__dirname + '/public', { maxAge: oneYear })); 
 });
 
-require('./routes/index')(app);
 require('./conf/initialize')(app);
 
 app.listen(config.getServer().port, function (){
