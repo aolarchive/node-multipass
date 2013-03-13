@@ -43,6 +43,9 @@
   "scripts": {
   	"start": "node app.js"
   },
+  "config": {
+    "env": "MULTIPASS_CONF"
+  },
   "licenses": [
     {
       "type": "BSD",

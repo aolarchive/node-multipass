@@ -1,9 +1,11 @@
-var _ = require('underscore')._;
+var _ = require('underscore')._
+  , pkg = require('../package.json');
 
 
 function getConfig() {
   var env = process.env.NODE_ENV || "development",
-    confOverride = process.env.MULTIPASS_CONF || '',
+    confName = pkg && pkg.config && pkg.config.env,
+    confOverride = process.env[confName] || '',
     confFile = '',
     conf = {};
   
