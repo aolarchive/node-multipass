@@ -141,7 +141,10 @@ HttpHelper.prototype.send = function(data) {
       }
       this.responseData = new ApiData(null, this.request, data);
 
-      console.error('Error ['+this.status+':'+this.responseData.getStatusCode()+']: ' + this.responseData.getStatusText());
+      console.error(
+      	'Error ['+this.status+':'+this.responseData.getStatusCode()+']: ' + this.responseData.getStatusText(),
+      	'(' + (data.data && data.getData().message) + ')'
+      );
     
     // If success response
     } else {

@@ -34,7 +34,7 @@ var ApiResponse = function(httpStatus, data, message) {
 };
 
 ApiResponse.prototype.isError = function() {
-  return util.isError(this.data);
+  return util.isError(this.data) || this.data instanceof Error;
 };
 
 ApiResponse.prototype.getData = function() {
