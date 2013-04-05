@@ -3,7 +3,8 @@ var Db = require('mongodb').Db
   , mongoStore = require('connect-mongodb')
   , config = require('../conf/config')
   , url = require('url')
-  , express = require('express');
+  , express = require('express')
+  , _ = require('underscore')._;
 
 
 var sessionStore = {
@@ -52,13 +53,13 @@ var sessionStore = {
       var urlObj = url.parse(config.session.connection),
         urlAuth = urlObj.auth ? urlObj.auth.split(':') : null;
         
-      sessionStore.config = {
+      sessionStore.config = _.extend(sessionStore.config, {
         host: urlObj.hostname,
         port: urlObj.port,
         db: String(urlObj.pathname).substr(1),
         username: (urlAuth && urlAuth[0]) || null,
         password: (urlAuth && urlAuth[1]) || null,
-      };
+      });
     }
 
     var serverConfig = new Server(
