@@ -16,7 +16,9 @@ var sessionStore = {
     db: config.session.db || null,
     collection: config.session.collection || null,
     username: config.session.username || null,
-    password: config.session.password || null
+    password: config.session.password || null,
+    cookie: config.session.cookie || null,
+    key: config.session.key || null
   },
   
   init : function(app) {
@@ -32,6 +34,8 @@ var sessionStore = {
       express.session(
         { 
           secret: config.session.secret,
+          key: sessionStore.config.key,
+          cookie: sessionStore.config.cookie,
           store: new mongoStore({
             db: sessionStore.db,
             collection : sessionStore.config.collection,
