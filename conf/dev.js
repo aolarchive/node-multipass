@@ -17,6 +17,16 @@ var config = {
     },
     */
    
+		/**
+		 * Cluster properties 
+		 */
+		/*
+		cluster: {
+			enabled: false,
+			workers: 1
+		},
+		*/
+		
     /**
      * URL paths
      */
@@ -51,9 +61,27 @@ var config = {
     },
     
     /**
+     * Map of plugins to load into the app, in the form of config objects.
+     */
+    /*
+    plugins: {
+    	// The object key is the plugin name
+    	myPlugin: {
+    		// The path to the plugin init code
+    		init: 'plugin.js'
+    	}
+    },
+    */
+    
+    /**
      * Mongo session store properties
      */
     session: {
+    	/*
+    	key: '',  // The optional session cookie key name; defaults to connect.sid
+    	cookie: {},  // The optional session cookie properties, based on express.session.cookie object
+    	collection: '', // The optional db collection name; defaults to 'sessions'
+    	*/
       secret: 'Leeloo Minai Lekarariba-Lamina-Tchai Ekbat De Sebat', // Or, Leeloo, for short :)
       connection : "mongodb://localhost:27017/multipass_session"
     },
