@@ -206,14 +206,31 @@ var auth = {
       console.log('auth.handleResponse');
       var http = new HttpHelper(req, res),
         apiRes = req.apiResponse || new ApiResponse(),
-        redirectParams = '';
+        redirectParams = '',
+        error = null;
       
-      // TODO: Find better way to pass success and error responses back with redirect url
       if (req.session && req.session.authredirect) {
+      	
+      	// Internal or HTTP error occurred
         if (apiRes.isError()) {
-          redirectParams = '?multipass_error=' + JSON.stringify( {message: apiRes.message, status: apiRes.getHTTPStatus()} );
+          error = {
+          	code: 'multipass_error',
+          	message: apiRes.message, 
+          	status: apiRes.getHTTPStatus()
+          }
+        // OAuth error occurred
+        } else if (req.query.error) {
+        	error = {
+          	code: req.query.error,
+          	message: req.query.error_description || ''
+          }
+        }
+        // If error, pass to callback as serialized query param
+        if (error) {
+        	redirectParams = '?multipass_error=' + JSON.stringify( error );
         }
         res.redirect(req.session.authredirect + redirectParams);
+        
       } else {
         http.send(apiRes);
       }
