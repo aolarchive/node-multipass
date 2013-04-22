@@ -160,7 +160,7 @@ var auth = {
    */
   useOAuthStrategy: function(provider, strategy, options, verify) {
     options = _.extend({
-      callbackURL: config.getBaseUrl() + auth.getProviderCallbackUrl(provider.strategy),
+      callbackURL: auth.getProviderCallbackUrl(provider.strategy),
       passReqToCallback: true
     }, options);
     
@@ -183,7 +183,7 @@ var auth = {
    */
   useOpenIDStrategy: function(provider, strategy, options, verify) {
     options = _.extend({
-      returnURL: config.getBaseUrl() + auth.getProviderCallbackUrl(provider.strategy),
+      returnURL: auth.getProviderCallbackUrl(provider.strategy),
       passReqToCallback: true
     }, options);
     
@@ -237,12 +237,25 @@ var auth = {
     }
   },
   
-  getProviderLoginUrl: function(strategy) {
+  getProviderLoginPath: function(strategy) {
     return config.paths.api + '/auth/' + String(strategy).toLowerCase();
   },
 
+  getProviderCallbackPath: function(strategy) {
+    return this.getProviderLoginPath(strategy) + '/callback';
+  },
+  
   getProviderCallbackUrl: function(strategy) {
-    return this.getProviderLoginUrl(strategy) + '/callback';
+  	var callbackUrl = config.getBaseUrl() + this.getProviderCallbackPath(strategy),
+  		url = '';
+  		
+  	if (config.paths.authCallback) {
+  		url = config.paths.authCallback;
+  		url = String(url).replace('{{url}}', encodeURIComponent(callbackUrl));
+  		callbackUrl = url;
+  	}
+  	
+  	return callbackUrl;
   },
   
   getAuthzStrategy: function(strategy) {
@@ -252,7 +265,7 @@ var auth = {
   addProvider: function(provider) {
     var providerData = {
         'provider': provider.strategy,
-        'loginUrl': this.getProviderLoginUrl(provider.strategy)
+        'loginUrl': this.getProviderLoginPath(provider.strategy)
     };
     this.providers.push(providerData);
   },
@@ -270,7 +283,7 @@ var auth = {
           
           // Assign login and callback routes for provider
           
-          app.get(auth.getProviderLoginUrl(provider.strategy),
+          app.get(auth.getProviderLoginPath(provider.strategy),
             HttpHelper.validate(auth.validateRules),
             auth.authenticateApp({ session:false, forceAuth:false }),
             function(req, res, next) {
@@ -280,7 +293,7 @@ var auth = {
             auth.authenticateProvider(provider.strategy, provider)
           );
     
-          app.get(auth.getProviderCallbackUrl(provider.strategy),
+          app.get(auth.getProviderCallbackPath(provider.strategy),
             [HttpHelper.validate(auth.validateRules),
              auth.authenticateApp({ forceAuth:false }),
              auth.authenticateProvider(provider.strategy, provider),
