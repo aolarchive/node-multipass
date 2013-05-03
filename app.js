@@ -35,7 +35,15 @@ if (clusterEnabled && cluster.isMaster) {
 	app.configure(function() {
 	  app.set('views', __dirname + '/views');
 	  app.set('view engine', 'ejs');
-	  app.use(express.logger('dev'));
+	  switch (app.get('env')) {
+	  	case 'production':
+	  	case 'stage':
+	  		app.use(express.logger('default'));
+	  		break;
+	  	default: 
+	  		app.use(express.logger('dev'));
+	  		break;
+	  }
 	  app.use(express.cookieParser());
 	  app.use(express.bodyParser());
 	  app.use(express.methodOverride());
