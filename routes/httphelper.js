@@ -128,7 +128,10 @@ HttpHelper.validate = function(getRules, required) {
 };
 
 HttpHelper.prototype.isSecure = function() {
-  return (this.request.secure || this.request.get('x-forwarded-proto') == 'https');
+  return (this.request.secure || 
+  	this.request.get('x-forwarded-proto') == 'https' || 
+  	this.request.get('x-lb-client-ssl') == 'true'
+  );
 };
 
 HttpHelper.prototype.send = function(data) {
