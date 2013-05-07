@@ -246,12 +246,14 @@ var auth = {
   },
   
   getProviderCallbackUrl: function(strategy) {
-  	var callbackUrl = config.getBaseUrl() + this.getProviderCallbackPath(strategy),
+  	var callbackPath = this.getProviderCallbackPath(strategy),
+  		callbackUrl = config.getBaseUrl() + callbackPath,
   		url = '';
   		
   	if (config.paths.authCallback) {
   		url = config.paths.authCallback;
   		url = String(url).replace('{{url}}', encodeURIComponent(callbackUrl));
+  		url = String(url).replace('{{path}}', callbackPath);
   		callbackUrl = url;
   	}
   	
