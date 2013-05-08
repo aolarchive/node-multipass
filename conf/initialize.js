@@ -1,5 +1,7 @@
 var config = require('./config')
-  ,	mongoose = require('mongoose');
+  ,	mongoose = require('mongoose')
+  , dataHelper = require('../data/helper')
+  , util = require('util');
 
 
 function init(app) {
@@ -8,11 +10,14 @@ function init(app) {
   app.set('config', config);
   app.set('mongoose', mongoose);
   
-  mongoose.connect(config.mongo.connection);
-  
+	mongoose.connect(
+		dataHelper.toConnectString(config.mongo.connection), 
+		{ replset: { rs_name: config.mongo.setName } }
+	);
+
   mongoose.connection.on('error', console.error.bind(console, 'Data connection error:'));
   mongoose.connection.once('open', function () {
-    console.log('Data connection successful to '+config.mongo.connection);
+    console.log('Data connection successful to '+util.inspect(config.mongo.connection));
   });
   
   /*
