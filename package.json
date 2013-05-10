@@ -1,7 +1,7 @@
 {
   "name": "node-multipass",
   "description": "Multiauth identity server using Node.js and MongoDB.",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "author": {
     "name": "Jeremy Jannotta",
     "email": "jeremy.jannotta@teamaol.com",
@@ -16,29 +16,29 @@
     "url": "https://github.com/aol/node-multipass/issues"
   },
   "dependencies": {
-    "express": ">= 3.0.1",
-    "ejs": ">= 0.8.3",
-    "node-uuid": ">= 1.4.0",
-    "underscore": ">= 1.4.2",
-    "mongodb": ">= 1.1.11",
-    "mongoose": ">= 3.3.1",
-    "connect-mongodb": ">= 1.1.5",
-    "passport": ">= 0.1.15",
-    "passport-facebook": ">= 0.1.0",
-    "passport-twitter": ">= 0.1.0",
-    "passport-aol-oauth": ">= 0.1.0", 
-    "passport-linkedin": ">= 0.1.0",
-    "passport-google-oauth": ">= 0.1.0",
-    "passport-windowslive": ">= 0.1.0",
-    "passport-yahoo-oauth": ">= 0.1.0",
-    "passport-github": ">= 0.1.0",
-    "passport-dropbox": ">= 0.1.0",
-    "passport-tumblr": ">= 0.1.0",
-    "oauth": ">= 0.1.0"
+    "express": "3.1.0",
+    "ejs": "0.8.3",
+    "node-uuid": "1.4.0",
+    "underscore": "1.4.4",
+    "mongodb": "1.2.14",
+    "mongoose": "3.5.8",
+    "connect-mongodb": "1.1.5",
+    "passport": "0.1.16",
+    "passport-facebook": "0.1.5",
+    "passport-twitter": "0.1.4",
+    "passport-aol-oauth": "0.1.0", 
+    "passport-linkedin": "0.1.3",
+    "passport-google-oauth": "0.1.5",
+    "passport-windowslive": "0.1.2",
+    "passport-yahoo-oauth": "0.1.2",
+    "passport-github": "0.1.3",
+    "passport-dropbox": "0.1.2",
+    "passport-tumblr": "0.1.2",
+    "oauth": "0.9.10"
   },
   "engines": {
-  	"node": "0.8.x",
-    "npm": "1.1.x"
+  	"node": "0.10.x",
+    "npm": "1.2.x"
   },
   "scripts": {
   	"start": "node app.js"
