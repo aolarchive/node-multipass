@@ -73,7 +73,12 @@ var auth = {
         name: 'state',
         value: req.query.state,
         pattern: /^.+$/i
-      }
+      },
+      {
+        name: 'force_login',
+        value: req.query.force_login,
+        pattern: /^[\w]+$/i
+      },
     ];
   },
   
@@ -85,19 +90,24 @@ var auth = {
   },
   
   authenticateProvider: function(provider, options) {
-   options = options || {};
-   
-   return function(req, res, next) {
-     console.log('auth.authenticateProvider');
-     
-     var authOptions = _.extend({}, options, {
-       session: false,
-       scope: req.query.scope || options.scope || '',
-       state: req.query.state || options.state || ''
-     });
-     
-     passport.authorize(provider, authOptions)(req, res, next);
-   }
+		options = options || {};
+	 
+		return function(req, res, next) {
+	  	console.log('auth.authenticateProvider');
+	 
+			var authOptions = _.extend({}, options, {
+				session: false,
+				scope: req.query.scope || options.scope || '',
+				state: req.query.state || options.state || ''
+			});
+	  	
+	  	// If force_login=true, add service-specific url param, if supported
+			if (req.query.force_login && String(req.query.force_login).toLowerCase() == 'true' && options.forceLoginParam) {
+	   		authOptions[options.forceLoginParam.name] = options.forceLoginParam.value;
+			}
+	   
+			passport.authorize(provider, authOptions)(req, res, next);
+		}
   },
   
   associate: function() {

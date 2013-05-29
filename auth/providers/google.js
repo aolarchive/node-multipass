@@ -6,7 +6,11 @@ var config = require('../../conf/config')
 var provider = {
   strategy: 'google',
   scope: ['https://www.googleapis.com/auth/userinfo.profile',
-          'https://www.googleapis.com/auth/userinfo.email']
+          'https://www.googleapis.com/auth/userinfo.email'],
+  forceLoginParam: {
+  	name: 'prompt',
+  	value: 'select_account'
+  }
 };
 
 auth.useOAuthStrategy(provider, GoogleStrategy, {

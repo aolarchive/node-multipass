@@ -5,7 +5,11 @@ var config = require('../../conf/config')
 
 var provider = {
   strategy: 'twitter',
-  scope: null
+  scope: null,
+  forceLoginParam: {
+  	name: 'forceLogin',
+  	value: 'true'
+  }
 };
 
 auth.useOAuthStrategy(provider, TwitterStrategy, {

@@ -5,7 +5,11 @@ var config = require('../../conf/config')
 
 var provider = {
   strategy: 'facebook',
-  scope: ['email']
+  scope: ['email'],
+  forceLoginParam: {
+  	name: 'auth_type',
+  	value: 'reauthenticate'
+  }
 };
 
 auth.useOAuthStrategy(provider, FacebookStrategy, {
