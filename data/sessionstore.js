@@ -1,7 +1,7 @@
-var mongoStore = require('connect-mongodb')
+var express = require('express')
+	, MongoStore = require('connect-mongo')(express)
   , dataHelper = require('./helper')
   , config = require('../conf/config')
-  , express = require('express')
   , util = require('util');
 
 
@@ -35,7 +35,7 @@ var sessionStore = {
           secret: config.session.secret,
           key: sessionStore.config.key,
           cookie: sessionStore.config.cookie,
-          store: new mongoStore({
+          store: new MongoStore({
             db: sessionStore.db,
             collection : sessionStore.config.collection,
             username: sessionStore.config.username,
