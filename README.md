@@ -71,7 +71,12 @@ The app automatically configures itself for a particular provider based on what 
   <tr>
     <td>GET</td>
     <td>/api/auth/:provider</td>
-    <td width="150">[r] - redirect URL<br>[scope] - oauth scope<br>[state] - oauth state</td>
+    <td width="150">
+		[r] - redirect URL<br>
+		[scope] - oauth scope<br>
+		[state] - oauth state<br>
+		[force_login=true] - force user to re-auth service
+		</td>
     <td>Y</td>
     <td>Authentication path for each provider. Available values for :provider can be retreived via /auth/providers.</td>
   </tr>
@@ -167,6 +172,7 @@ Also the response body will indicate a status of "Error", and include a status t
 ## Credits
 * [Jeremy Jannotta](https://github.com/jeremyjannotta)
 * [Stash server](https://github.com/aol/Stash) - Much of the multiauth code is copied/derived from the AOL Stash project, so many thanks goes to them for the inspiration and examples for this project.
+* [Jeff Rodenburg](https://github.com/jrodenburg) - Borrowed his work on Stash Server and am using his passport-aol-oauth module.
 
 ## License
 Copyright (c) 2013 AOL, Inc.
