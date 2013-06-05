@@ -1,7 +1,7 @@
 {
   "name": "node-multipass",
   "description": "Multiauth identity server using Node.js and MongoDB.",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "author": {
     "name": "Jeremy Jannotta",
     "email": "jeremy.jannotta@teamaol.com",
@@ -35,7 +35,9 @@
     "passport-github": "0.1.5",
     "passport-dropbox": "0.1.2",
     "passport-tumblr": "0.1.2",
-    "oauth": "0.9.10"
+    "oauth": "0.9.10",
+    "googleapis": "~0.2.9",
+    "fbgraph": "0.2.6"
   },
   "engines": {
   	"node": "0.10.x",
