@@ -4,8 +4,7 @@ var passport = require('passport')
   , userAPI = require('../data/user')
   , HttpHelper = require('./httphelper')
   , ApiResponse = require('../data/apiresponse')
-  , appRoutes = require('./app')
-  , actorRoutes = require('./actors');
+  , appRoutes = require('./app');
 
 
 module.exports = function(app){
@@ -112,9 +111,6 @@ module.exports = function(app){
   
   /* Pull in App API routes */
   appRoutes(app);
-  
-  /* Pull in Actor routes */
-  actorRoutes(app);
   
   /* Pull in plugin routes */
   if (app.get('plugins')) {
