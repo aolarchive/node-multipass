@@ -1,7 +1,8 @@
 var OAuth = require('oauth').OAuth
-  , config = require('../conf/config')
-  , userAPI = require('../data/user')
-  , ApiResponse = require('../data/apiresponse');
+  , config = require('../../conf/config')
+  , userAPI = require('../../data/user')
+  , ApiResponse = require('../../data/apiresponse')
+  , debug = require('debug')(config.name + ':actors:twitter');
 
 
 var twitterActor = {
@@ -52,13 +53,14 @@ var twitterActor = {
               function (error, data, response2) {
                 if (error) {
                   var errorData = JSON.parse(error.data);
-                  console.log('Error: Something is wrong.\n'+JSON.stringify(error)+'\n');
+                  debug('Error updating twitter status for id %s.', providerId);
+                  debug(JSON.stringify(error));
                   
                   callback(new ApiResponse(500, new Error(errorData), 'Error updating twitter status.'));
                   
                 } else {
-                  console.log('Twitter status updated.\n');
-                  console.log(response2+'\n');
+                  debug('Twitter status updated for id %s.', providerId);
+                  debug(response2);
                   
                   callback(new ApiResponse(JSON.parse(data)));
                 }
@@ -81,13 +83,14 @@ var twitterActor = {
               function (error, data, response2) {
                 if (error) {
                   var errorData = JSON.parse(error.data);
-                  console.log('Error: Something is wrong.\n'+JSON.stringify(error)+'\n');
+                  debug('Error getting twitter timeline for id %s.', providerId);
+                  debug(JSON.stringify(error));
                   
                   callback(new ApiResponse(500, new Error(errorData), 'Error getting twitter timeline.'));
                   
                 } else {
-                  console.log('Twitter timeline retrieved.\n');
-                  console.log(response2+'\n');
+                  debug('Twitter timeline retrieved for id %s.', providerId);
+                  debug(response2);
                   
                   callback(new ApiResponse(JSON.parse(data)));
                 }

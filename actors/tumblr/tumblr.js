@@ -1,8 +1,9 @@
 var OAuth = require('oauth').OAuth
-  , config = require('../conf/config')
-  , userAPI = require('../data/user')
-  , ApiResponse = require('../data/apiresponse')
-  , urlUtil = require('url');
+  , config = require('../../conf/config')
+  , userAPI = require('../../data/user')
+  , ApiResponse = require('../../data/apiresponse')
+  , urlUtil = require('url')
+  , debug = require('debug')(config.name + ':actors:twitter');
 
 
 var tumblrActor = {
@@ -50,13 +51,14 @@ var tumblrActor = {
               function (error, data, response2) {
                 if (error) {
                   var errorData = JSON.parse(error.data);
-                  console.log('Error: Something is wrong.\n'+JSON.stringify(error)+'\n');
+                  debug('Error getting tumblr user info for id %s.', providerId);
+                  debug(JSON.stringify(error));
                   
                   callback(new ApiResponse(500, new Error(errorData), 'Error getting tumblr user info.'));
                   
                 } else {
-                  console.log('Tumblr user info retrieved.\n');
-                  console.log(response2+'\n');
+                  debug('Tumblr user info retrieved for id %s.', providerId);
+                  debug(response2);
                   
                   callback(new ApiResponse(JSON.parse(data)));
                 }
@@ -103,13 +105,14 @@ var tumblrActor = {
               function (error, data, response2) {
                 if (error) {
                   var errorData = JSON.parse(error.data);
-                  console.log('Error: Something is wrong.\n'+JSON.stringify(error)+'\n');
+                  debug('Error posting to tumblr blog for id %s.', providerId);
+                  debug(JSON.stringify(error));
                   
                   callback(new ApiResponse(500, new Error(errorData), 'Error submitting tumblr post.'));
                   
                 } else {
-                  console.log('tumblr post submitted.\n');
-                  console.log(response2+'\n');
+                  debug('Tumblr post submitted for id %s.', providerId);
+                  debug(response2);
                   
                   callback(new ApiResponse(JSON.parse(data)));
                 }
