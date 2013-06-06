@@ -2,7 +2,8 @@ var mongoose = require('mongoose')
   , config = require('../conf/config')
   , Schemas = require('./schemas')
   , uuid = require('node-uuid')
-  , ApiResponse = require('./apiresponse');
+  , ApiResponse = require('./apiresponse')
+  , debug = require('debug')('multipass:user');
 
 
 var User = mongoose.model('User', Schemas.User, (config.mongo.collection || 'users'));
@@ -92,7 +93,8 @@ var userAPI = {
    *  success: [201] The user object that was added.
    */
   addUser : function(context, profile, callback) {
-    console.log('userAPI.addUser');
+    debug('addUser ' + userAPI.truncateId(context.appId));
+    
     var newUser = buildUser(context, profile);
     newUser.save(function(err,doc) {
       var res = null;
@@ -184,7 +186,8 @@ var userAPI = {
    *  success: [201] The profile object that was added.
    */
   addProfile : function(context, profile, callback) {
-    console.log('userAPI.addProfile');
+    debug('addProfile ' + profile.provider + '/' + profile.id + ' to ' + userAPI.truncateId(context.appId));
+    
     this.getUser(context, false,
       function(res){
         if (res.isError()) {
@@ -265,7 +268,8 @@ var userAPI = {
    *  success: [200] The user object whose profile was updated.
    */
   updateProfileByUser : function(user, profile, callback) {
-    console.log('userAPI.updateProfileByUser');
+    debug('updateProfileByUser ' + profile.provider + '/' + profile.id + ' in ' + userAPI.truncateId(user.appId));
+    
     var matchingProfile = userAPI.findProfileByUser(user, profile.provider, profile.id),
       res = null;
     
@@ -362,6 +366,16 @@ var userAPI = {
         }
       });
     }
+  },
+  
+  truncateId: function(str) {
+  	var truncStr = str;
+  	if (str.length < 8) {
+  		truncStr = str.substr(0, 1) + '..' + str.substr(-2);
+  	} else {
+  		 truncStr = str.substr(0, 4) + '..' + str.substr(-4); 
+  	}
+  	return truncStr;
   }
   
 };

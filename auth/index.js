@@ -3,7 +3,8 @@ var passport = require('passport')
   , config = require('../conf/config')
   , userAPI = require('../data/user')
   , HttpHelper = require('../routes/httphelper')
-  , ApiResponse = require('../data/apiresponse');
+  , ApiResponse = require('../data/apiresponse')
+  , debug = require('debug')('multipass:auth');
 
 
 // Passport session setup.
@@ -93,7 +94,7 @@ var auth = {
 		options = options || {};
 	 
 		return function(req, res, next) {
-	  	console.log('auth.authenticateProvider');
+	  	debug('authenticateProvider ' + provider);
 	 
 			var authOptions = _.extend({}, options, {
 				session: false,
@@ -112,9 +113,10 @@ var auth = {
   
   associate: function() {
     return function(req, res, next) {
-      console.log('auth.associate');
       var user = req.user,
         profile = req.account;
+      
+      debug('associate ' + profile.provider + '/' + profile.id);
 
       // Return error if missing provider name or id; won't be able access it otherwise 
       if (!profile.provider || !profile.id) {
@@ -143,13 +145,14 @@ var auth = {
    * before passing it on; assumes already authed
    */
   authzVerify: function(req, provider, accessToken, refreshToken, profile, done){
-    console.log('auth.authzVerify');
     profile.authToken = accessToken;
     profile.authTokenSecret = refreshToken;
     
     if (!profile.id) {
       profile.id = profile.username || profile.displayName || null;
     }
+    
+    debug('authzVerify ' + profile.provider + '/' + profile.id);
     
     return done(null, profile);
   },
@@ -213,7 +216,7 @@ var auth = {
 
   handleResponse: function() {
     return function(req, res, next) {
-      console.log('auth.handleResponse');
+      debug('handleResponse');
       var http = new HttpHelper(req, res),
         apiRes = req.apiResponse || new ApiResponse(),
         redirectParams = '',
@@ -331,10 +334,10 @@ var auth = {
     return function(req, res, next){
       //console.log('authenticateApp', req.user);
       if (!req.isAuthenticated() || options.forceAuth) {
-        console.log('authenticateApp: forceAuth');
+        debug('authenticateApp: forceAuth (do auth)');
         passport.authenticate(auth._appAuthStrategy, options)(req, res, next);
       } else {
-        console.log('authenticateApp: pass');
+        debug('authenticateApp: pass (skip auth)');
         next();
       }
     }
