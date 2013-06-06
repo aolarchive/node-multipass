@@ -103,7 +103,7 @@ module.exports = function(app){
     auth.authenticateApp(),
     function(req, res, next) {
       var http = new HttpHelper(req, res);
-      var data = new ApiResponse(auth.providers || []);
+      var data = new ApiResponse(auth.getProvidersData() || []);
       http.send(data);
     }
   );

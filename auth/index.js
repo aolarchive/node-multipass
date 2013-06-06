@@ -275,11 +275,16 @@ var auth = {
   },
   
   addProvider: function(provider) {
-    var providerData = {
-        'provider': provider.strategy,
-        'loginUrl': this.getProviderLoginPath(provider.strategy)
-    };
-    this.providers.push(providerData);
+    this.providers.push(provider);
+  },
+  
+  getProvidersData: function() {
+  	return this.providers.map(function (provider, i) {
+  		return {
+  			'provider': provider.strategy,
+        'loginUrl': auth.getProviderLoginPath(provider.strategy)
+  		};
+  	});
   },
   
   loadProviders: function(app) {
