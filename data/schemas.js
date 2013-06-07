@@ -16,7 +16,7 @@ var UserProfile = new Schema({
   authToken : String,
   authTokenSecret : String,
   emails : [],
-  originalUserId: String,
+  metaData: Schema.Types.Mixed,
   creationDate: Date,
   modifiedDate: Date
 });

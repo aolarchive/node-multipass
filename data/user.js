@@ -39,6 +39,7 @@ function buildUserProfile(profile){
       authToken : profile.authToken,
       authTokenSecret : profile.authTokenSecret,
       emails : profile.emails,
+      metaData: profile.metaData,
       creationDate : Date.now(),
       modifiedDate : Date.now()
   };
@@ -57,6 +58,7 @@ function updateUserProfile(profile){
       authToken : profile.authToken,
       authTokenSecret : profile.authTokenSecret,
       emails : profile.emails,
+      metaData: profile.metaData,
       modifiedDate : Date.now()
   };
   return data;
