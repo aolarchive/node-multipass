@@ -81,6 +81,83 @@ var facebookActor = {
       
     },
     
+    // TODO: Fix issue where submitting this twice with same data, just returns
+    // the User object on each request after the first.
+    addPageProfiles: function(context, providerId, profiles, callback) {
+    	if (profiles.length) {
+
+				// Get the user facebook profile that contains stored pages data	
+				userAPI.getProfile(context, facebookActor.provider, providerId, function (getRes) {
+					if (getRes.isError()) {
+						callback(getRes);
+						
+					} else {
+						var userProfile = getRes.getData(),
+							pageProfile, userPages, foundPages, foundPage, 
+							assocPages = [];
+						
+						if (userProfile.metaData && userProfile.metaData.pages && userProfile.metaData.pages.length) {
+							userPages = userProfile.metaData.pages;
+							
+							// Iterate over all the profiles to add
+							profiles.forEach(function (profile, profileIndex) {
+
+								foundPages = userPages.filter(function (page) {
+									return page.id === profile.id;
+								});
+								
+								// Found stored page data
+								if (foundPages.length) {
+									foundPage = foundPages[0];
+									
+									// Build profile object to add
+									pageProfile = {
+										provider: facebookActor.provider,
+										id: foundPage.id,
+										authToken: foundPage.access_token,
+										displayName: foundPage.name,
+										metaData: {
+											type: 'page',
+											perms: foundPage.perms
+										}
+									};
+									
+									if (profile.displayName) {
+										pageProfile.displayName = profile.displayName;
+									};
+									
+									// Associate profile with user.
+									// Executes callback once all profiles have been processed.
+									userAPI.associateProfile(context, pageProfile, function (assocRes) {
+										if (assocRes.isError()) {
+											callback(assocRes);
+											
+										} else {
+											assocPages.push(assocRes.getData());
+										} 
+										
+										if (profileIndex === (profiles.length - 1)) {
+											callback(new ApiResponse(assocPages));
+										}
+									});
+									
+								} else {
+									callback(new ApiResponse(500, new Error('Error finding facebook page in profile.')));
+								}
+																
+							});
+							
+						} else {
+							callback(new ApiResponse(500, new Error('Error: No facebook pages in profile.')));
+						}
+						
+					}
+				});
+			} else {
+				callback(new ApiResponse(400, new Error('Must provide page profile data with request.')));
+			}
+    },
+    
     _getAccounts: function (id, accessToken, callback) {
     	
   		graph.setAccessToken(accessToken);
