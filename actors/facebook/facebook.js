@@ -40,7 +40,7 @@ var facebookActor = {
         	
         	graph.get(String(providerId), null, function (err, res) {
         		if (err) {
-        			callback(new ApiResponse(500, new Error(err), err.message));
+        			callback(new ApiResponse(500, new Error(err.message)));
         		} else {
         			callback(new ApiResponse(res));
         		}
@@ -87,7 +87,7 @@ var facebookActor = {
       	
     	graph.get(String(id) + '/accounts', null, function (err, res) {
     		if (err) {
-    			callback(new ApiResponse(500, new Error(err), err.message));
+    			callback(new ApiResponse(500, new Error(err.message)));
     		} else {
     			callback(new ApiResponse(res));
     		}
@@ -100,7 +100,7 @@ var facebookActor = {
         	
     	graph.post(String(id) + '/feed', postData, function (err, res) {
     		if (err) {
-    			callback(new ApiResponse(500, new Error(err), err.message));
+    			callback(new ApiResponse(500, new Error(err.message)));
     		} else {
     			callback(new ApiResponse(res));
     		}
