@@ -44,6 +44,7 @@ var provider = {
 						
 					if (data && data.data && data.data.length) {	
 						req.account.metaData = {
+							type: 'user',
 							pages: data.data
 						};
 						next();
