@@ -69,9 +69,9 @@ module.exports = function(app){
     auth.authenticateApp(),
     function(req, res, next) {
       var http = new HttpHelper(req, res),
-      	message = req.body && req.body.message;
+      	postData = req.body;
       
-      facebookActor.postToFeed(req.user, req.params.providerId, message, function(data) {
+      facebookActor.postToFeed(req.user, req.params.providerId, postData, function(data) {
         http.send(data);
       });
     }

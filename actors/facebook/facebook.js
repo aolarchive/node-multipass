@@ -89,17 +89,22 @@ var facebookActor = {
       
     },
     
-    postToFeed: function (context, providerId, message, callback) {
+    /**
+     * Post to a User or Page Facebook feed.
+     * 
+		 * @param {Object} context
+		 * @param {String} providerId
+		 * @param {Object} postData
+		 * @param {Function} callback
+     */
+    postToFeed: function (context, providerId, postData, callback) {
     	
       facebookActor.getTokens(context, providerId, function(data){
       	
         if (!data) {
           callback(new ApiResponse(500, new Error('Error retrieving facebook auth token.')));
-        } else {
-          var postData = {
-          	message: message
-          };
           
+        } else {
         	facebookActor._postToFeed(providerId, data.token, postData, callback);
         }
       });
@@ -196,6 +201,18 @@ var facebookActor = {
     	});
   	},
   	
+  	/**
+  	 * Post to a User or Page Facebook feed.
+  	 * 
+     * Required permissions:
+     *   User feed: publish_actions
+     *   Page feed: manage_pages, status_update
+     * 
+		 * @param {String} id
+		 * @param {String} accessToken
+		 * @param {Object} postData
+		 * @param {Function} callback
+  	 */
   	_postToFeed: function (id, accessToken, postData, callback) {
   		
   		graph.setAccessToken(accessToken);
