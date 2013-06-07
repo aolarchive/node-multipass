@@ -56,17 +56,9 @@ var facebookActor = {
       	
         if (!data) {
           callback(new ApiResponse(500, new Error('Error retrieving facebook auth token.')));
-        } else {
           
-        	graph.setAccessToken(data.token);
-        	
-        	graph.get(String(providerId) + '/accounts', null, function (err, res) {
-        		if (err) {
-        			callback(new ApiResponse(500, new Error(err), err.message));
-        		} else {
-        			callback(new ApiResponse(res));
-        		}
-        	});
+        } else {
+          facebookActor._getAccounts(providerId, data.token, callback);
         }
       });
       
@@ -79,23 +71,41 @@ var facebookActor = {
         if (!data) {
           callback(new ApiResponse(500, new Error('Error retrieving facebook auth token.')));
         } else {
-          var wallPost = {
+          var postData = {
           	message: message
           };
           
-        	graph.setAccessToken(data.token);
-        	
-        	graph.post(providerId + '/feed', wallPost, function (err, res) {
-        		if (err) {
-        			callback(new ApiResponse(500, new Error(err), err.message));
-        		} else {
-        			callback(new ApiResponse(res));
-        		}
-        	});
+        	facebookActor._postToFeed(providerId, data.token, postData, callback);
         }
       });
       
-    }
+    },
+    
+    _getAccounts: function (id, accessToken, callback) {
+    	
+  		graph.setAccessToken(accessToken);
+      	
+    	graph.get(String(id) + '/accounts', null, function (err, res) {
+    		if (err) {
+    			callback(new ApiResponse(500, new Error(err), err.message));
+    		} else {
+    			callback(new ApiResponse(res));
+    		}
+    	});
+  	},
+  	
+  	_postToFeed: function (id, accessToken, postData, callback) {
+  		
+  		graph.setAccessToken(accessToken);
+        	
+    	graph.post(String(id) + '/feed', postData, function (err, res) {
+    		if (err) {
+    			callback(new ApiResponse(500, new Error(err), err.message));
+    		} else {
+    			callback(new ApiResponse(res));
+    		}
+    	});
+  	}
     
 };
   
