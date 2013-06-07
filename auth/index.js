@@ -111,7 +111,7 @@ var auth = {
 		}
   },
   
-  associate: function() {
+  associate: function(providerData) {
     return function(req, res, next) {
       var user = req.user,
         profile = req.account;
@@ -126,6 +126,7 @@ var auth = {
       // Auth'ed already, associating profile with current user
       } else if (user != null && profile != null) {
         
+        // Associate the profile with the user
         userAPI.associateProfile(user, profile, function(apiRes){
           req.apiResponse = apiRes; // Return APIResponse
           next();
@@ -138,6 +139,22 @@ var auth = {
       }
 
     }
+  },
+  
+  prepareAssociation: function(providerData) {
+  	if (providerData && providerData.prepareHandler) {
+  		return providerData.prepareHandler;
+  	} else {
+  		return function (req, res, next) { next(); };
+  	}
+  },
+  
+  postAssociation: function(providerData) {
+  	if (providerData && providerData.postHandler) {
+  		return providerData.postHandler;
+  	} else {
+  		return function (req, res, next) { next(); };
+  	}
   },
   
   /**
@@ -317,7 +334,9 @@ var auth = {
             [HttpHelper.validate(auth.validateRules),
              auth.authenticateApp({ forceAuth:false }),
              auth.authenticateProvider(provider.strategy, provider),
-             auth.associate(),
+             auth.prepareAssociation(provider),
+             auth.associate(provider),
+             auth.postAssociation(provider),
              auth.handleResponse()]
           );
         }
