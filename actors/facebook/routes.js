@@ -77,4 +77,16 @@ module.exports = function(app){
     }
   );
   
+  /*
+  app.get(config.paths.api + '/actors/facebook/:providerId/debug',
+    auth.authenticateApp(),
+    function(req, res, next) {
+      var http = new HttpHelper(req, res);
+      
+      facebookActor.debugToken(req.user, req.params.providerId, function(data) {
+        http.send(data);
+      });
+    }
+  );
+  */
 };

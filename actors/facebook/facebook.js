@@ -28,6 +28,31 @@ var facebookActor = {
       });
     },
     
+    /*
+    debugToken: function (context, providerId, callback) {
+    	facebookActor.getTokens(context, facebookActor.provider, providerId, function(data){
+      	
+        if (!data) {
+          callback(new ApiResponse(500, new Error('Error retrieving facebook auth token.')));
+        } else {
+          
+        	//graph.setAccessToken(data.token);
+        	var params = {
+        		access_token: data.token,
+        		input_token: data.token
+        	};
+        	
+        	graph.get('debug_token', params, function (err, res) {
+        		if (err) {
+        			callback(new ApiResponse(500, new Error(err.message)));
+        		} else {
+        			callback(new ApiResponse(res));
+        		}
+        	});
+        }
+      });
+    },
+    */
     getProfile: function (context, providerId, callback) {
     	
       facebookActor.getTokens(context, providerId, function(data){
