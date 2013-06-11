@@ -12,6 +12,10 @@ var provider = {
   	value: 'reauthenticate'
   },
   
+  isExtendedAuth: function (profile) {
+  	return (profile && profile.metaData && profile.metaData.pages && profile.metaData.pages.length);
+  },
+  
   /*
    Facebook Pages
     "data": [{

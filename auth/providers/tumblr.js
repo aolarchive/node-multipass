@@ -5,7 +5,8 @@ var config = require('../../conf/config')
 
 var provider = {
   strategy: 'tumblr',
-  scope: null
+  scope: null,
+  isExtendedAuth: true
 };
 
 auth.useOAuthStrategy(provider, TumblrStrategy, {
