@@ -1,5 +1,6 @@
 var passport = require('passport')
   , _ = require('underscore')._
+  , querystring = require('querystring')
   , config = require('../conf/config')
   , userAPI = require('../data/user')
   , HttpHelper = require('../routes/httphelper')
@@ -231,15 +232,19 @@ var auth = {
     auth.useStrategy(provider, strategy, options, verify);
   },
 
-  handleResponse: function() {
+  handleResponse: function(providerData) {
     return function(req, res, next) {
       debug('handleResponse');
       var http = new HttpHelper(req, res),
         apiRes = req.apiResponse || new ApiResponse(),
         redirectParams = '',
-        error = null;
+        error = null,
+        params = {},
+        redirectUrl = '';
       
       if (req.session && req.session.authredirect) {
+      	
+      	redirectUrl = req.session.authredirect;
       	
       	// Internal or HTTP error occurred
         if (apiRes.isError()) {
@@ -257,9 +262,31 @@ var auth = {
         }
         // If error, pass to callback as serialized query param
         if (error) {
-        	redirectParams = '?multipass_error=' + JSON.stringify( error );
+        	params.multipass_error = JSON.stringify( error );
         }
-        res.redirect(req.session.authredirect + redirectParams);
+        
+        // Set account data to pass back in redirect params
+        if (req.account && req.account.provider) {
+        	params.provider = req.account.provider;
+        	params.providerId = req.account.id;
+        }
+        
+        // Determine if account requires extended auth, and set redirect param
+        if (!_.isUndefined(providerData.isExtendedAuth)) {
+        	if (_.isFunction(providerData.isExtendedAuth)) {
+        		params.extendedAuth = providerData.isExtendedAuth(req.account);
+        	} else {
+        		params.extendedAuth = Boolean(providerData.isExtendedAuth);
+        	}
+        }
+        
+        // Add querystring to redirect url
+        if (!_.isEmpty(params)) {
+        	redirectUrl += (redirectUrl.indexOf('?') == -1 ? '?' : '&') + querystring.stringify(params);
+        }
+        
+        debug('redirect ' + redirectUrl);
+        res.redirect(redirectUrl);
         
       } else {
         http.send(apiRes);
@@ -337,7 +364,7 @@ var auth = {
              auth.prepareAssociation(provider),
              auth.associate(provider),
              auth.postAssociation(provider),
-             auth.handleResponse()]
+             auth.handleResponse(provider)]
           );
         }
       });
