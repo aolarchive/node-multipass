@@ -52,15 +52,13 @@ var twitterActor = {
               data.token, data.secret, body, "application/json",
               function (error, data, response2) {
                 if (error) {
-                  var errorData = JSON.parse(error.data);
                   debug('Error updating twitter status for id %s.', providerId);
                   debug(JSON.stringify(error));
                   
-                  callback(new ApiResponse(500, new Error(errorData), 'Error updating twitter status.'));
+                  callback(new ApiResponse(500, new Error(twitterActor._errorToString(error))));
                   
                 } else {
                   debug('Twitter status updated for id %s.', providerId);
-                  debug(response2);
                   
                   callback(new ApiResponse(JSON.parse(data)));
                 }
@@ -81,16 +79,14 @@ var twitterActor = {
           twitterActor.oauth.get("https://api.twitter.com/1.1/statuses/home_timeline.json",
               data.token, data.secret, 
               function (error, data, response2) {
-                if (error) {
-                  var errorData = JSON.parse(error.data);
+                if (error) {	
                   debug('Error getting twitter timeline for id %s.', providerId);
                   debug(JSON.stringify(error));
                   
-                  callback(new ApiResponse(500, new Error(errorData), 'Error getting twitter timeline.'));
+                  callback(new ApiResponse(500, new Error(twitterActor._errorToString(error))));
                   
                 } else {
                   debug('Twitter timeline retrieved for id %s.', providerId);
-                  debug(response2);
                   
                   callback(new ApiResponse(JSON.parse(data)));
                 }
@@ -98,7 +94,19 @@ var twitterActor = {
         }
       });
       
-    }
+    },
+    
+    _errorToString: function (error) {
+  		var str = null,
+  			errorData;
+  		if (error && error.data) {
+  			errorData = JSON.parse(error.data);
+        str = errorData.errors.map(function (value) {
+      		return value.message;
+      	}).toString();
+  		}
+  		return str;
+  	} 
     
 };
 

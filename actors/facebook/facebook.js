@@ -2,7 +2,7 @@ var OAuth = require('oauth').OAuth
   , config = require('../../conf/config')
   , userAPI = require('../../data/user')
   , ApiResponse = require('../../data/apiresponse')
-  , debug = require('debug')(config.name + ':actors:facebook')
+  , debug = require('debug')('multipass:actors:facebook')
   , graph = require('fbgraph');
 
 
@@ -65,7 +65,7 @@ var facebookActor = {
         	
         	graph.get(String(providerId), null, function (err, res) {
         		if (err) {
-        			callback(new ApiResponse(500, new Error(err.message)));
+        			callback(new ApiResponse(500, new Error(facebookActor._errorToString(err))));
         		} else {
         			callback(new ApiResponse(res));
         		}
@@ -114,6 +114,7 @@ var facebookActor = {
     // TODO: Fix issue where submitting this twice with same data, just returns
     // the User object on each request after the first.
     addPageProfiles: function(context, providerId, profiles, callback) {
+    	debug('addPageProfiles ' + providerId + ' ' + JSON.stringify(profiles));
     	if (profiles.length) {
 
 				// Get the user facebook profile that contains stored pages data	
@@ -194,7 +195,7 @@ var facebookActor = {
       	
     	graph.get(String(id) + '/accounts', null, function (err, res) {
     		if (err) {
-    			callback(new ApiResponse(500, new Error(err.message)));
+    			callback(new ApiResponse(500, new Error(facebookActor._errorToString(err))));
     		} else {
     			callback(new ApiResponse(res));
     		}
@@ -219,12 +220,26 @@ var facebookActor = {
         	
     	graph.post(String(id) + '/feed', postData, function (err, res) {
     		if (err) {
-    			callback(new ApiResponse(500, new Error(err.message)));
+    			debug('Error posting to facebook feed for id %s.', id);
+          debug(JSON.stringify(err));
+    			
+    			callback(new ApiResponse(500, new Error(facebookActor._errorToString(err))));
     		} else {
+    			debug('Facebook feed updated for id %s.', id);
+    			
     			callback(new ApiResponse(res));
     		}
     	});
-  	}
+  	},
+  	
+  	_errorToString: function (error) {
+  		var str = '';
+  		if (error && error.message) {
+  			str = String(error.message || '');
+	    	str = str.replace(/(Malformed access token).*$/i, '$1');
+	    }
+    	return str;
+  	} 
     
 };
   
