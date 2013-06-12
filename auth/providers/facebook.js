@@ -21,12 +21,12 @@ var provider = {
     "data": [{
         "category": "Community",
         "name": "Jeremy Tester's App Page",
-        "access_token": "CAABgRGjUtkABACrDpkzxlm7QhUZCxW1ZA3cibgZChs2SU4DKVDelikER8dUCDI9hZAthlNzcyM4OZAnWPKynj5q7HuBJZCEOR69lMsAwMFnPujPghZBvdD4kEETdq7ZCoeCvPJ2XCjyb8fdUj0AyWZCQWTeJe4QeB5JiVDdubvPjIben1UwnboL1q",
+        "access_token": "{ACCESS_TOKEN}",
         "id": "194676927348958",
         "perms": ["ADMINISTER", "EDIT_PROFILE", "CREATE_CONTENT", "MODERATE_CONTENT", "CREATE_ADS", "BASIC_ADMIN"]
     }],
     "paging": {
-        "next": "https://graph.facebook.com/100005622129389/accounts?access_token=CAABgRGjUtkABAKUkeNiEkSbKPLrqMwPZC9t8vuwLWjb9PT2ofFCAZCZB6h1znkqJ3g5PiuVdb1byUoV36UXLg1AcnPvMRS89Mkn8vU1JHUcWOPjWfEJYZBOY0ZBZCR9ZCeWpggOmz7ZBuOszr2kcQJPT6QgUrJnjIcIjxKdqeZBySOPWvZAtOmaA21g1ZAfriX7CxsztUEivamNigZDZD&limit=5000&offset=5000&__after_id=194676927348958"
+        "next": "https://graph.facebook.com/100005622129389/accounts?access_token={ACCESS_TOKEN}&limit=5000&offset=5000&__after_id=194676927348958"
     }
    */
   prepareHandler: function (req, res, next) {
