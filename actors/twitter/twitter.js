@@ -2,7 +2,7 @@ var OAuth = require('oauth').OAuth
   , config = require('../../conf/config')
   , userAPI = require('../../data/user')
   , ApiResponse = require('../../data/apiresponse')
-  , debug = require('debug')(config.name + ':actors:twitter');
+  , debug = require('debug')('multipass:actors:twitter');
 
 
 var twitterActor = {
@@ -48,7 +48,7 @@ var twitterActor = {
           var body = {'status': status},
             out;
 
-          twitterActor.oauth.post("http://api.twitter.com/1/statuses/update.json",
+          twitterActor.oauth.post("https://api.twitter.com/1.1/statuses/update.json",
               data.token, data.secret, body, "application/json",
               function (error, data, response2) {
                 if (error) {
