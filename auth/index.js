@@ -380,10 +380,10 @@ var auth = {
     return function(req, res, next){
       //console.log('authenticateApp', req.user);
       if (!req.isAuthenticated() || options.forceAuth) {
-        debug('authenticateApp: forceAuth (do auth)');
+        //debug('authenticateApp: forceAuth (do auth)');
         passport.authenticate(auth._appAuthStrategy, options)(req, res, next);
       } else {
-        debug('authenticateApp: pass (skip auth)');
+        //debug('authenticateApp: pass (skip auth)');
         next();
       }
     }
