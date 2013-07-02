@@ -378,7 +378,62 @@ var userAPI = {
   		 truncStr = str.substr(0, 4) + '..' + str.substr(-4); 
   	}
   	return truncStr;
-  }
+  },
+  
+  /**
+   * Get a list of profiles from all the userIds in the context.
+   * List of userIds specified by a ',' delimited list in context.userId.
+   * 
+   * Returns by default a list of User objects that match the userIds.
+   * If aggregate param is true, then returns a new User object with 
+   * a single profiles array, containing all the profiles aggregated together.
+   * 
+   * Responses:
+   *  success: [200] The user object that was found.
+   */
+  getUsers : function(context, aggregrate, callback) {
+  	aggregate = aggregrate != null ? aggregrate : false;
+  	var userIds = [];
+  	
+  	if (context && context.userId) {
+  		userIds = String(context.userId).split(',').map(function(value) {
+  			return value.trim();
+  		});
+  	}
+  	
+    User.find({'appId':context.appId, 'userId':{ $in: userIds }},
+      fieldInclusions,
+      function(err, users){
+        var res = null,
+        	aggregatedUser = null;
+        	
+        if (err) {
+          res = new ApiResponse(500, err, 'Error retriving the users.');
+          
+        } else if (aggregrate){
+        	if (users.length) {
+        		aggregatedUser = {
+        			appId: context.appId,
+        			userId: context.userId,
+        			profiles: []
+        		};
+        		users.forEach(function (user) {
+        			user.profiles && user.profiles.forEach(function (profile) {
+        				profile = profile.toObject();
+        				profile.userId = user.userId;
+        				aggregatedUser.profiles.push(profile);
+        			});
+        		});
+        	}
+          res = new ApiResponse(aggregatedUser);
+          
+        } else {
+        	res = new ApiResponse(users);
+        }
+        callback(res);
+      }
+    );
+  },
   
 };
 

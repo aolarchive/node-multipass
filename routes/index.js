@@ -61,6 +61,32 @@ module.exports = function(app){
       });
     }
   );
+  
+  /**
+   * GET /api/users
+   * 
+   * Get all users and their profiles, that match the list of userIds in 
+   * the context, which are ',' delimited.
+   * 
+   * Params:
+   *   'aggregate' - if true, combines the profiles into one list, else 
+   *     if false (default), returns list of in-tact User objects.
+   */
+  app.get(config.paths.api + '/users',
+    auth.authenticateApp(),
+    function(req, res) {
+      var http = new HttpHelper(req, res),
+      	aggregate = req.query.aggregate;
+      	
+      if (aggregate) {
+      	aggregate = (aggregate == 1 || aggregate.toLowerCase() == 'true');
+      }
+      
+      userAPI.getUsers(req.user, aggregate, function(data) {
+        http.send(data);
+      });
+    }
+  );
 
   /**
    * GET /api/user/:provider/:providerId
