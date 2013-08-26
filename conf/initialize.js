@@ -1,7 +1,9 @@
 var config = require('./config')
   ,	mongoose = require('mongoose')
   , dataHelper = require('../data/helper')
-  , util = require('util');
+  , util = require('util')
+  , path = require('path')
+  , fs = require('fs');
 
 
 function init(app) {
@@ -26,6 +28,7 @@ function init(app) {
   
   var plugins = {},
    pluginConfig,
+   pluginViews,
    plugin;
   
   if (config.plugins) {
@@ -38,6 +41,18 @@ function init(app) {
           if (plugin) {
             plugins[key] = plugin;
             
+            // Configure the viewsPath for the plugin
+            plugin._viewsPath = path.join(__dirname, path.dirname(pluginConfig.init)) + '/';
+            
+            if (plugin.views) {
+            	pluginViews = path.join(__dirname, path.dirname(pluginConfig.init), plugin.views, '/');
+
+            	if (fs.existsSync(pluginViews)) {
+            		plugin._viewsPath = pluginViews;
+            	}
+            }
+            
+            // Initialize plugin
             if (plugin.init) {
               plugin.init(app);
             }
@@ -56,4 +71,4 @@ function init(app) {
   require('../routes/index')(app);
 }
 
-module.exports = init;
+module.exports.init = init;

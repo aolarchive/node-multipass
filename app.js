@@ -4,6 +4,7 @@ var express = require('express')
   , auth = require('./auth')
   , config = require('./conf/config')
   , sessionStore = require('./data/sessionstore')
+  , initialize = require('./conf/initialize')
   , HttpHelper = require('./routes/httphelper');
 
 
@@ -33,7 +34,7 @@ if (clusterEnabled && cluster.isMaster) {
 	
 	// configure Express
 	app.configure(function() {
-	  app.set('views', __dirname + '/views');
+	  app.set('views', __dirname + '/');
 	  app.set('view engine', 'ejs');
 	  switch (app.get('env')) {
 	  	case 'production':
@@ -71,7 +72,7 @@ if (clusterEnabled && cluster.isMaster) {
 	  app.use(express.static(__dirname + '/public', { maxAge: oneYear })); 
 	});
 	
-	require('./conf/initialize')(app);
+	initialize.init(app);
 	
 	app.listen(config.getServer().port, function (){
 	  console.log('App listening on port '+config.getServer().port);

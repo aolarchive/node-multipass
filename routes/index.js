@@ -3,8 +3,7 @@ var passport = require('passport')
   , auth = require('../auth')
   , userAPI = require('../data/user')
   , HttpHelper = require('./httphelper')
-  , ApiResponse = require('../data/apiresponse')
-  , appRoutes = require('./app');
+  , ApiResponse = require('../data/apiresponse');
 
 
 module.exports = function(app){
@@ -134,9 +133,6 @@ module.exports = function(app){
     }
   );
   
-  
-  /* Pull in App API routes */
-  appRoutes(app);
   
   /* Pull in plugin routes */
   if (app.get('plugins')) {

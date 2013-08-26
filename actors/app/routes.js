@@ -1,12 +1,15 @@
 var passport = require('passport')
-  , config = require('../conf/config')
-  , auth = require('../auth')
-  , appAPI = require('../data/app')
-  , HttpHelper = require('./httphelper')
-  , ApiResponse = require('../data/apiresponse');
+  , config = require('../../conf/config')
+  , auth = require('../../auth')
+  , appAPI = require('../../data/app')
+  , HttpHelper = require('../../routes/httphelper')
+  , ApiResponse = require('../../data/apiresponse');
 
 
 module.exports = function(app){
+	
+	var viewsPath = app.get('plugins')['app'] && app.get('plugins')['app']._viewsPath;
+	
   /*
   app.get(config.paths.api + '/app',
     //auth.ensureAuthenticated, 
@@ -75,18 +78,18 @@ module.exports = function(app){
       if (!req.param('action')) {
 
         appAPI.getAppsByUserId(userId, function(data) {
-          res.render('app', { userId: userId, apps: data.data });
+          res.render(viewsPath + 'app', { userId: userId, apps: data.data });
         });
         
       } else if (req.param('action') == 'create') {
         
-        res.render('appform', { app: { userId: userId } });
+        res.render(viewsPath + 'appform', { app: { userId: userId } });
         
       } else if (req.param('action') == 'edit' && req.param('appId')) {
         
         appAPI.getApp(req.param('appId'), function(data) {
           if (!data.isError()) {
-            res.render('appform', { app: data.data });
+            res.render(viewsPath + 'appform', { app: data.data });
           }
         });
         
