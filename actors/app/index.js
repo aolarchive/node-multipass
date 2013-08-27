@@ -5,10 +5,8 @@ module.exports = {
   
   views: 'views/',
   
-  actor: null,
-  
   init: function(app) {
-  	console.log('app._viewsPath', this._viewsPath);
+  	//console.log('plugin:'+this.name, this);
   },
   
   routes: function(app) {
