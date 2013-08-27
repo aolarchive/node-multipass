@@ -1,11 +1,20 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>Multipass Demo Auth Callback</title>
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.js"></script>
-		<script src="js/demo.js"></script>
+		<title>Multipass Auth Callback</title>
 	</head>
 	<body class="mp-auth">
 		Multipass auth callback
+		<script>
+		  var parent = window.opener || window.parent;
+      
+      if (window !== parent) {
+        if (parent['_multipassCallback_']) {
+          parent['_multipassCallback_'](String(location.search).substr(1));
+        }
+        
+        window.close();
+      }
+		</script>
 	</body>
 </html>
