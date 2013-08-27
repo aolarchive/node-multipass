@@ -5,8 +5,8 @@ module.exports = {
   
   views: 'views/',
   
-  init: function(app) {
-  	//console.log('plugin:'+this.name, this);
+  init: function(app, options) {
+  	//console.log('plugin:'+this.name, this, options);
   },
   
   routes: function(app) {

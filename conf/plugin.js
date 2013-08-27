@@ -13,6 +13,7 @@ var plugin = {
   
 	  var plugins = {},
 	   pluginConfig,
+	   pluginOptions,
 	   pluginViews,
 	   pluginStatic,
 	   pluginStaticRoute = null,
@@ -23,6 +24,8 @@ var plugin = {
 	    try {
 	      Object.keys(pluginConfigs).forEach(function (key) {
 	        pluginConfig = pluginConfigs[key];
+	        
+	        pluginOptions = pluginConfig.options || {};
 	        
 	        if (pluginConfig.init) {
 	          plugin = require(pluginConfig.init);
@@ -82,7 +85,7 @@ var plugin = {
 	             * Initialize plugin
 	             */
 	            if (plugin.init) {
-	              plugin.init(app);
+	              plugin.init(app, pluginOptions);
 	            }
 	          }
 	        }
