@@ -408,7 +408,7 @@
       
       this.buildProfiles();
       
-      authResponse && this.showResponse('', JSON.parse(authResponse));
+      //authResponse && this.showResponse('', JSON.parse(authResponse));
     },
     
     initAuth: function() {
