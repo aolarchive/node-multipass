@@ -8,7 +8,7 @@ var mongoose = require('mongoose')
 
 var App = mongoose.model('App', Schemas.App, 'apps');
 
-var fieldInclusions = { '__v':0 };  // 0==exclude, 1==include
+var fieldInclusions = { '__v':0, 'secret':0 };  // 0==exclude, 1==include
 
 function buildApp(app) {
   
