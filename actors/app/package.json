@@ -3,10 +3,11 @@
   "description": "Multipass plugin for managing apps for the service.",
   "version": "0.1.0",
   "dependencies": {
-    "passport-els": "git+ssh://git@github.com:aol/node-passport-els.git#d476cad57724e86d9675236a9ad3ccdc0e45d8e9"
+    "passport-els": "git+ssh://git@github.com:aol/node-passport-els.git#d476cad57724e86d9675236a9ad3ccdc0e45d8e9",
+    "superagent": "~0.15.4"
   },
   "engines": {
-  	"node": "0.10.x",
+    "node": "0.10.x",
     "npm": "1.2.x"
   }
 }
