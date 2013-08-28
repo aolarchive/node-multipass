@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>jquery-multipass test</title>
+</head>
+<body>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"></script>
+	<script src="https://devlocal.aol.com:3443/js/jquery-multipass.js"></script>
+	<script>
+		$.multipass.init({
+			apiBaseUrl: 'https://devlocal.aol.com:3443',
+			authCallbackUrl: 'https://devlocal.aol.com:3443/auth.html',
+			userId: '',
+			appId: 'bcca4c62-dbbc-4b22-a3c5-7bdb96fca106',
+			appSecret: '3470a522d81c77f9b48133df779841f1'
+		});
+		
+		$(document).bind('multipass-auth', function (event, params) {
+			console.log('multipass-auth', params);
+		});
+	</script>
+</body>
+</html>
