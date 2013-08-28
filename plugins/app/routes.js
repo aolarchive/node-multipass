@@ -116,7 +116,7 @@ module.exports = function(app){
 	        
 	      } else if (req.param('action') == 'edit' && req.param('appId')) {
 	        
-	        appAPI.getApp(req.param('appId'), function(data) {
+	        appAPI.getApp(req.param('appId'), false, function(data) {
 	          if (!data.isError()) {
 	            res.render(viewsPath + 'appform', { app: data.data });
 	          }

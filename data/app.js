@@ -8,7 +8,8 @@ var mongoose = require('mongoose')
 
 var App = mongoose.model('App', Schemas.App, 'apps');
 
-var fieldInclusions = { '__v':0, 'secret':0 };  // 0==exclude, 1==include
+var fieldInclusions = { '__v':0 },  // 0==exclude, 1==include
+	fieldInclusionsSafe = { '__v':0, 'secret':0 };
 
 function buildApp(app) {
   
@@ -35,9 +36,12 @@ function generateSecret() {
 
 var appAPI = {
 
-    getApp: function(appId, callback){
+    getApp: function(appId, sanitize, callback){
+    	sanitize = sanitize == null ? true : sanitize;
+    	var inclusions = !!sanitize ? fieldInclusionsSafe : fieldInclusions;
+    	
       App.findOne({'appId': App.encrypt(appId)},
-        fieldInclusions,
+        inclusions,
         function(err, doc){
           var res = null;
           if (err) {
@@ -60,7 +64,7 @@ var appAPI = {
           res = new ApiResponse(500, err, 'Error creating the app.');
           callback(res);
         } else {
-          appAPI.getApp(App.decrypt(doc.appId), function(newRes){
+          appAPI.getApp(App.decrypt(doc.appId), true, function(newRes){
             if (newRes.isError()) {
               callback(newRes);
             } else {
@@ -73,7 +77,7 @@ var appAPI = {
     },
     
     deleteApp: function(appId, callback){
-      this.getApp(appId, function(res){
+      this.getApp(appId, true, function(res){
         if (res.isError()) {
           callback(res);
         } else {
@@ -92,7 +96,7 @@ var appAPI = {
     },
     
     updateApp: function(app, callback){
-      this.getApp(app.appId, function(res){
+      this.getApp(app.appId, true, function(res){
         if (res.isError()) {
           callback(res);
         } else {
@@ -111,7 +115,7 @@ var appAPI = {
               res = new ApiResponse(500, err, 'Error updating the app.');
               callback(res);
             } else {
-              appAPI.getApp(App.decrypt(doc.appId), function(newRes){
+              appAPI.getApp(App.decrypt(doc.appId), true, function(newRes){
                 if (newRes.isError()) {
                   callback(newRes);
                 } else {
@@ -134,7 +138,7 @@ var appAPI = {
       }
       
       App.findOne({'appId':App.encrypt(appId), 'secret':App.encrypt(secret), 'hosts': host },
-        fieldInclusions,
+        fieldInclusionsSafe,
         function(err, doc){
           var res = null;
           if (err) {
@@ -148,7 +152,7 @@ var appAPI = {
     },
     
     refreshAppSecret: function(appId, callback){
-      this.getApp(appId, function(res){
+      this.getApp(appId, true, function(res){
         if (res.isError()) {
           callback(res);
         } else {
@@ -164,7 +168,7 @@ var appAPI = {
               res = new ApiResponse(500, err, 'Error updating the app.');
               callback(res);
             } else {
-              appAPI.getApp(App.decrypt(doc.appId), function(newRes){
+              appAPI.getApp(App.decrypt(doc.appId), true, function(newRes){
                 if (newRes.isError()) {
                   callback(newRes);
                 } else {
@@ -180,7 +184,7 @@ var appAPI = {
     
     getAppsByUserId: function(userId, callback) {
       App.find({'userId':userId},
-        fieldInclusions,
+        fieldInclusionsSafe,
         function(err, docs){
           var res = null;
           if (err) {
