@@ -2,6 +2,7 @@ var config = require('./config')
   ,	mongoose = require('mongoose')
   , dataHelper = require('../data/helper')
   , util = require('util')
+  , path = require('path')
   , plugin = require('./plugin');
 
 
@@ -10,6 +11,7 @@ function init(app) {
   // Store references to useful things
   app.set('config', config);
   app.set('mongoose', mongoose);
+  app.set('approot', path.dirname(require.main.filename));
   
 	mongoose.connect(
 		dataHelper.toConnectString(config.mongo.connection), 
