@@ -5,6 +5,7 @@ var express = require('express')
   , config = require('./conf/config')
   , sessionStore = require('./data/sessionstore')
   , initialize = require('./conf/initialize')
+  , nstest = require('nstest')
   , HttpHelper = require('./routes/httphelper');
 
 
@@ -65,6 +66,12 @@ if (clusterEnabled && cluster.isMaster) {
 	  });
 	  // Handle all other errors 
 	  app.use(HttpHelper.errorHandler);
+	  // Healthcheck handler
+  	app.use(nstest.healthcheck({
+    	doc_root: __dirname + '/public',
+    	ok_text: 'Multipass ok',
+    	error_text: 'Multipass error'
+    }));
 	});
 	
 	app.configure('production', 'stage', function(){

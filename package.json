@@ -27,7 +27,7 @@
     "passport": "0.1.17",
     "passport-facebook": "git://github.com/jeremyjannotta/passport-facebook.git",
     "passport-twitter": "0.1.5",
-    "passport-aol-oauth": "git://github.com/jeremyjannotta/passport-aol-oauth.git", 
+    "passport-aol-oauth": "git://github.com/jeremyjannotta/passport-aol-oauth.git",
     "passport-linkedin": "0.1.3",
     "passport-google-oauth": "0.1.5",
     "passport-windowslive": "0.1.3",
@@ -37,14 +37,15 @@
     "passport-tumblr": "0.1.2",
     "oauth": "0.9.10",
     "googleapis": "~0.2.10",
-    "fbgraph": "0.2.6"
+    "fbgraph": "0.2.6",
+    "nstest": "git+ssh://git@stash.ops.aol.com:2022/amp/amp-node-nstest.git"
   },
   "engines": {
-  	"node": "0.10.x",
+    "node": "0.10.x",
     "npm": "1.2.x"
   },
   "scripts": {
-  	"start": "node app.js"
+    "start": "node app.js"
   },
   "config": {
     "env": "MULTIPASS_CONF"
