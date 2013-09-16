@@ -8,7 +8,7 @@ var provider = {
   strategy: 'facebook',
   scope: ['email'],
   forceLoginParam: {
-  	name: 'auth_type',
+  	name: 'authType',
   	value: 'reauthenticate'
   },
   

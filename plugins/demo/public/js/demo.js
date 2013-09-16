@@ -88,7 +88,7 @@
     },
     
     loginAuthProvider: function(loginUrl) {
-      var url = this.options.apiBaseUrl + loginUrl + '?r=auth.html';
+      var url = this.options.apiBaseUrl + loginUrl + '?r=auth.html&force_login=true';
       
       var authWin = window.open(url, 'multipass-auth', 'width=800,height=600');
     },
