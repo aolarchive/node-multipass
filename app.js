@@ -1,6 +1,7 @@
 var express = require('express')
   , cluster = require('cluster')
   , util = require('util')
+  , logging = require('./conf/logging')
   , auth = require('./auth')
   , config = require('./conf/config')
   , sessionStore = require('./data/sessionstore')
@@ -35,30 +36,34 @@ if (clusterEnabled && cluster.isMaster) {
 	
 	// configure Express
 	app.configure(function() {
+		
+		// Setup views
 	  app.set('views', __dirname + '/');
 	  app.set('view engine', 'ejs');
-	  switch (app.get('env')) {
-	  	case 'production':
-	  	case 'stage':
-	  		app.use(express.logger('default'));
-	  		break;
-	  	default: 
-	  		app.use(express.logger('dev'));
-	  		break;
-	  }
+	  
+	  // Setup logging
+	  logging.init(app);
+	  
+	  // Setup middleware
 	  app.use(express.cookieParser());
 	  app.use(express.bodyParser());
 	  app.use(express.methodOverride());
+	  
 	  // Trust proxy if exists
 	  if (config.hasProxy()) {
 	    app.enable('trust proxy');
 	  }
+	  
 	  // Init session management
 	  sessionStore.init(app);
+	  
 	  // Init auth
 	  auth.init(app);
+	  
+	  // Router setup
 	  app.use(app.router);
 	  app.use(express.static(__dirname + '/public'));
+	  
 	  // Log errors
 	  app.use(function(err, req, res, next) {
 	    console.error(err.stack);
@@ -66,6 +71,7 @@ if (clusterEnabled && cluster.isMaster) {
 	  });
 	  // Handle all other errors 
 	  app.use(HttpHelper.errorHandler);
+	  
 	  // Healthcheck handler
   	app.use(nstest.healthcheck({
     	doc_root: __dirname + '/public',

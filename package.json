@@ -38,7 +38,9 @@
     "oauth": "0.9.10",
     "googleapis": "~0.2.10",
     "fbgraph": "0.2.6",
-    "nstest": "git+ssh://git@stash.ops.aol.com:2022/amp/amp-node-nstest.git"
+    "nstest": "git+ssh://git@stash.ops.aol.com:2022/amp/amp-node-nstest.git",
+    "moment": "2.2.1",
+    "microtime": "0.4.0"
   },
   "engines": {
     "node": "0.10.x",
