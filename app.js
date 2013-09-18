@@ -1,7 +1,8 @@
 var express = require('express')
   , cluster = require('cluster')
   , util = require('util')
-  , logging = require('./conf/logging')
+  , path = require('path')
+  , accesslog = require('./conf/accesslog')
   , auth = require('./auth')
   , config = require('./conf/config')
   , sessionStore = require('./data/sessionstore')
@@ -37,12 +38,28 @@ if (clusterEnabled && cluster.isMaster) {
 	// configure Express
 	app.configure(function() {
 		
+	  // Setup logging
+	  var logOptions = {
+	  	logFile: false,
+	  	format: 'dev',
+	  	ready: function (options) {
+				if (options.logFile) {
+					app.set('logFile', options.logFile);
+					console.log('Logging to ' + app.get('logFile'));
+				} else {
+					console.log('Logging to STDOUT');
+				}
+			}
+	  };
+	  app.configure('production', 'stage', function () {
+	  	logOptions.logFile = path.resolve(config.logging && config.logging.accessLog);
+	  	logOptions.format = 'argus';
+	  });
+	  app.use(accesslog.logger(app, logOptions));
+	  
 		// Setup views
 	  app.set('views', __dirname + '/');
 	  app.set('view engine', 'ejs');
-	  
-	  // Setup logging
-	  logging.init(app);
 	  
 	  // Setup middleware
 	  app.use(express.cookieParser());
