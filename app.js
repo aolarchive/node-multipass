@@ -39,22 +39,21 @@ if (clusterEnabled && cluster.isMaster) {
 	app.configure(function() {
 		
 	  // Setup logging
-	  var logOptions = {
-	  	logFile: false,
-	  	format: 'dev',
-	  	ready: function (options) {
-				if (options.logFile) {
-					app.set('logFile', options.logFile);
-					console.log('Logging to ' + app.get('logFile'));
-				} else {
-					console.log('Logging to STDOUT');
+	  var accessLog = (config.logging && config.logging.access),
+	  	logOptions = {
+		  	logFile: (accessLog && accessLog.file) 
+		  		? path.resolve(accessLog.file)
+		  		: false,
+		  	format: (accessLog && accessLog.format) || 'dev',
+		  	ready: function (options) {
+					if (options.logFile) {
+						app.set('logFile', options.logFile);
+						console.log('Logging to ' + app.get('logFile'));
+					} else {
+						console.log('Logging to STDOUT');
+					}
 				}
-			}
-	  };
-	  app.configure('production', 'stage', function () {
-	  	logOptions.logFile = path.resolve(config.logging && config.logging.accessLog);
-	  	logOptions.format = 'argus';
-	  });
+		  };
 	  app.use(accesslog.logger(app, logOptions));
 	  
 		// Setup views
