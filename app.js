@@ -56,6 +56,14 @@ if (clusterEnabled && cluster.isMaster) {
 		  };
 	  app.use(accesslog.logger(app, logOptions));
 	  
+		// Healthcheck handler
+		// NOTE: Route must appear before sslHandler so always available
+		app.use(nstest.healthcheck({
+			doc_root: __dirname + '/public',
+			ok_text: 'Multipass ok',
+			error_text: 'Multipass error'
+		}));
+    
 		// Setup views
 	  app.set('views', __dirname + '/');
 	  app.set('view engine', 'ejs');
@@ -69,7 +77,7 @@ if (clusterEnabled && cluster.isMaster) {
 	  if (config.hasProxy()) {
 	    app.enable('trust proxy');
 	  }
-	  
+    
 	  // Init session management
 	  sessionStore.init(app);
 	  
@@ -88,12 +96,6 @@ if (clusterEnabled && cluster.isMaster) {
 	  // Handle all other errors 
 	  app.use(HttpHelper.errorHandler);
 	  
-	  // Healthcheck handler
-  	app.use(nstest.healthcheck({
-    	doc_root: __dirname + '/public',
-    	ok_text: 'Multipass ok',
-    	error_text: 'Multipass error'
-    }));
 	});
 	
 	app.configure('production', 'stage', function(){
