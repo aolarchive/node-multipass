@@ -14,13 +14,17 @@ function init(app) {
   app.set('approot', path.dirname(require.main.filename));
   
 	mongoose.connect(
-		dataHelper.toConnectString(config.mongo.connection), 
-		{ replset: { rs_name: config.mongo.setName } }
+		dataHelper.toConnectString(config.data.mongo.connection), 
+		{ 
+			replset: { rs_name: config.data.mongo.setName },
+			user: config.data.mongo.username,
+			pass: config.data.mongo.password
+		}
 	);
 
   mongoose.connection.on('error', console.error.bind(console, 'Data connection error:'));
   mongoose.connection.once('open', function () {
-    console.log('Data connection successful to '+util.inspect(config.mongo.connection));
+    console.log('Data connection successful to '+util.inspect(config.data.mongo.connection));
   });
   
   // Dynamically load plugins, based on config.plugins hash 

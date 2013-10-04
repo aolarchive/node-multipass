@@ -6,7 +6,7 @@ var mongoose = require('mongoose')
   , debug = require('debug')('multipass:user');
 
 
-var User = mongoose.model('User', Schemas.User, (config.mongo.collection || 'users'));
+var User = mongoose.model('User', Schemas.User, (config.data.mongo.collection || 'users'));
 
 var fieldInclusions = { '__v':0 };  // 0==exclude, 1==include
 

@@ -23,7 +23,7 @@ var UserProfile = new Schema({
 
 UserProfile.plugin(encryption, { 
   fields: ['authToken', 'authTokenSecret'], 
-  key: config.mongo.secret, 
+  key: config.data.secret, 
   input: 'utf8',
   output: 'base64' 
 });
@@ -49,7 +49,7 @@ var App = new Schema({
 
 App.plugin(encryption, { 
   fields: ['appId', 'secret'], 
-  key: config.mongo.secret, 
+  key: config.data.secret, 
   input: 'utf8',
   output: 'base64' 
 });

@@ -10,23 +10,21 @@ var sessionStore = {
   db: null,
     
   config : {
-    host: config.session.host || null,
-    port: config.session.port || null,
-    db: config.session.db || null,
-    collection: config.session.collection || null,
-    username: config.session.username || null,
-    password: config.session.password || null,
+    host: config.session.mongo.host || null,
+    port: config.session.mongo.port || null,
+    db: config.session.mongo.db || null,
+    collection: config.session.mongo.collection || null,
+    username: config.session.mongo.username || null,
+    password: config.session.mongo.password || null,
     cookie: config.session.cookie || null,
     key: config.session.key || null
   },
   
   init : function(app) {
     
-    sessionStore.db.once('error', function(event){
-      console.log('SessionStore connection error: ['+event.toString()+']');
-    });
+    sessionStore.db.once('error', console.error.bind(console, 'SessionStore connection error:'));
     sessionStore.db.once('open', function(event){
-      console.log('SessionStore connection successful to '+util.inspect(config.session.connection));
+      console.log('SessionStore connection successful to '+util.inspect(config.session.mongo.connection));
     });
     
     app.use(
@@ -50,8 +48,10 @@ var sessionStore = {
 
 // Create initial Db instance
 sessionStore.db = dataHelper.getDb(
-	config.session.connection, 
-	{ replset: { rs_name: config.session.setName } }
+	config.session.mongo.connection, 
+	{ 
+		replset: { rs_name: config.session.mongo.setName }
+	}
 );
 
 module.exports = sessionStore;
