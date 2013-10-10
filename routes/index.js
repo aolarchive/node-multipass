@@ -28,6 +28,9 @@ module.exports = function(app){
   //  auth.appAuthHandler
   //);
   
+  /* Load auth provider login routes */
+  auth.loadProviderRoutes(app);
+  
   /**
    * GET /api/user
    * 

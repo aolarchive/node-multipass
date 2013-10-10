@@ -341,31 +341,8 @@ var auth = {
       Object.keys(config.providers).forEach(function(key) {
         var provider = require('./providers/' + String(key).toLowerCase()).provider;
         if (provider) {
-          
           // Add provider to list of available providers
           auth.addProvider(provider);
-          
-          // Assign login and callback routes for provider
-          
-          app.get(auth.getProviderLoginPath(provider.strategy),
-            HttpHelper.validate(auth.validateRules),
-            auth.authenticateApp({ session:false, forceAuth:false }),
-            function(req, res, next) {
-              auth.setRedirect(req);
-              next();
-            },
-            auth.authenticateProvider(provider.strategy, provider)
-          );
-    
-          app.get(auth.getProviderCallbackPath(provider.strategy),
-            [HttpHelper.validate(auth.validateRules),
-             auth.authenticateApp({ forceAuth:false }),
-             auth.authenticateProvider(provider.strategy, provider),
-             auth.prepareAssociation(provider),
-             auth.associate(provider),
-             auth.postAssociation(provider),
-             auth.handleResponse(provider)]
-          );
         }
       });
     }
@@ -395,6 +372,37 @@ var auth = {
     var provider = require('./providers/' + String(strategy).toLowerCase()).provider;
     if (provider) console.log('Using app auth provider "'+strategy+'"');
     else console.log('Error loading app auth provider "'+strategy+'"');
+  },
+  
+  loadProviderRoutes: function(app) {
+  	if (auth.providers.length) {
+  		
+  		// Assign login and callback routes for provider
+  		auth.providers.forEach(function (provider) {
+        
+        // Login route
+        app.get(auth.getProviderLoginPath(provider.strategy),
+          HttpHelper.validate(auth.validateRules),
+          auth.authenticateApp({ session:false, forceAuth:false }),
+          function(req, res, next) {
+            auth.setRedirect(req);
+            next();
+          },
+          auth.authenticateProvider(provider.strategy, provider)
+        );
+  
+  			// Callback route
+        app.get(auth.getProviderCallbackPath(provider.strategy),
+          [HttpHelper.validate(auth.validateRules),
+           auth.authenticateApp({ forceAuth:false }),
+           auth.authenticateProvider(provider.strategy, provider),
+           auth.prepareAssociation(provider),
+           auth.associate(provider),
+           auth.postAssociation(provider),
+           auth.handleResponse(provider)]
+        );
+  		});
+  	}
   }
   
 };
