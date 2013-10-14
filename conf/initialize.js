@@ -16,7 +16,10 @@ function init(app) {
 	mongoose.connect(
 		dataHelper.toConnectString(config.data.mongo.connection), 
 		{ 
-			replset: { rs_name: config.data.mongo.setName },
+			replset: { 
+				rs_name: config.data.mongo.setName,
+				readPreference: 'secondaryPreferred' 
+			},
 			user: config.data.mongo.username,
 			pass: config.data.mongo.password
 		}

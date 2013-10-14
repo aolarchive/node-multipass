@@ -50,7 +50,10 @@ var sessionStore = {
 sessionStore.db = dataHelper.getDb(
 	config.session.mongo.connection, 
 	{ 
-		replset: { rs_name: config.session.mongo.setName }
+		replset: { 
+			rs_name: config.session.mongo.setName,
+			readPreference: 'secondaryPreferred' 
+		}
 	}
 );
 
