@@ -410,12 +410,13 @@
     },
     "passport-els": {
       "version": "0.0.1",
-      "from": "passport-els@git+ssh://git@github.com:aol/node-passport-els.git#0ae2ea5c926c2322090ec52c99ecb4b21112d131",
-      "resolved": "git+ssh://git@github.com:aol/node-passport-els.git#0ae2ea5c926c2322090ec52c99ecb4b21112d131",
+      "from": "passport-els@git+ssh://repo-node-multipass-els@github.com:aol/node-passport-els.git#0ae2ea5c926c2322090ec52c99ecb4b21112d131",
+      "resolved": "git+ssh://repo-node-multipass-els@github.com:aol/node-passport-els.git#0ae2ea5c926c2322090ec52c99ecb4b21112d131",
       "dependencies": {
         "pkginfo": {
           "version": "0.3.0",
-          "from": "pkginfo@~0.3.0"
+          "from": "pkginfo@~0.3.0",
+          "resolved": "https://registry.npmjs.org/pkginfo/-/pkginfo-0.3.0.tgz"
         },
         "superagent": {
           "version": "0.15.5",
@@ -423,7 +424,7 @@
           "dependencies": {
             "qs": {
               "version": "0.6.5",
-              "from": "qs@~0.6.0",
+              "from": "qs@0.6.5",
               "resolved": "https://registry.npmjs.org/qs/-/qs-0.6.5.tgz"
             },
             "formidable": {
@@ -448,8 +449,7 @@
             },
             "cookiejar": {
               "version": "1.3.0",
-              "from": "cookiejar@1.3.0",
-              "resolved": "https://registry.npmjs.org/cookiejar/-/cookiejar-1.3.0.tgz"
+              "from": "cookiejar@1.3.0"
             },
             "reduce": {
               "version": "0.1.2",
@@ -469,7 +469,8 @@
                     },
                     "is": {
                       "version": "0.2.6",
-                      "from": "is@~0.2.6"
+                      "from": "is@~0.2.6",
+                      "resolved": "https://registry.npmjs.org/is/-/is-0.2.6.tgz"
                     }
                   }
                 }
