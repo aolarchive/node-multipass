@@ -35,7 +35,7 @@
     "passport-github": "0.1.5",
     "passport-dropbox": "0.1.2",
     "passport-tumblr": "0.1.2",
-    "passport-els": "git+ssh://repo-node-multipass-els@github.com:aol/node-passport-els.git#0ae2ea5c926c2322090ec52c99ecb4b21112d131",
+    "passport-els": "git+ssh://repo-node-multipass-els/aol/node-passport-els.git#0ae2ea5c926c2322090ec52c99ecb4b21112d131",
     "oauth": "0.9.10",
     "googleapis": "0.4.5",
     "fbgraph": "0.2.7",
