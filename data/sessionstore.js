@@ -2,7 +2,8 @@ var express = require('express')
 	, MongoStore = require('connect-mongo')(express)
   , dataHelper = require('./helper')
   , config = require('../conf/config')
-  , util = require('util');
+  , util = require('util')
+  , _ = require('underscore')._;
 
 
 var sessionStore = {
@@ -16,7 +17,9 @@ var sessionStore = {
     collection: config.session.mongo.collection || null,
     username: config.session.mongo.username || null,
     password: config.session.mongo.password || null,
-    cookie: config.session.cookie || null,
+    cookie: _.extend({ 
+    	maxAge: 1000 * 60 * 5	// Use 5 min. TTL for login sessions 
+    	}, config.session.cookie),
     key: config.session.key || null
   },
   
