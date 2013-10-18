@@ -45,14 +45,18 @@ var provider = {
 					
 				} else {
 					var data = pagesRes.getData();
-						
+					
+					// If the user has any Pages, add them to profile.metaData object
+					// NOTE: This object may be empty if the access token doesn't have 
+					//  the 'manage_pages' permission	
 					if (data && data.data && data.data.length) {	
 						req.account.metaData = {
 							type: 'user',
 							pages: data.data
 						};
-						next();
 					}
+					
+					next();
 				}
 			});
 			
