@@ -1,6 +1,7 @@
 var passport = require('passport')
   , _ = require('underscore')._
   , querystring = require('querystring')
+  , crypto = require('crypto')
   , config = require('../conf/config')
   , userAPI = require('../data/user')
   , HttpHelper = require('../routes/httphelper')
@@ -84,11 +85,73 @@ var auth = {
     ];
   },
   
-  setRedirect: function(req) {
+  prepareSession: function(provider) {
+  	return function(req, res, next) {
+  		
       //req.session.authredirect = config.paths.authRedirect;
       if (req.param('r') != null && req.session) {
-          req.session.authredirect = req.param('r');
+      	req.session.authredirect = req.param('r');
       }
+      
+      // Detect if the login and callback domains don't match, 
+      // in which case we pass the encrypted sessionId with the callback url
+      if (req.host !== config.getProxy().host) {
+      	
+      	// Encrypt sessionId -> requestId
+      	var cipher = crypto.createCipher('aes-256-cbc', config.session.secret),
+      		requestId = cipher.update(req.sessionID, 'utf8', 'hex') + cipher.final('hex');
+      	
+      	req.requestIdParam = 'request_id=' + encodeURIComponent(requestId);
+      	
+      	debug('prepareSession: request_id=' + requestId);
+      }
+      
+      next();
+    };
+  },
+  
+  validateSession: function(provider) {
+  	return function(req, res, next) {
+  		
+  		// Check for request_id in the callback url, which we'll decrypt 
+  		// into a sessionId for replacing our session
+  		if (req.query.request_id) {
+  			debug('validateSession: request_id=' + req.query.request_id);
+  			
+  			// Decrypt requestId -> sessionId
+  			var decipher = crypto.createDecipher('aes-256-cbc', config.session.secret),
+      		sessionId = decipher.update(req.query.request_id, 'hex', 'utf8') + decipher.final('utf8');
+      	
+      	// Retrieve original session object	
+				req.sessionStore.get(sessionId, function(err, sess) {
+  				debug('validateSession: sessionStore.get:', sessionId);
+  				
+  				if (!err && sess && sess.passport) {
+  					// Replace current session object with original session object
+  					req.sessionStore.createSession(req, sess);
+  					
+  					// Link original sessionId to this session
+  					req.session.originalId = sessionId;
+  					
+  					debug('validateSession: createSession:', req.sessionID);
+  					
+  					// If passport user data is missing, re-login the user
+  					if (!req.isAuthenticated()) {
+	  					req.logIn(sess.passport.user, function(err) {	
+	  						debug('validateSession: req.logIn');
+	  						next();
+	  					});
+	  				} else {
+	  					next();
+	  				}
+  				} else {
+  					next();
+  				}
+  			});
+  		} else {
+  			next();
+  		}
+  	};
   },
   
   authenticateProvider: function(provider, options) {
@@ -102,6 +165,12 @@ var auth = {
 				scope: req.query.scope || options.scope || '',
 				state: req.query.state || options.state || ''
 			});
+			
+			// Append request_id param to callback url
+	 		if (req.requestIdParam) {
+	 			authOptions.callbackURL = auth.getProviderCallbackUrl(provider);
+	 			authOptions.callbackURL += (authOptions.callbackURL.indexOf('?') === -1 ? '?' : '&') + req.requestIdParam;
+	 		}
 	  	
 	  	// If force_login=true, add service-specific url param, if supported
 			if (req.query.force_login && String(req.query.force_login).toLowerCase() == 'true' && options.forceLoginParam) {
@@ -357,10 +426,10 @@ var auth = {
     return function(req, res, next){
       //console.log('authenticateApp', req.user);
       if (!req.isAuthenticated() || options.forceAuth) {
-        //debug('authenticateApp: forceAuth (do auth)');
+        debug('authenticateApp: forceAuth='+options.forceAuth, 'isAuth='+req.isAuthenticated());
         passport.authenticate(auth._appAuthStrategy, options)(req, res, next);
       } else {
-        //debug('authenticateApp: pass (skip auth)');
+        debug('authenticateApp: pass (skip auth)');
         next();
       }
     }
@@ -383,17 +452,15 @@ var auth = {
         // Login route
         app.get(auth.getProviderLoginPath(provider.strategy),
           HttpHelper.validate(auth.validateRules),
-          auth.authenticateApp({ session:false, forceAuth:false }),
-          function(req, res, next) {
-            auth.setRedirect(req);
-            next();
-          },
+          auth.prepareSession(provider.strategy),
+          auth.authenticateApp({ session:true, forceAuth:false }),
           auth.authenticateProvider(provider.strategy, provider)
         );
   
   			// Callback route
         app.get(auth.getProviderCallbackPath(provider.strategy),
           [HttpHelper.validate(auth.validateRules),
+           auth.validateSession(provider.strategy),
            auth.authenticateApp({ forceAuth:false }),
            auth.authenticateProvider(provider.strategy, provider),
            auth.prepareAssociation(provider),
