@@ -16,7 +16,7 @@ passport.serializeUser(function(user, done) {
   var serializedData = {
       appId: null,
       userId: null
-  }
+  };
   if (user instanceof ApiResponse) {
     if (user.isError()) {
       done(user.getData(), serializedData);
@@ -178,7 +178,7 @@ var auth = {
 			}
 	   
 			passport.authorize(provider, authOptions)(req, res, next);
-		}
+		};
   },
   
   associate: function(providerData) {
@@ -208,7 +208,7 @@ var auth = {
         next(); 
       }
 
-    }
+    };
   },
   
   prepareAssociation: function(providerData) {
@@ -273,7 +273,7 @@ var auth = {
       } else {
         return auth.authzVerify(req, provider, accessToken, refreshToken, profile, done);
       }
-    }
+    };
     
     auth.useStrategy(provider, strategy, options, verify);
   },
@@ -296,7 +296,7 @@ var auth = {
       } else {
         return auth.authzVerify(req, provider, identifier, null, profile, done);
       }
-    }
+    };
     
     auth.useStrategy(provider, strategy, options, verify);
   },
@@ -321,13 +321,13 @@ var auth = {
           	code: 'multipass_error',
           	message: apiRes.message, 
           	status: apiRes.getHTTPStatus()
-          }
+          };
         // OAuth error occurred
         } else if (req.query.error) {
         	error = {
           	code: req.query.error,
           	message: req.query.error_description || ''
-          }
+         };
         }
         // If error, pass to callback as serialized query param
         if (error) {
@@ -360,7 +360,7 @@ var auth = {
       } else {
         http.send(apiRes);
       }
-    }
+    };
   },
   
   getProviderLoginPath: function(strategy) {
@@ -432,7 +432,7 @@ var auth = {
         debug('authenticateApp: pass (skip auth)');
         next();
       }
-    }
+    };
   },
   
   loadAppProvider: function(strategy) {
