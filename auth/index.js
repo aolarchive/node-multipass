@@ -2,6 +2,7 @@ var passport = require('passport')
   , _ = require('underscore')._
   , querystring = require('querystring')
   , crypto = require('crypto')
+  , urlUtil = require('url')
   , config = require('../conf/config')
   , userAPI = require('../data/user')
   , HttpHelper = require('../routes/httphelper')
@@ -94,16 +95,13 @@ var auth = {
       }
       
       // Detect if the login and callback domains don't match, 
-      // in which case we pass the encrypted sessionId with the callback url
+      // in which case we pass the encrypted sessionId with the request
       if (req.host !== config.getProxy().host) {
       	
-      	// Encrypt sessionId -> requestId
-      	var cipher = crypto.createCipher('aes-256-cbc', config.session.secret),
-      		requestId = cipher.update(req.sessionID, 'utf8', 'hex') + cipher.final('hex');
+      	req.requestId = auth.encryptSessionId(req.sessionID);
+      	req.requestIdParam = 'state';
       	
-      	req.requestIdParam = 'request_id=' + encodeURIComponent(requestId);
-      	
-      	debug('prepareSession: request_id=' + requestId);
+      	debug('prepareSession: requestId=' + req.requestId);
       }
       
       next();
@@ -113,14 +111,14 @@ var auth = {
   validateSession: function(provider) {
   	return function(req, res, next) {
   		
-  		// Check for request_id in the callback url, which we'll decrypt 
-  		// into a sessionId for replacing our session
-  		if (req.query.request_id) {
-  			debug('validateSession: request_id=' + req.query.request_id);
+  		// Check for 'state' in the callback url, which we'll  
+  		// decrypt into a sessionId for replacing our session
+  		var requestId = req.query.state || null;
+  		
+  		if (requestId) {
+  			debug('validateSession: requestId=' + requestId);
   			
-  			// Decrypt requestId -> sessionId
-  			var decipher = crypto.createDecipher('aes-256-cbc', config.session.secret),
-      		sessionId = decipher.update(req.query.request_id, 'hex', 'utf8') + decipher.final('utf8');
+  			var sessionId = auth.decryptSessionId(requestId);
       	
       	// Retrieve original session object	
 				req.sessionStore.get(sessionId, function(err, sess) {
@@ -154,6 +152,22 @@ var auth = {
   	};
   },
   
+  // Encrypt sessionId -> requestId
+  encryptSessionId: function(sessionId) {
+  	var cipher = crypto.createCipher('aes-256-cbc', config.session.secret),
+  		requestId = cipher.update(sessionId, 'utf8', 'hex') + cipher.final('hex');
+  	
+  	return requestId;
+  },
+	
+  // Decrypt requestId -> sessionId 
+  decryptSessionId: function(requestId) {
+		var decipher = crypto.createDecipher('aes-256-cbc', config.session.secret),
+  		sessionId = decipher.update(requestId, 'hex', 'utf8') + decipher.final('utf8');
+  		
+  	return sessionId;
+  },
+  
   authenticateProvider: function(provider, options) {
 		options = options || {};
 	 
@@ -161,15 +175,23 @@ var auth = {
 	  	debug('authenticateProvider ' + provider);
 	 
 			var authOptions = _.extend({}, options, {
-				session: false,
-				scope: req.query.scope || options.scope || '',
-				state: req.query.state || options.state || ''
-			});
+					session: false,
+					scope: req.query.scope || options.scope || '',
+					state: req.query.state || options.state || ''
+				}),
+				callbackParams = {};
 			
-			// Append request_id param to callback url
-	 		if (req.requestIdParam) {
-	 			authOptions.callbackURL = auth.getProviderCallbackUrl(provider);
-	 			authOptions.callbackURL += (authOptions.callbackURL.indexOf('?') === -1 ? '?' : '&') + req.requestIdParam;
+			// Attach state to request
+	 		if (req.requestId) {
+	 			// If OAuth2, use oauth state property
+	 			if (options.strategyType == 'OAuth2Strategy') {
+	 				authOptions.state = req.requestId;
+	 			
+	 			// Else append as param to callback url	
+	 			} else {
+	 				callbackParams[req.requestIdParam || 'state'] = req.requestId;
+	 				authOptions.callbackURL = auth.getProviderCallbackUrl(provider, callbackParams);
+	 			}
 	 		}
 	  	
 	  	// If force_login=true, add service-specific url param, if supported
@@ -249,6 +271,9 @@ var auth = {
    * each Strategy implementation.
    */
   useStrategy: function(provider, strategy, options, verify) {
+  	// Store the classname of the base strategy type, i.e. 'OAuthStrategy', etc.
+  	provider.strategyType = strategy.super_.name || '';
+  	
     passport.use(
       provider.strategy,
       new strategy(options, verify)
@@ -371,7 +396,7 @@ var auth = {
     return this.getProviderLoginPath(strategy) + '/callback';
   },
   
-  getProviderCallbackUrl: function(strategy) {
+  getProviderCallbackUrl: function(strategy, params) {
   	var callbackPath = this.getProviderCallbackPath(strategy),
   		callbackUrl = config.getBaseUrl() + callbackPath,
   		url = '';
@@ -381,6 +406,11 @@ var auth = {
   		url = String(url).replace('{{url}}', encodeURIComponent(callbackUrl));
   		url = String(url).replace('{{path}}', callbackPath);
   		callbackUrl = url;
+  	}
+  	
+  	if (params) {
+  		callbackUrl += (callbackUrl.indexOf('?') === -1 ? '?' : '&') 
+  			+ urlUtil.format({query:params}).substr(1);
   	}
   	
   	return callbackUrl;
