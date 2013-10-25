@@ -45,6 +45,8 @@ var auth = {
   
   _appAuthStrategy: null,
   
+  _sessionTimeout: (1000 * 60 * 5),	// 5 min
+  
   // Initialize Passport!  Also use passport.session() middleware, to support
   // persistent login sessions (recommended).
   init: function(app) {
@@ -98,7 +100,7 @@ var auth = {
       // in which case we pass the encrypted sessionId with the request
       if (req.host !== config.getProxy().host) {
       	
-      	req.requestId = auth.encryptSessionId(req.sessionID);
+      	req.requestId = auth.encryptSessionState(req.sessionID);
       	req.requestIdParam = 'state';
       	
       	debug('prepareSession: requestId=' + req.requestId);
@@ -113,59 +115,110 @@ var auth = {
   		
   		// Check for 'state' in the callback url, which we'll  
   		// decrypt into a sessionId for replacing our session
-  		var requestId = req.query.state || null;
+  		var requestId = req.query.state || null,
+  			sessionState;
   		
   		if (requestId) {
   			debug('validateSession: requestId=' + requestId);
   			
-  			var sessionId = auth.decryptSessionId(requestId);
-      	
-      	// Retrieve original session object	
-				req.sessionStore.get(sessionId, function(err, sess) {
-  				debug('validateSession: sessionStore.get:', sessionId);
+  			sessionState = auth.decryptSessionState(requestId);
+  			
+  			if (sessionState) {
+  				debug('validateSession: sessionState:', sessionState);
   				
-  				if (!err && sess && sess.passport) {
-  					// Replace current session object with original session object
-  					req.sessionStore.createSession(req, sess);
+  				if (sessionState.timestamp && (Date.now() - sessionState.timestamp) < auth._sessionTimeout) {
   					
-  					// Link original sessionId to this session
-  					req.session.originalId = sessionId;
-  					
-  					debug('validateSession: createSession:', req.sessionID);
-  					
-  					// If passport user data is missing, re-login the user
-  					if (!req.isAuthenticated()) {
-	  					req.logIn(sess.passport.user, function(err) {	
-	  						debug('validateSession: req.logIn');
-	  						next();
-	  					});
-	  				} else {
-	  					next();
-	  				}
+		      	// Retrieve original session object	
+						req.sessionStore.get(sessionState.sessionId, function(err, sess) {
+		  				debug('validateSession: sessionStore.get:', sessionState.sessionId);
+		  				
+		  				if (!err && sess && sess.passport) {
+		  					// Replace current session object with original session object
+		  					req.sessionStore.createSession(req, sess);
+		  					
+		  					// Link original sessionId to this session
+		  					req.session.originalId = sessionState.sessionId;
+		  					
+		  					debug('validateSession: createSession:', req.sessionID);
+		  					
+		  					// If passport user data is missing, re-login the user
+		  					if (!req.isAuthenticated()) {
+			  					req.logIn(sess.passport.user, function(err) {	
+			  						debug('validateSession: req.logIn');
+			  						next();
+			  					});
+			  				} else {
+			  					next();
+			  				}
+		  				} else {
+		  					next();
+		  				}
+		  			});
+		  			
   				} else {
-  					next();
+  					next(new Error('Session state has timed out.'));
   				}
-  			});
+  			} else {
+  				next(new Error('Missing or invalid session state.'));
+  			}
+      	
   		} else {
   			next();
   		}
   	};
   },
   
-  // Encrypt sessionId -> requestId
-  encryptSessionId: function(sessionId) {
-  	var cipher = crypto.createCipher('aes-256-cbc', config.session.secret),
-  		requestId = cipher.update(sessionId, 'utf8', 'hex') + cipher.final('hex');
+  /**
+   * Encrypt the sessionId into a unique requestId hash. 
+   * 
+   * Hash is comprised of (sessionId + timestamp), which should be unique 
+   * per request, helps maintains state, allows the timestamp to be validated, 
+   * and helps prevent CSRF. 
+   * 
+   * <pre>{SESSION_ID}:t:{TIMESTAMP} -> {REQUEST_ID}</pre>
+   * 
+   * @param {String} sessionId The sessionId to maintain across requests.
+   * 
+   * @return {String} The encrypted state hash.
+   */
+  encryptSessionState: function(sessionId) {
+  	var requestId = sessionId + ':t:' + Date.now(),
+  		cipher = crypto.createCipher('aes-256-cbc', config.session.secret),
+  		crypted = cipher.update(requestId, 'utf8', 'hex') + cipher.final('hex');
   	
-  	return requestId;
+  	return crypted;
   },
 	
-  // Decrypt requestId -> sessionId 
-  decryptSessionId: function(requestId) {
+  /**
+   * Decrypt the requestId hash into a request state object.
+   * 
+   * Object comprises sessionId and timestamp, which is then used to lookup 
+   * and load a session, and validate the time the request was made
+   * 
+   * @param {String} requestId The state hash to decrypt into a state object.
+   * 
+   * @return {Object} The state object.
+   * <pre>
+   * {
+   * 	 sessionId: String,
+   *   timestamp: Number
+   * }
+   * </pre>
+   */
+  decryptSessionState: function(requestId) {
 		var decipher = crypto.createDecipher('aes-256-cbc', config.session.secret),
-  		sessionId = decipher.update(requestId, 'hex', 'utf8') + decipher.final('utf8');
+  		decrypted = decipher.update(requestId, 'hex', 'utf8') + decipher.final('utf8'),
+  		parts = decrypted && decrypted.split(':t:'),
+  		state = null;
+  	
+  	if (parts && parts.length == 2) {
+  		state = {
+  			sessionId: parts[0],
+  			timestamp: Number(parts[1])
+  		};
+  	}
   		
-  	return sessionId;
+  	return state;
   },
   
   authenticateProvider: function(provider, options) {
