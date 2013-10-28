@@ -3,6 +3,7 @@ var passport = require('passport')
   , querystring = require('querystring')
   , crypto = require('crypto')
   , urlUtil = require('url')
+  , base64 = require('../util/base64')
   , config = require('../conf/config')
   , userAPI = require('../data/user')
   , HttpHelper = require('../routes/httphelper')
@@ -88,6 +89,12 @@ var auth = {
     ];
   },
   
+  /**
+   * Middleware to prepare the session and request before the auth login route. 
+   * Adds redirect and requestId parameters to session and request objects.
+   * 
+   * @param {String} provider The provider strategy name.
+   */
   prepareSession: function(provider) {
   	return function(req, res, next) {
   		
@@ -110,6 +117,14 @@ var auth = {
     };
   },
   
+  /**
+   * Middleware to validate the session after the auth callback is received. 
+   * If a requestId is detected, decrypts and validates the sessionState,  
+   * replaces the current session with the original session data, and logs-in 
+   * the user to the new session.
+   * 
+   * @param {String} provider The provider strategy name. 
+   */
   validateSession: function(provider) {
   	return function(req, res, next) {
   		
@@ -126,6 +141,7 @@ var auth = {
   			if (sessionState) {
   				debug('validateSession: sessionState:', sessionState);
   				
+  				// Check if sessionState timestamp is within timeout limits
   				if (sessionState.timestamp && (Date.now() - sessionState.timestamp) < auth._sessionTimeout) {
   					
 		      	// Retrieve original session object	
@@ -184,7 +200,8 @@ var auth = {
   encryptSessionState: function(sessionId) {
   	var requestId = sessionId + ':t:' + Date.now(),
   		cipher = crypto.createCipher('aes-256-cbc', config.session.secret),
-  		crypted = cipher.update(requestId, 'utf8', 'hex') + cipher.final('hex');
+  		crypted = cipher.update(requestId, 'utf8', 'base64') + cipher.final('base64'),
+  		crypted = base64.urlSafe(crypted);
   	
   	return crypted;
   },
@@ -206,8 +223,10 @@ var auth = {
    * </pre>
    */
   decryptSessionState: function(requestId) {
+  	requestId = base64.urlUnsafe(requestId);
+  	
 		var decipher = crypto.createDecipher('aes-256-cbc', config.session.secret),
-  		decrypted = decipher.update(requestId, 'hex', 'utf8') + decipher.final('utf8'),
+  		decrypted = decipher.update(requestId, 'base64', 'utf8') + decipher.final('utf8'),
   		parts = decrypted && decrypted.split(':t:'),
   		state = null;
   	
