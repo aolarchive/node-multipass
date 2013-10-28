@@ -24,16 +24,20 @@ function encryption (schema, options) {
   }
   
   // Encrypt a string with the options provided
-  function encrypt (str) {
-    var cipher = crypto.createCipher(algorithm, key)
-      , crypted = cipher.update(str, input, output) + cipher.final(output);
+  function encrypt (str, alg, out) {
+  	alg = alg || algorithm;
+  	out = out || output;
+    var cipher = crypto.createCipher(alg, key)
+      , crypted = cipher.update(str, input, out) + cipher.final(out);
     return crypted;
   }
 
   // Decrypt an encrypted string
-  function decrypt (str) {
-    var decipher = crypto.createDecipher(algorithm, key)
-      , dec = decipher.update(str, output, input) + decipher.final(input);
+  function decrypt (str, alg, out) {
+  	alg = alg || algorithm;
+  	out = out || output;
+    var decipher = crypto.createDecipher(alg, key)
+      , dec = decipher.update(str, out, input) + decipher.final(input);
     return dec;
   }
 

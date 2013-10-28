@@ -1,6 +1,9 @@
 var passport = require('passport')
   , _ = require('underscore')._
   , querystring = require('querystring')
+  , crypto = require('crypto')
+  , urlUtil = require('url')
+  , base64 = require('../util/base64')
   , config = require('../conf/config')
   , userAPI = require('../data/user')
   , HttpHelper = require('../routes/httphelper')
@@ -15,7 +18,7 @@ passport.serializeUser(function(user, done) {
   var serializedData = {
       appId: null,
       userId: null
-  }
+  };
   if (user instanceof ApiResponse) {
     if (user.isError()) {
       done(user.getData(), serializedData);
@@ -42,6 +45,8 @@ var auth = {
   providers: [],
   
   _appAuthStrategy: null,
+  
+  _sessionTimeout: (1000 * 60 * 5),	// 5 min
   
   // Initialize Passport!  Also use passport.session() middleware, to support
   // persistent login sessions (recommended).
@@ -84,11 +89,155 @@ var auth = {
     ];
   },
   
-  setRedirect: function(req) {
+  /**
+   * Middleware to prepare the session and request before the auth login route. 
+   * Adds redirect and requestId parameters to session and request objects.
+   * 
+   * @param {String} provider The provider strategy name.
+   */
+  prepareSession: function(provider) {
+  	return function(req, res, next) {
+  		
       //req.session.authredirect = config.paths.authRedirect;
       if (req.param('r') != null && req.session) {
-          req.session.authredirect = req.param('r');
+      	req.session.authredirect = req.param('r');
       }
+      
+      // Detect if the login and callback domains don't match, 
+      // in which case we pass the encrypted sessionId with the request
+      if (req.host !== config.getProxy().host) {
+      	
+      	req.requestId = auth.encryptSessionState(req.sessionID);
+      	req.requestIdParam = 'state';
+      	
+      	debug('prepareSession: requestId=' + req.requestId);
+      }
+      
+      next();
+    };
+  },
+  
+  /**
+   * Middleware to validate the session after the auth callback is received. 
+   * If a requestId is detected, decrypts and validates the sessionState,  
+   * replaces the current session with the original session data, and logs-in 
+   * the user to the new session.
+   * 
+   * @param {String} provider The provider strategy name. 
+   */
+  validateSession: function(provider) {
+  	return function(req, res, next) {
+  		
+  		// Check for 'state' in the callback url, which we'll  
+  		// decrypt into a sessionId for replacing our session
+  		var requestId = req.query.state || null,
+  			sessionState;
+  		
+  		if (requestId) {
+  			debug('validateSession: requestId=' + requestId);
+  			
+  			sessionState = auth.decryptSessionState(requestId);
+  			
+  			if (sessionState) {
+  				debug('validateSession: sessionState:', sessionState);
+  				
+  				// Check if sessionState timestamp is within timeout limits
+  				if (sessionState.timestamp && (Date.now() - sessionState.timestamp) < auth._sessionTimeout) {
+  					
+		      	// Retrieve original session object	
+						req.sessionStore.get(sessionState.sessionId, function(err, sess) {
+		  				debug('validateSession: sessionStore.get:', sessionState.sessionId);
+		  				
+		  				if (!err && sess && sess.passport) {
+		  					// Replace current session object with original session object
+		  					req.sessionStore.createSession(req, sess);
+		  					
+		  					// Link original sessionId to this session
+		  					req.session.originalId = sessionState.sessionId;
+		  					
+		  					debug('validateSession: createSession:', req.sessionID);
+		  					
+		  					// If passport user data is missing, re-login the user
+		  					if (!req.isAuthenticated()) {
+			  					req.logIn(sess.passport.user, function(err) {	
+			  						debug('validateSession: req.logIn');
+			  						next();
+			  					});
+			  				} else {
+			  					next();
+			  				}
+		  				} else {
+		  					next();
+		  				}
+		  			});
+		  			
+  				} else {
+  					next(new Error('Session state has timed out.'));
+  				}
+  			} else {
+  				next(new Error('Missing or invalid session state.'));
+  			}
+      	
+  		} else {
+  			next();
+  		}
+  	};
+  },
+  
+  /**
+   * Encrypt the sessionId into a unique requestId hash. 
+   * 
+   * Hash is comprised of (sessionId + timestamp), which should be unique 
+   * per request, helps maintains state, allows the timestamp to be validated, 
+   * and helps prevent CSRF. 
+   * 
+   * <pre>{SESSION_ID}:t:{TIMESTAMP} -> {REQUEST_ID}</pre>
+   * 
+   * @param {String} sessionId The sessionId to maintain across requests.
+   * 
+   * @return {String} The encrypted state hash.
+   */
+  encryptSessionState: function(sessionId) {
+  	var requestId = sessionId + ':t:' + Date.now(),
+  		cipher = crypto.createCipher('aes-256-cbc', config.session.secret),
+  		crypted = cipher.update(requestId, 'utf8', 'base64') + cipher.final('base64'),
+  		crypted = base64.urlSafe(crypted);
+  	
+  	return crypted;
+  },
+	
+  /**
+   * Decrypt the requestId hash into a request state object.
+   * 
+   * Object comprises sessionId and timestamp, which is then used to lookup 
+   * and load a session, and validate the time the request was made
+   * 
+   * @param {String} requestId The state hash to decrypt into a state object.
+   * 
+   * @return {Object} The state object.
+   * <pre>
+   * {
+   * 	 sessionId: String,
+   *   timestamp: Number
+   * }
+   * </pre>
+   */
+  decryptSessionState: function(requestId) {
+  	requestId = base64.urlUnsafe(requestId);
+  	
+		var decipher = crypto.createDecipher('aes-256-cbc', config.session.secret),
+  		decrypted = decipher.update(requestId, 'base64', 'utf8') + decipher.final('utf8'),
+  		parts = decrypted && decrypted.split(':t:'),
+  		state = null;
+  	
+  	if (parts && parts.length == 2) {
+  		state = {
+  			sessionId: parts[0],
+  			timestamp: Number(parts[1])
+  		};
+  	}
+  		
+  	return state;
   },
   
   authenticateProvider: function(provider, options) {
@@ -98,10 +247,24 @@ var auth = {
 	  	debug('authenticateProvider ' + provider);
 	 
 			var authOptions = _.extend({}, options, {
-				session: false,
-				scope: req.query.scope || options.scope || '',
-				state: req.query.state || options.state || ''
-			});
+					session: false,
+					scope: req.query.scope || options.scope || '',
+					state: req.query.state || options.state || ''
+				}),
+				callbackParams = {};
+			
+			// Attach state to request
+	 		if (req.requestId) {
+	 			// If OAuth2, use oauth state property
+	 			if (options.strategyType == 'OAuth2Strategy') {
+	 				authOptions.state = req.requestId;
+	 			
+	 			// Else append as param to callback url	
+	 			} else {
+	 				callbackParams[req.requestIdParam || 'state'] = req.requestId;
+	 				authOptions.callbackURL = auth.getProviderCallbackUrl(provider, callbackParams);
+	 			}
+	 		}
 	  	
 	  	// If force_login=true, add service-specific url param, if supported
 			if (req.query.force_login && String(req.query.force_login).toLowerCase() == 'true' && options.forceLoginParam) {
@@ -109,7 +272,7 @@ var auth = {
 			}
 	   
 			passport.authorize(provider, authOptions)(req, res, next);
-		}
+		};
   },
   
   associate: function(providerData) {
@@ -139,7 +302,7 @@ var auth = {
         next(); 
       }
 
-    }
+    };
   },
   
   prepareAssociation: function(providerData) {
@@ -180,6 +343,9 @@ var auth = {
    * each Strategy implementation.
    */
   useStrategy: function(provider, strategy, options, verify) {
+  	// Store the classname of the base strategy type, i.e. 'OAuthStrategy', etc.
+  	provider.strategyType = strategy.super_.name || '';
+  	
     passport.use(
       provider.strategy,
       new strategy(options, verify)
@@ -204,7 +370,7 @@ var auth = {
       } else {
         return auth.authzVerify(req, provider, accessToken, refreshToken, profile, done);
       }
-    }
+    };
     
     auth.useStrategy(provider, strategy, options, verify);
   },
@@ -227,7 +393,7 @@ var auth = {
       } else {
         return auth.authzVerify(req, provider, identifier, null, profile, done);
       }
-    }
+    };
     
     auth.useStrategy(provider, strategy, options, verify);
   },
@@ -252,13 +418,13 @@ var auth = {
           	code: 'multipass_error',
           	message: apiRes.message, 
           	status: apiRes.getHTTPStatus()
-          }
+          };
         // OAuth error occurred
         } else if (req.query.error) {
         	error = {
           	code: req.query.error,
           	message: req.query.error_description || ''
-          }
+         };
         }
         // If error, pass to callback as serialized query param
         if (error) {
@@ -291,7 +457,7 @@ var auth = {
       } else {
         http.send(apiRes);
       }
-    }
+    };
   },
   
   getProviderLoginPath: function(strategy) {
@@ -302,7 +468,7 @@ var auth = {
     return this.getProviderLoginPath(strategy) + '/callback';
   },
   
-  getProviderCallbackUrl: function(strategy) {
+  getProviderCallbackUrl: function(strategy, params) {
   	var callbackPath = this.getProviderCallbackPath(strategy),
   		callbackUrl = config.getBaseUrl() + callbackPath,
   		url = '';
@@ -312,6 +478,11 @@ var auth = {
   		url = String(url).replace('{{url}}', encodeURIComponent(callbackUrl));
   		url = String(url).replace('{{path}}', callbackPath);
   		callbackUrl = url;
+  	}
+  	
+  	if (params) {
+  		callbackUrl += (callbackUrl.indexOf('?') === -1 ? '?' : '&') 
+  			+ urlUtil.format({query:params}).substr(1);
   	}
   	
   	return callbackUrl;
@@ -357,13 +528,13 @@ var auth = {
     return function(req, res, next){
       //console.log('authenticateApp', req.user);
       if (!req.isAuthenticated() || options.forceAuth) {
-        //debug('authenticateApp: forceAuth (do auth)');
+        debug('authenticateApp: forceAuth='+options.forceAuth, 'isAuth='+req.isAuthenticated());
         passport.authenticate(auth._appAuthStrategy, options)(req, res, next);
       } else {
-        //debug('authenticateApp: pass (skip auth)');
+        debug('authenticateApp: pass (skip auth)');
         next();
       }
-    }
+    };
   },
   
   loadAppProvider: function(strategy) {
@@ -383,17 +554,15 @@ var auth = {
         // Login route
         app.get(auth.getProviderLoginPath(provider.strategy),
           HttpHelper.validate(auth.validateRules),
-          auth.authenticateApp({ session:false, forceAuth:false }),
-          function(req, res, next) {
-            auth.setRedirect(req);
-            next();
-          },
+          auth.prepareSession(provider.strategy),
+          auth.authenticateApp({ session:true, forceAuth:false }),
           auth.authenticateProvider(provider.strategy, provider)
         );
   
   			// Callback route
         app.get(auth.getProviderCallbackPath(provider.strategy),
           [HttpHelper.validate(auth.validateRules),
+           auth.validateSession(provider.strategy),
            auth.authenticateApp({ forceAuth:false }),
            auth.authenticateProvider(provider.strategy, provider),
            auth.prepareAssociation(provider),

@@ -1,6 +1,6 @@
 var config = require('../../conf/config')
   , auth = require('../index')
-  , AppStrategy = require('../appstrategy')
+  , AppStrategy = require('../strategies/app')
   , appAPI = require('../../data/app');
 
 
