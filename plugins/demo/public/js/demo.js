@@ -409,6 +409,8 @@
       
       $('.mp-user-container').toggle(Boolean(multipass.options.userId));
       
+      $('.mp-user-form input, .mp-user-form button').toggle($('#mp-login').data('auth') && location.hash === '#full');
+      
       this.buildProviders();
       
       this.buildProfiles();
@@ -517,6 +519,27 @@
         
         multipass.openCrossPost();
       });
+      
+			$('#mp-login').multiAuth({
+				devId: 'co1dDRMvlgZJXvWK',
+				successUrl: 'https://devlocal.aol.com:3443/demo/authreceiver.html',
+				getTokenCallback: function (json) {
+					
+					if (json.response.statusCode == 200) {
+						$(this.authLink)
+							.html('Logout (' + json.response.data.userData.attributes.displayName +')')
+							.data('auth', true);
+						multipass.updateUserId(json.response.data.userData.attributes.loginId);
+					} else {
+						$(this.authLink)
+							.html('Login')
+							.data('auth', false);
+						multipass.updateUserId('');
+					}
+					
+          multipass.initUi();
+				}
+			});
     
     // Auth handler window
     } else if ($('.mp-auth').length) {

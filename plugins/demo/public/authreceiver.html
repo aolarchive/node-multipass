@@ -1,0 +1,29 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>MultiAuth Helper</title>
+</head><body>
+<script type="text/javascript">
+(function(w){
+
+//new logic to pull requestId for mobile redirect
+ var l = window.location,
+ u = l.toString(),
+ v = u.match(/requestId=/g) ? decodeURIComponent(u.match(/requestId=([^&]+)/)[1]) : 0,
+ r = v && (v.substring(0,2) === 'm=') ? v.substring(2) : 0;
+
+ if(r){   //there is a redirect path for mobile use it
+     l.href = l.protocol + "//" + l.host + r;
+ }
+ else{   //normal flow if mobile redir wasn't dectected
+    var o=w.opener||w.parent||w;
+    if (o.triggerAolAuthResponse ) {
+        o.triggerAolAuthResponse(w.location);
+    }
+    else{
+    o.jQuery(o.document).trigger('aol-ma-response',w.location);
+    }
+    w.close();
+}
+
+})(window);
+</script>
+</body></html>
