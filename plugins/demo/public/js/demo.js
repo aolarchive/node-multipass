@@ -522,7 +522,7 @@
       
 			$('#mp-login').multiAuth({
 				devId: 'ao1acmCLPhksv0zu',
-				successUrl: 'https://devlocal.aol.com:3443/demo/authreceiver.html',
+				successUrl: location.protocol + '//' + location.host + '/demo/authreceiver.html',
 				getTokenCallback: function (json) {
 					
 					if (json.response.statusCode == 200) {
