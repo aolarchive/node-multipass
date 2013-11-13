@@ -11,7 +11,7 @@ var facebookActor = {
     provider: 'facebook',
     
     getTokens: function(context, providerId, callback) {
-      userAPI.getProfile(context, facebookActor.provider, providerId, true, function(res){
+      userAPI.getProfile(context, facebookActor.provider, providerId, 'private', function(res){
       	
         if (res.isError()) {
           callback(false);
@@ -118,7 +118,7 @@ var facebookActor = {
     	if (profiles.length) {
 
 				// Get the user facebook profile that contains stored pages data	
-				userAPI.getProfile(context, facebookActor.provider, providerId, true, function (getRes) {
+				userAPI.getProfile(context, facebookActor.provider, providerId, 'private', function (getRes) {
 					if (getRes.isError()) {
 						callback(getRes);
 						

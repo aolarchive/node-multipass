@@ -12,16 +12,16 @@ var provider = {
   	value: 'reauthenticate'
   },
   
-  getProjectionFields: function (private) {
-		if (!private) {
+  getProjectionFields: function (projection) {
+		if (projection === 'private') {
+			return {};
+		} else {
 			return {
 				'profiles.metaData.perms': 0,
 				'profiles.metaData.access_token': 0,
 				'profiles.metaData.pages.perms': 0,
 				'profiles.metaData.pages.access_token': 0
 			};
-		} else {
-			return {};
 		}
   },
   

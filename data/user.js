@@ -71,10 +71,10 @@ var userAPI = {
    * Responses:
    *  success: [200] An Array of User objects that match the profile.
    */
-  findUsersByProfile : function(context, profile, private, callback) {
+  findUsersByProfile : function(context, profile, projection, callback) {
     profile = profile || {};
     User.find({'appId':context.appId, 'profiles.provider':profile.provider, 'profiles.providerId':profile.id},
-      userAPI.getProjectionFields(private),
+      userAPI.getProjectionFields(projection),
       { sort:{ modifiedDate:-1 } }, // Sort by modifiedDate, DESC
       function(err, users){
         var res = null;
@@ -113,9 +113,9 @@ var userAPI = {
    * Responses:
    *  success: [200] The user object that was found.
    */
-  getUser : function(context, allowEmptyResult, private, callback) {
+  getUser : function(context, allowEmptyResult, projection, callback) {
     User.findOne({'appId':context.appId, 'userId':context.userId},
-      userAPI.getProjectionFields(private),
+      userAPI.getProjectionFields(projection),
       function(err, doc){
         var res = null;
         if (err) {
@@ -163,8 +163,8 @@ var userAPI = {
    * Responses:
    *  success: [200] The profile object that was found.
    */
-  getProfile : function(context, provider, providerId, private, callback) {
-    this.getUser(context, false, private, 
+  getProfile : function(context, provider, providerId, projection, callback) {
+    this.getUser(context, false, projection, 
       function(res){
         if (res.isError()) {
           callback(res);
@@ -190,7 +190,7 @@ var userAPI = {
   addProfile : function(context, profile, callback) {
     debug('addProfile ' + profile.provider + '/' + profile.id + ' to ' + userAPI.truncateId(context.appId));
     
-    this.getUser(context, false, true, 
+    this.getUser(context, false, 'private', 
       function(res){
         if (res.isError()) {
           callback(res);
@@ -219,7 +219,7 @@ var userAPI = {
    *  success: [200] The profile object that was removed.
    */
   removeProfile : function(context, provider, providerId, callback) {
-    this.getUser(context, false, false, 
+    this.getUser(context, false, '', 
       function(res){
         if (res.isError()) {
           callback(res);
@@ -338,7 +338,7 @@ var userAPI = {
     // If a userId was provided, retrieve user
     if (context.userId) {
       
-      this.getUser(context, true, true, function(apiRes) {
+      this.getUser(context, true, 'private', function(apiRes) {
         var user;
         
         if (apiRes.isError()) {
@@ -354,7 +354,7 @@ var userAPI = {
     // If no userId provided, find the most recent user by profile
     } else {
       
-      this.findUsersByProfile(context, profile, true, function(apiRes){
+      this.findUsersByProfile(context, profile, 'private', function(apiRes){
         var users, mostRecentUser;
         
         if (apiRes.isError()) {
@@ -391,7 +391,7 @@ var userAPI = {
    * Responses:
    *  success: [200] The user object that was found.
    */
-  getUsers : function(context, aggregrate, private, callback) {
+  getUsers : function(context, aggregrate, projection, callback) {
   	aggregate = aggregrate != null ? aggregrate : false;
   	var userIds = [];
   	
@@ -402,7 +402,7 @@ var userAPI = {
   	}
   	
     User.find({'appId':context.appId, 'userId':{ $in: userIds }},
-      userAPI.getProjectionFields(private),
+      userAPI.getProjectionFields(projection),
       function(err, users){
         var res = null,
         	aggregatedUser = null;
@@ -435,13 +435,12 @@ var userAPI = {
     );
   },
   
-  getProjectionFields : function(private) {
-		private = !!private;
+  getProjectionFields : function(projection) {
 		var fields = {},
 			//FIXME: required here to avoid circular dependency; possibly replace with dependency injection
 			auth = require('../auth');  
 			
-		if (private) {
+		if (projection === 'private') {
 			fields = {
 				'__v': 0
 			};
@@ -458,7 +457,7 @@ var userAPI = {
 		// Add provider-specific field projections
 		auth.providers.forEach(function (provider) {
 			if (provider.getProjectionFields) {
-				fields = _.extend(fields, provider.getProjectionFields(private));
+				fields = _.extend(fields, provider.getProjectionFields(projection));
 			}
 		});
 		

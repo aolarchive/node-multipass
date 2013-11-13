@@ -22,7 +22,7 @@ var googleActor = {
     }()),
     
     getTokens: function(context, providerId, callback) {
-      userAPI.getProfile(context, googleActor.provider, providerId, true, function(res){
+      userAPI.getProfile(context, googleActor.provider, providerId, 'private', function(res){
         if (res.isError()) {
           callback(false);
         } else if (!res.getData()) {

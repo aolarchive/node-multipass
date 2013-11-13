@@ -21,12 +21,12 @@ module.exports = function(app){
   /**
    * [*] /api/private/user*
    * 
-   * Capture all private routes, set req.isPrivate flag, then rewrite url  
+   * Capture all private routes, set req.projection='private', then rewrite url  
    * before continuing to next route.
    */
   app.all(config.paths.api + '/private/user*', 
   	function(req, res, next) {
-  		req.isPrivate = true;
+  		req.projection = 'private';
   		req.url = req.url.replace(config.paths.api + '/private/', config.paths.api + '/');
   		next();
   	}
@@ -45,7 +45,7 @@ module.exports = function(app){
     function(req, res) {
       var http = new HttpHelper(req, res);
       
-      userAPI.getUser(req.user, false, req.isPrivate, function(data) {
+      userAPI.getUser(req.user, false, req.projection, function(data) {
         http.send(data);
       });
     }
@@ -88,7 +88,7 @@ module.exports = function(app){
       	aggregate = (aggregate == 1 || aggregate.toLowerCase() == 'true');
       }
       
-      userAPI.getUsers(req.user, aggregate, req.isPrivate, function(data) {
+      userAPI.getUsers(req.user, aggregate, req.projection, function(data) {
         http.send(data);
       });
     }
@@ -104,7 +104,7 @@ module.exports = function(app){
     function(req, res, next) {
       var http = new HttpHelper(req, res);
       
-      userAPI.getProfile(req.user, req.params.provider, req.params.providerId, req.isPrivate, function(data){
+      userAPI.getProfile(req.user, req.params.provider, req.params.providerId, req.projection, function(data){
         http.send(data);
       });
     }
@@ -181,7 +181,7 @@ module.exports = function(app){
         } else {
           next('route');
         }
-      }
+      };
     }
   });
   
