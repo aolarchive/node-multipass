@@ -24,7 +24,7 @@ var twitterActor = {
     }()),
     
     getTokens: function(context, providerId, callback) {
-      userAPI.getProfile(context, twitterActor.provider, providerId, function(res){
+      userAPI.getProfile(context, twitterActor.provider, providerId, true, function(res){
         if (res.isError()) {
           callback(false);
         } else if (!res.getData()) {

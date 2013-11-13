@@ -19,14 +19,18 @@ module.exports = function(app){
   );
   
   /**
-   * [*] /api/*
+   * [*] /api/private/user*
    * 
-   * Process all requests under the API:
-   * * Validate app credentials
+   * Capture all private routes, set req.isPrivate flag, then rewrite url  
+   * before continuing to next route.
    */
-  //app.all(config.paths.api + '/*', 
-  //  auth.appAuthHandler
-  //);
+  app.all(config.paths.api + '/private/user*', 
+  	function(req, res, next) {
+  		req.isPrivate = true;
+  		req.url = req.url.replace(config.paths.api + '/private/', config.paths.api + '/');
+  		next();
+  	}
+  );
   
   /* Load auth provider login routes */
   auth.loadProviderRoutes(app);
@@ -41,7 +45,7 @@ module.exports = function(app){
     function(req, res) {
       var http = new HttpHelper(req, res);
       
-      userAPI.getUser(req.user, false, function(data) {
+      userAPI.getUser(req.user, false, req.isPrivate, function(data) {
         http.send(data);
       });
     }
@@ -84,7 +88,7 @@ module.exports = function(app){
       	aggregate = (aggregate == 1 || aggregate.toLowerCase() == 'true');
       }
       
-      userAPI.getUsers(req.user, aggregate, function(data) {
+      userAPI.getUsers(req.user, aggregate, req.isPrivate, function(data) {
         http.send(data);
       });
     }
@@ -100,7 +104,7 @@ module.exports = function(app){
     function(req, res, next) {
       var http = new HttpHelper(req, res);
       
-      userAPI.getProfile(req.user, req.params.provider, req.params.providerId, function(data){
+      userAPI.getProfile(req.user, req.params.provider, req.params.providerId, req.isPrivate, function(data){
         http.send(data);
       });
     }

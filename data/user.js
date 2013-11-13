@@ -2,6 +2,7 @@ var mongoose = require('mongoose')
   , config = require('../conf/config')
   , Schemas = require('./schemas')
   , uuid = require('node-uuid')
+	, _ = require('underscore')._
   , ApiResponse = require('./apiresponse')
   , debug = require('debug')('multipass:user');
 
@@ -64,17 +65,16 @@ function updateUserProfile(profile){
   return data;
 };
 
-
 var userAPI = {
   
   /**
    * Responses:
    *  success: [200] An Array of User objects that match the profile.
    */
-  findUsersByProfile : function(context, profile, callback) {
+  findUsersByProfile : function(context, profile, private, callback) {
     profile = profile || {};
     User.find({'appId':context.appId, 'profiles.provider':profile.provider, 'profiles.providerId':profile.id},
-      fieldInclusions,
+      userAPI.getProjectionFields(private),
       { sort:{ modifiedDate:-1 } }, // Sort by modifiedDate, DESC
       function(err, users){
         var res = null;
@@ -113,9 +113,9 @@ var userAPI = {
    * Responses:
    *  success: [200] The user object that was found.
    */
-  getUser : function(context, allowEmptyResult, callback) {
+  getUser : function(context, allowEmptyResult, private, callback) {
     User.findOne({'appId':context.appId, 'userId':context.userId},
-      fieldInclusions,
+      userAPI.getProjectionFields(private),
       function(err, doc){
         var res = null;
         if (err) {
@@ -136,7 +136,7 @@ var userAPI = {
    */
   removeUser : function(context, callback) {
     User.findOne({'appId':context.appId, 'userId':context.userId},
-      fieldInclusions,  
+      userAPI.getProjectionFields(),  
       function(err, doc){
         var res = null;
         if (err) {
@@ -163,8 +163,8 @@ var userAPI = {
    * Responses:
    *  success: [200] The profile object that was found.
    */
-  getProfile : function(context, provider, providerId, callback) {
-    this.getUser(context, false,
+  getProfile : function(context, provider, providerId, private, callback) {
+    this.getUser(context, false, private, 
       function(res){
         if (res.isError()) {
           callback(res);
@@ -190,7 +190,7 @@ var userAPI = {
   addProfile : function(context, profile, callback) {
     debug('addProfile ' + profile.provider + '/' + profile.id + ' to ' + userAPI.truncateId(context.appId));
     
-    this.getUser(context, false,
+    this.getUser(context, false, true, 
       function(res){
         if (res.isError()) {
           callback(res);
@@ -219,7 +219,7 @@ var userAPI = {
    *  success: [200] The profile object that was removed.
    */
   removeProfile : function(context, provider, providerId, callback) {
-    this.getUser(context, false,
+    this.getUser(context, false, false, 
       function(res){
         if (res.isError()) {
           callback(res);
@@ -338,7 +338,7 @@ var userAPI = {
     // If a userId was provided, retrieve user
     if (context.userId) {
       
-      this.getUser(context, true, function(apiRes) {
+      this.getUser(context, true, true, function(apiRes) {
         var user;
         
         if (apiRes.isError()) {
@@ -354,7 +354,7 @@ var userAPI = {
     // If no userId provided, find the most recent user by profile
     } else {
       
-      this.findUsersByProfile(context, profile, function(apiRes){
+      this.findUsersByProfile(context, profile, true, function(apiRes){
         var users, mostRecentUser;
         
         if (apiRes.isError()) {
@@ -391,7 +391,7 @@ var userAPI = {
    * Responses:
    *  success: [200] The user object that was found.
    */
-  getUsers : function(context, aggregrate, callback) {
+  getUsers : function(context, aggregrate, private, callback) {
   	aggregate = aggregrate != null ? aggregrate : false;
   	var userIds = [];
   	
@@ -402,7 +402,7 @@ var userAPI = {
   	}
   	
     User.find({'appId':context.appId, 'userId':{ $in: userIds }},
-      fieldInclusions,
+      userAPI.getProjectionFields(private),
       function(err, users){
         var res = null,
         	aggregatedUser = null;
@@ -435,6 +435,36 @@ var userAPI = {
     );
   },
   
+  getProjectionFields : function(private) {
+		private = !!private;
+		var fields = {},
+			//FIXME: required here to avoid circular dependency; possibly replace with dependency injection
+			auth = require('../auth');  
+			
+		if (private) {
+			fields = {
+				'__v': 0
+			};
+		} else {
+			fields = {
+				'__v': 0,
+				'appId': 0,
+				'userId': 0,
+				'profiles.authToken': 0, 
+				'profiles.authTokenSecret': 0
+			};
+		}
+		
+		// Add provider-specific field projections
+		auth.providers.forEach(function (provider) {
+			if (provider.getProjectionFields) {
+				fields = _.extend(fields, provider.getProjectionFields(private));
+			}
+		});
+		
+		return fields;
+	}
+	
 };
 
 module.exports = userAPI;

@@ -12,6 +12,19 @@ var provider = {
   	value: 'reauthenticate'
   },
   
+  getProjectionFields: function (private) {
+		if (!private) {
+			return {
+				'profiles.metaData.perms': 0,
+				'profiles.metaData.access_token': 0,
+				'profiles.metaData.pages.perms': 0,
+				'profiles.metaData.pages.access_token': 0
+			};
+		} else {
+			return {};
+		}
+  },
+  
   isExtendedAuth: function (profile) {
   	return (profile && profile.metaData && profile.metaData.pages && profile.metaData.pages.length);
   },
