@@ -490,6 +490,17 @@ var userAPI = {
 		return fields;
 	},
 	
+	/**
+	 * Manually filter which fields to show in an object, based on a projection 
+	 * fields object returned from userAPI.getProjectionFields().
+	 *  
+	 * @todo Traverse nested properties, like 'profiles.metaData.pages'.
+	 * 
+	 * @param {Object} data The source data to filter.
+	 * @param {Object} fields The projection fields object.
+	 * 
+	 * @return {Object} The filtered data object.
+	 */
 	filterByProjectionFields : function(data, fields) {
 		if (data && fields) {
 			Object.keys(data).forEach(function (name, value) {
