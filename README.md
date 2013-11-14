@@ -123,6 +123,27 @@ The app automatically configures itself for a particular provider based on what 
     <td>Y</td>
     <td>Deletes a particular auth profile for the currently-authenticated user, based the given 'provider' and 'providerId' values.</td>
   </tr>
+  <tr>
+    <td>GET</td>
+    <td>/api/users</td>
+    <td>
+    [aggregate=true] - combine all user profiles into one list, versus list of complete separate user objects (default)<br>
+    </td>
+    <td>Y</td>
+    <td>Returns an array of all user objects, for the userIds provided with the request as comma-delimted list in the header.<br>
+    Example: X-Multipass-User: user1,user2</td>
+  </tr>
+  <tr>
+    <td>*</td>
+    <td>/api/:projection/user*</td>
+    <td>inherited</td>
+    <td>Y</td>
+    <td>Execute /user* routes within a given projection, which determine what fields are returned in the response. Possible values for projection:
+    <ul>
+    <li>private: show all fields, including sensitive data</li>
+    <li>(empty): default, show only basic fields, no sensitive data</li>
+    </ul></td>
+  </tr>
 </table>
 
 ### Authentication
