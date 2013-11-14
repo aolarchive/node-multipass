@@ -393,7 +393,8 @@ var userAPI = {
    */
   getUsers : function(context, aggregrate, projection, callback) {
   	aggregate = aggregrate != null ? aggregrate : false;
-  	var userIds = [];
+  	var userIds = [],
+  		projectionFields = userAPI.getProjectionFields(projection);
   	
   	if (context && context.userId) {
   		userIds = String(context.userId).split(',').map(function(value) {
@@ -402,7 +403,7 @@ var userAPI = {
   	}
   	
     User.find({'appId':context.appId, 'userId':{ $in: userIds }},
-      userAPI.getProjectionFields(projection),
+      projectionFields,
       function(err, users){
         var res = null,
         	aggregatedUser = null;
@@ -425,6 +426,9 @@ var userAPI = {
         			});
         		});
         	}
+        	
+        	aggregatedUser = userAPI.filterByProjectionFields(aggregatedUser, projectionFields);
+        	
           res = new ApiResponse(aggregatedUser);
           
         } else {
@@ -435,6 +439,29 @@ var userAPI = {
     );
   },
   
+  /**
+   * Retrieve an object listing which fields are allowed in the results, based 
+   * on a given projection string. Used to filter MongoDB find requests, and 
+   * follows the MongoDB projection format.
+   * 
+   * @see http://docs.mongodb.org/manual/tutorial/project-fields-from-query-results/#projection
+   * 
+   * Possible projections:
+   * - private: omits all sensitive values
+   * - (none): default, returns basic and safe values
+   * 
+	 * @param {String} projection The projection string to use. Empty value 
+	 * returns a default projection.
+	 * 
+	 * @return {Object} The projection fields object.
+	 * <pre>
+	 * {
+	 * 	'field': (1 | 0),
+	 *  'field.field': (1 | 0),
+	 *  ...
+	 * }
+	 * </pre>
+   */
   getProjectionFields : function(projection) {
 		var fields = {},
 			//FIXME: required here to avoid circular dependency; possibly replace with dependency injection
@@ -461,6 +488,17 @@ var userAPI = {
 		});
 		
 		return fields;
+	},
+	
+	filterByProjectionFields : function(data, fields) {
+		if (data && fields) {
+			Object.keys(data).forEach(function (name, value) {
+				if (fields[name] === 0) {
+					delete data[name];
+				} 
+			});
+		}
+		return data;
 	}
 	
 };
