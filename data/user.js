@@ -448,7 +448,6 @@ var userAPI = {
 			fields = {
 				'__v': 0,
 				'appId': 0,
-				'userId': 0,
 				'profiles.authToken': 0, 
 				'profiles.authTokenSecret': 0
 			};
