@@ -125,9 +125,8 @@
       "resolved": "https://registry.npmjs.org/underscore/-/underscore-1.5.2.tgz"
     },
     "debug": {
-      "version": "0.7.2",
-      "from": "debug@0.7.2",
-      "resolved": "https://registry.npmjs.org/debug/-/debug-0.7.2.tgz"
+      "version": "0.7.4",
+      "from": "debug@latest"
     },
     "mongodb": {
       "version": "1.3.19",
