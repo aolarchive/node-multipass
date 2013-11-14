@@ -1,3 +1,4 @@
+var els = require('../../auth/els');
  
 module.exports = {
   
@@ -5,7 +6,7 @@ module.exports = {
   
   static: 'public/',
   
-  staticRoute: '/demo',
+  staticRoute: '/demo/',
   
   init: function(app, options) {
   	options = options || {};
@@ -14,6 +15,11 @@ module.exports = {
   	if (options.appId && options.appSecret) {
   		encodedAuth = new Buffer(options.appId + ':' + options.appSecret).toString('base64');
   	}
+  	
+  	// Protect entire folder behind ELS authentication
+  	app.all('/demo/?*',
+			els.ensureAuthenticated
+  	);
   	
   	// Proxy all /demo/api/ requests, and inject auth creds
     app.all('/demo/api/*',

@@ -404,6 +404,8 @@
     },
     
     initUi: function(authResponse) {
+    	$('.mp-user-form').show();
+    	
       $('.mp-userId').text(multipass.options.userId)
         .toggle(Boolean(multipass.options.userId));
       

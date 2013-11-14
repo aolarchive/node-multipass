@@ -4,31 +4,8 @@ var passport = require('passport')
   , appAPI = require('../../data/app')
   , HttpHelper = require('../../routes/httphelper')
   , ApiResponse = require('../../data/apiresponse')
-  , ELSStrategy = require('passport-els').Strategy;
+  , els = require('../../auth/els');
 
-
-/*
- * Define ELS verification in strategy
- */
-var els = new ELSStrategy( function(req, done) {
-  this.ELS(req, function(err,user) {
-    if(err) return done(err, null);
-    done(null, user);
-  }); 
-});
-
-/*
- * Ensure authentication
- */
-var ensureAuthenticated = function(req, res, next) {
-  els.authenticate(req, null, function(err,user) {
-    if(err) return res.send(403, err);
-    if(user) { 
-      req.user = user;         // add user to request object
-      next(); 
-    }
-  });
-};
 
 module.exports = function(app){
 	
@@ -37,7 +14,7 @@ module.exports = function(app){
 	// APP MANAGEMENT API
 	
 	app.get(config.paths.api + '/app',
-    ensureAuthenticated, 
+    els.ensureAuthenticated, 
     function(req, res, next) {
       var http = new HttpHelper(req, res),
       	userId = req.user && req.user.name;
@@ -49,7 +26,7 @@ module.exports = function(app){
   );
   
   app.post(config.paths.api + '/app',
-    ensureAuthenticated, 
+    els.ensureAuthenticated, 
     function(req, res, next) {
       var http = new HttpHelper(req, res);
       
@@ -60,7 +37,7 @@ module.exports = function(app){
   );
   
   app.put(config.paths.api + '/app',
-    ensureAuthenticated, 
+    els.ensureAuthenticated, 
     function(req, res, next) {
       var http = new HttpHelper(req, res);
       
@@ -71,7 +48,7 @@ module.exports = function(app){
   );
   
   app.delete(config.paths.api + '/app',
-    ensureAuthenticated, 
+    els.ensureAuthenticated, 
     function(req, res, next) {
       var http = new HttpHelper(req, res),
         appId = (req.body && req.body.appId) || '';
@@ -83,7 +60,7 @@ module.exports = function(app){
   );
   
   app.post(config.paths.api + '/app/secret',
-    ensureAuthenticated, 
+    els.ensureAuthenticated, 
     function(req, res, next) {
       var http = new HttpHelper(req, res),
         appId = (req.body && req.body.appId) || '';
@@ -97,7 +74,7 @@ module.exports = function(app){
   // APP MANAGEMENT UI
   
   app.get('/app', 
-  	ensureAuthenticated,
+  	els.ensureAuthenticated,
   	function(req, res) {
   		
       var userId = req.user && req.user.name; // Auth guid
