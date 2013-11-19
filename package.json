@@ -41,7 +41,8 @@
     "fbgraph": "0.2.7",
     "nstest": "git+ssh://git@stash.ops.aol.com:2022/amp/amp-node-nstest.git",
     "moment": "2.2.1",
-    "microtime": "0.4.0"
+    "microtime": "0.4.0",
+    "swagger-node-express": "~1.3.2"
   },
   "engines": {
     "node": "0.10.x",

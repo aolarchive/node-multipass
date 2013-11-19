@@ -8,7 +8,8 @@ var express = require('express')
   , sessionStore = require('./data/sessionstore')
   , initialize = require('./conf/initialize')
   , nstest = require('nstest')
-  , HttpHelper = require('./routes/httphelper');
+  , HttpHelper = require('./routes/httphelper')
+  , swagger = require("swagger-node-express");
 
 
 var debugMode = typeof global.v8debug != 'undefined',
@@ -87,6 +88,12 @@ if (clusterEnabled && cluster.isMaster) {
 	  // Router setup
 	  app.use(app.router);
 	  app.use(express.static(__dirname + '/public'));
+	  
+	  
+  swagger.setAppHandler(app);
+  swagger.configure("https://devlocal.aol.com:3443", require('./package.json').version);
+  //app.use('/swagger', express.static(path.join(__dirname, 'public/swagger')));
+  
 	  
 	  // Log errors
 	  app.use(function(err, req, res, next) {
