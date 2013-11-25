@@ -1,65 +1,25 @@
 node-multipass
 ==============
 
-Multiauth identity server using Node.js and MongoDB.
+Multiple identity management server using Node.js and MongoDB.
 
-## Overview
-node-multipass is a RESTful web service that authenticates users with various accounts (Facebook, Twitter, Aol, etc), and associates the credentials obtained with one user account.
+## What Is It?
+Multipass is a RESTful web service that authenticates users with various accounts (Facebook, Twitter, Aol, etc), and associates the credentials obtained with one user account.
 The REST API provides access to the credentials, and ability to delete existing profiles and users.
 
 This app requires Node.js and MongoDB. It uses `node-passport` to handle authentication, and `mongoose` for database access.
 
-### Setup
-* Install Node.js
-* Install MongoDB
-* Install project node dependencies - in project folder type `npm install`, and npm will pull down all required node modules
-* Run MongoDB - type `mongod`
-* Run app - type `node app`
+### What Isn't It?
+* It is not a multi-auth identity system for maintaining login sessions for users. 
+* It is not a magical portal into a parallel universe.
 
-### Configuration
-Most configuration takes place in the `conf/` folder, managed by the special `conf/config.js` file. 
+### Why Would I Use It?
+Multipass has a fairly narrow focus, it simply provides a simple, flexible, programmtic way of obtaining and storing auth credentials, and accessing them, for use by other apps to do interesting things. 
 
-#### Environment ####
-The server environment is determined by the `NODE_ENV` environment variable, one of ('development', 'stage', 'production'), and defaults to 'development'.
-```
-NODE_ENV=stage
-```
+Examples of what you could do, building on top of Multipass:
+* Create an app for scheduling Tweets on behalf of users
+* Create an app for collecting social stats for users by pulling lists of friends, tweets, likes, etc.
 
-#### Custom Config File ####
-By default, the system looks under `conf/` for the config file, with a name corresponding to the server environment (`dev.js`, `stage.js`, `prod.js`). 
-
-To get started on the config file, look at `conf/conf.sample.js`, which has a basic skeleton in place.
-
-If you don't want to place the config files under `conf/`, you may specify a path to your own file by setting its filepath to the `MULTIPASS_CONF` environment variable.
-```
-MULTIPASS_CONF=/etc/multipass/config.js
-```
-
-### Auth Providers
-The included set of auth providers are:
-* Facebook
-* Twitter
-* AOL
-* LinkedIn
-* Google
-* Windows Live
-* DropBox
-* GitHub
-* Tumblr
-* Yahoo
-
-To setup a new auth provider, add it under the 'providers' object in the config file, with appropriate auth ids and secret info. 
-```javascript
-providers: {
-  facebook: {
-    appId: "123-456-789",
-    appSecret: "abcd-efgh-ijkl-mnop-qrst-uvwx-yz"
-  }
-}
-```
-NOTE: The provider config properties are unique to the corresponding auth strategy ('appId' vs. 'consumerKey', etc.), so you must use those properties to set up providers. See https://github.com/jaredhanson/passport#strategies-1 for documentation on available strategies.
-
-The app automatically configures itself for a particular provider based on what you add in the config file. Then using the provider name you used in the providers object, like `'facebook'`, it then tries to load a corresponding provider strategy module with the same name from the `auth/providers/` folder, such as `facebook.js`. You can also add additional auth strategies by including them or writing your own. Each one just needs its own unique provider name.
 
 ## REST API
 <table>
@@ -197,9 +157,102 @@ Also the response body will indicate a status of "Error", and include a status t
 }
 ```
 
+## Setup
+* Install Node.js
+* Install MongoDB
+* Install project node dependencies - in project folder type `npm install`, and npm will pull down all required node modules
+* Run MongoDB - type `mongod`
+* Run app - type `node app`
+
+### Configuration
+Most configuration takes place in the `conf/` folder, managed by the special `conf/config.js` file. 
+
+#### Environment ####
+The server environment is determined by the `NODE_ENV` environment variable, one of ('development', 'stage', 'production'), and defaults to 'development'.
+```
+NODE_ENV=stage
+```
+
+#### Custom Config File ####
+By default, the system looks under `conf/` for the config file, with a name corresponding to the server environment (`dev.js`, `stage.js`, `prod.js`). 
+
+To get started on the config file, look at `conf/conf.sample.js`, which has a basic skeleton in place.
+
+If you don't want to place the config files under `conf/`, you may specify a path to your own file by setting its filepath to the `MULTIPASS_CONF` environment variable.
+```
+MULTIPASS_CONF=/etc/multipass/config.js
+```
+
+### Auth Providers
+The included set of auth providers are:
+* Facebook
+* Twitter
+* AOL
+* LinkedIn
+* Google
+* Windows Live
+* DropBox
+* GitHub
+* Tumblr
+* Yahoo
+
+To setup a new auth provider, add it under the 'providers' object in the config file, with appropriate auth ids and secret info. 
+```javascript
+providers: {
+  facebook: {
+    appId: "123-456-789",
+    appSecret: "abcd-efgh-ijkl-mnop-qrst-uvwx-yz"
+  }
+}
+```
+NOTE: The provider config properties are unique to the corresponding auth strategy ('appId' vs. 'consumerKey', etc.), so you must use those properties to set up providers. See https://github.com/jaredhanson/passport#strategies-1 for documentation on available strategies.
+
+The app automatically configures itself for a particular provider based on what you add in the config file. Then using the provider name you used in the providers object, like `'facebook'`, it then tries to load a corresponding provider strategy module with the same name from the `auth/providers/` folder, such as `facebook.js`. You can also add additional auth strategies by including them or writing your own. Each one just needs its own unique provider name.
+
+
 ## Plugins
+Multipass has a plugin system for extending it's functionality, and providing additional behavior. For a peek at what plugins are already available, check out the `plugins/` folder.
+
+Included plugins:
+* Demo (`plugins/demo/`) - provides a simple interface for trying out user auth flows, and viewing the data
+* Application management (`plugins/app/`) - app for managing the appIds for this service
 
 ## Examples
+
+* Launch client-side auth flow to login into Twitter
+<pre>
+GET /api/auth/twitter?r=auth.html&force_login=true
+Authorization: Basic {BASE64-HASH}
+X-Multipass-User: demo_user
+</pre>
+<pre>
+Redirects to the Twitter client login screen, and once complete, redirects back to auth.html.
+</pre>
+
+* Get collection of all private auth data for a user
+<pre>
+GET /api/private/user
+Authorization: Basic {BASE64-HASH}
+X-Multipass-User: demo_user
+</pre>
+<pre>
+Returns JSON with complete user object, including sensitive fields.
+{
+  "data": {
+    "userId": "demo_user",
+    "profiles": [
+      {
+        "provider": "twitter",
+        "providerId": 123456789,
+        "username": "TwitterUser",
+        "authToken": "{TOKEN}"
+      }
+    ]
+  },
+  "status": "Ok"
+}
+</pre>
+
 
 ## Credits
 * [Jeremy Jannotta](https://github.com/jeremyjannotta)
