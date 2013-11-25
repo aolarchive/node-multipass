@@ -25,10 +25,12 @@ The server environment is determined by the `NODE_ENV` environment variable, one
 NODE_ENV=stage
 ```
 
-There are separate config files corresponding to each server enviroment (`dev.js`, `stage.js`, `prod.js`), that are chosen based on the `NODE_ENV` variable. To get started, look at `dev.js`, which has a basic skeleton in place.
-
 #### Custom Config File ####
-If you don't want to use the config files under `conf/`, you may specify a path to your own file by setting its filepath to the `MULTIPASS_CONF` environment variable.
+By default, the system looks under `conf/` for the config file, with a name corresponding to the server environment (`dev.js`, `stage.js`, `prod.js`). 
+
+To get started on the config file, look at `conf/conf.sample.js`, which has a basic skeleton in place.
+
+If you don't want to place the config files under `conf/`, you may specify a path to your own file by setting its filepath to the `MULTIPASS_CONF` environment variable.
 ```
 MULTIPASS_CONF=/etc/multipass/config.js
 ```
@@ -65,7 +67,7 @@ The app automatically configures itself for a particular provider based on what 
     <th>Method</th>
     <th>Path</th>
     <th>Parameters</th>
-    <th>User Context Req.</th>
+    <th>UserId Req.</th>
     <th>Description</th>
   </tr>
   <tr>
@@ -135,7 +137,7 @@ The app automatically configures itself for a particular provider based on what 
   </tr>
   <tr>
     <td>*</td>
-    <td>/api/:projection/user*</td>
+    <td>/api[/:projection]/user*</td>
     <td>inherited</td>
     <td>Y</td>
     <td>Execute /user* routes within a given projection, which determine what fields are returned in the response. Possible values for projection:
@@ -149,16 +151,21 @@ The app automatically configures itself for a particular provider based on what 
 ### Authentication
 #### API Authentication
 All requests to the API require authentication via an appId and appSecret. These are included in the request with a standard HTTP basic Authorization header. 
-The appId and apPSecret are managed by a separate app included with Multipass.
+The appId and appSecret are managed by a separate app included with Multipass.
 
-Ex: `Authorization: basic base64{appId:appSecret}`
+Ex: `Authorization: basic {base64(appId:appSecret)}`
+
+The appId defines the scope of the data available from the API, usually associated with a certain application, and no request can access data outside their appId.
 
 #### UserId
-Most requests also require a userId (unless noted otherwise) which can be any string provided by the end user. The userId is unique per appId. It is included in the request with a custom header, `X-Multipass-User`.
+Most requests also require a userId (unless noted otherwise) which can be any string provided by the end user. It is included in the request with a custom header, `X-Multipass-User`.
 
 Ex: `X-Multipass-User: KorbenDallas`
 
-The user context is the combination of an appId and userId, i.e. `{ appId:'', userId:'' }`, and used to identify a unique user object.
+The userId defines a container of user data, and must be unique within a given appId.
+
+#### User Context
+The user context is simply the combination of an appId and userId, i.e. `{ appId:'', userId:'' }`, and used to identify a single unique user object.
 
 ### Method Override
 The API allows method override with POST, so for instance to perform a DELETE, you can perform a POST and include `_method="delete"` in the post body.
@@ -189,6 +196,10 @@ Also the response body will indicate a status of "Error", and include a status t
   statusCode: 1
 }
 ```
+
+## Plugins
+
+## Examples
 
 ## Credits
 * [Jeremy Jannotta](https://github.com/jeremyjannotta)
