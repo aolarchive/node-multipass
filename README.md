@@ -20,6 +20,37 @@ Examples of what you could do, building on top of Multipass:
 * Create an app for scheduling Tweets on behalf of users
 * Create an app for collecting social stats for users by pulling lists of friends, tweets, likes, etc.
 
+### How The Auth Flow Works
+Multipass authenticates users by exposing a pair of API routes to the client:
+<pre>
+/api/auth/:provider
+/api/auth/:provider/callback
+</pre>
+
+It starts by initiating the login route in the client (`/api/auth/:provider`), which simply redirects to a third-party auth page. This route can be called any way you'd like -- in the browser's tab, or pop-up window -- depending on the desired experience.
+
+Once the third-party auth flow has succeeded, it will automatically redirect back to the Multipass callback route (`/api/auth/:provider/callback`), also exposed to the client, which is when it receives and stores the auth credentials.
+
+Upon the successful callback, Multipass then redirects back to an auth-receiver file (`auth.html`), if provided with the initial login request. This file handles finalization tasks, like closing the pop-up window, and executing a JS function in the parent/opener window.
+
+<table>
+<tr><td>1) Site</td>			<td>foo.com</td></tr>
+<tr><td>2) Multipass-login</td>		<td>foo.com/api/auth/twitter?r=foo.com/auth.html</td></tr>
+<tr><td>3) Third-party-login-flow</td>	<td>api.twitter.com/...</td></tr>
+<tr><td>4) Multipass-callback</td>	<td>foo.com/api/auth/twitter/callback?code={CODE}</td></tr>
+<tr><td>5) Auth-receiver</td>		<td>foo.com/auth.html</td></tr>
+</table>
+
+#### A Note About Proxies
+It should be noted that for the above auth flow to work, the Multipass API client-side auth routes should ideally be exposed through a proxy within the host site domain.
+
+Advantages:
+* Solve cross-domain restrictions, so the routes can be called from the client-side code within the host domain.
+* The server-side proxy can inject the appId, appSecret, and userId, without revealing this sensitive data with the request.
+
+Other options:
+* Use an IFRAME in the Multipass API domain, to host Javscript that launches the Multipass login route
+
 
 ## REST API
 <table>
