@@ -1,129 +1,33 @@
 (function($) {
 
-  var multipass = {
-
-    options: {
-      apiBaseUrl: location.protocol + '//' + location.host,
-      userId: '',
-      appId: '',
-      appSecret: '',
-      authCallback: '_multipassCallback_'
-    },
-      
-    init: function(customOptions) {
-      this.options = $.extend({}, this.options, customOptions);
-      
-      $.ajaxSetup({
-        contentType: 'application/json'
-      });
-      
-      if (multipass.options.appId && multipass.options.appSecret) {
-      	$.ajaxSetup({
-	        headers: {
-	          'Authorization': 'Basic ' + btoa(multipass.options.appId + ':' + multipass.options.appSecret)
-	        }
-	      });
-      }
-      
-      this.updateUserId(multipass.options.userId);
-      
-      window[this.options.authCallback] = $.proxy(multipass.initUi, multipass);
-    },
-    
-    updateUserId: function(userId) {
-      if (userId) {
-        this.options.userId = userId;
-        
-        $.ajaxSetup({
-          headers: {
-            'X-Multipass-User': multipass.options.userId
-          }
-        });
-      }
-    },
-    
-    getProviders: function(callback) {
-      var options = {
-        url: this.options.apiBaseUrl + '/api/auth/providers'
-      };
-      
-      this.apiRequest(options, callback);
-    },
-    
-    getProfiles: function(callback) {
-      var options = {
-        url: this.options.apiBaseUrl + '/api/user'
-      };
-      
-      this.apiRequest(options, function(data, err, options) {
-        if (data) {
-          callback(data.profiles, err, options);
-        } else {
-          callback(data, err, options);
-        }
-      }, false);
-    },
-    
-    getProfile: function(provider, providerId, callback) {
-      var options = {
-        url: this.options.apiBaseUrl + '/api/user/' + provider + '/' + providerId
-      };
-      
-      this.apiRequest(options, callback);
-    },
-    
-    removeProfile: function(provider, providerId, callback) {
-      var options = {
-        url: this.options.apiBaseUrl + '/api/user/' + provider + '/' + providerId,
-        type: 'post',
-        data: JSON.stringify({ '_method': 'delete' })
-      };
-      
-      this.apiRequest(options, callback);
-    },
-    
-    removeUser: function(callback) {
-      var options = {
-        url: this.options.apiBaseUrl + '/api/user',
-        type: 'post',
-        data: JSON.stringify({ '_method': 'delete' })
-      };
-      
-      this.apiRequest(options, callback);
-    },
-    
-    loginAuthProvider: function(loginUrl) {
-      var url = this.options.apiBaseUrl + loginUrl + '?r=auth.html&force_login=true';
-      
-      var authWin = window.open(url, 'multipass-auth', 'width=800,height=600');
-    },
+  var demo = {
 
     updateTwitterStatus: function(providerId, status, callback) {
       var options = {
-        url: this.options.apiBaseUrl + '/api/actors/twitter/' + providerId + '/status',
+        url: $.multipass.options.apiBaseUrl + '/api/actors/twitter/' + providerId + '/status',
         type: 'post',
         data: JSON.stringify({ 'status': status })
       };
       
-      this.apiRequest(options, callback);
+      $.multipass.apiRequest(options, callback);
     },
     
     getTumblrBlogs: function(providerId, callback) {
       var options = {
-        url: this.options.apiBaseUrl + '/api/actors/tumblr/' + providerId + '/user/blogs'
+        url: $.multipass.options.apiBaseUrl + '/api/actors/tumblr/' + providerId + '/user/blogs'
       };
       
-      this.apiRequest(options, callback);
+      $.multipass.apiRequest(options, callback);
     },
     
     submitTumblrBlogPost: function(providerId, hostname, title, body, callback) {
       var options = {
-        url: this.options.apiBaseUrl + '/api/actors/tumblr/' + providerId + '/user/blogs/' + encodeURIComponent(hostname) + '/post',
+        url: $.multipass.options.apiBaseUrl + '/api/actors/tumblr/' + providerId + '/user/blogs/' + encodeURIComponent(hostname) + '/post',
         type: 'post',
         data: JSON.stringify({ 'title': title, 'body': body })
       };
       
-      this.apiRequest(options, callback);
+      $.multipass.apiRequest(options, callback);
     },
     
     openCrossPost: function() {
@@ -142,7 +46,7 @@
         }
       });
       
-      multipass.getTumblrBlogs(providerData.tumblr.providerId, function(data){
+      demo.getTumblrBlogs(providerData.tumblr.providerId, function(data){
         var content = '<select class="mp-tumblr-blog" title="Choose a blog">';
         $.each(data, function(i, blog){
           content += '<option value="'+blog.baseHostname+'">'+blog.baseHostname+'</option>';
@@ -166,13 +70,13 @@
               if (body.length) {
                 $('.mp-dialog').dialog( "option", "buttons", null );
                 
-                multipass.submitTumblrBlogPost(providerData.tumblr.providerId, hostname, title, body, function(data){
+                demo.submitTumblrBlogPost(providerData.tumblr.providerId, hostname, title, body, function(data){
                   // Add short delay between posts
                   setTimeout(function(){
                     var status = title + ' - ' + body;
                     
                     // Send same post to Twitter
-                    multipass.updateTwitterStatus(providerData.twitter.providerId, status, function(data){
+                    demo.updateTwitterStatus(providerData.twitter.providerId, status, function(data){
                       $('.mp-dialog').html('<p>Cross post sent successfully to Tumblr and Twitter.</p>').dialog({
                         Cancel: function() {
                           $( this ).dialog( "destroy" );
@@ -195,7 +99,7 @@
     },
     
     buildProfiles: function() {
-      if (!this.options.userId) {
+      if (!$.multipass.options.userId) {
         return;
       }
       
@@ -209,7 +113,7 @@
       $('.mp-user-remove').hide();
       $('.mp-user-empty').show();
       
-      this.getProfiles(function(data, err){
+      $.multipass.getProfiles(function(data, err){
         if (err || !data) {
           return;
         }
@@ -236,8 +140,8 @@
                     provider = providerData.provider,
                     providerId = providerData.providerId;
                   
-                  multipass.getProfile(provider, providerId, function(data, err, options) {
-                    multipass.showResponse(options.url, data);
+                  $.multipass.getProfile(provider, providerId, function(data, err, options) {
+                    demo.showResponse(options.url, data);
                   });
                 }
               })),
@@ -256,8 +160,8 @@
                     providerId = providerData.providerId;
                   
                   if (window.confirm("Are you sure you want to remove providerId '"+provider+':'+providerId+"'?")) {
-                    multipass.removeProfile(provider, providerId, function(data) {
-                      multipass.buildProfiles();
+                    $.multipass.removeProfile(provider, providerId, function(data) {
+                      demo.buildProfiles();
                     });
                   }
                 }
@@ -299,7 +203,7 @@
                         if (status.length) {
                           $('.mp-dialog').dialog( "option", "buttons", null );
                           
-                          multipass.updateTwitterStatus(providerId, status, function(data){
+                          demo.updateTwitterStatus(providerId, status, function(data){
                             $('.mp-dialog').html('<p>Tweet sent successfully!</p>').dialog({
                               Cancel: function() {
                                 $( this ).dialog( "destroy" );
@@ -331,7 +235,7 @@
                     providerId = providerData.providerId,
                     content = '';
                   
-                  multipass.getTumblrBlogs(providerId, function(data){
+                  demo.getTumblrBlogs(providerId, function(data){
                     content += '<select class="mp-tumblr-blog" title="Choose a blog">';
                     $.each(data, function(i, blog){
                       content += '<option value="'+blog.baseHostname+'">'+blog.baseHostname+'</option>';
@@ -355,7 +259,7 @@
                           if (body.length) {
                             $('.mp-dialog').dialog( "option", "buttons", null );
                             
-                            multipass.submitTumblrBlogPost(providerId, hostname, title, body, function(data){
+                            demo.submitTumblrBlogPost(providerId, hostname, title, body, function(data){
                               $('.mp-dialog').html('<p>Post submitted successfully!</p>').dialog({
                                 Cancel: function() {
                                   $( this ).dialog( "destroy" );
@@ -379,10 +283,10 @@
     },
     
     buildProviders: function() {
-      if (!this.options.userId) {
+      if (!$.multipass.options.userId) {
         return;
       }
-      this.getProviders(function(data){
+      $.multipass.getProviders(function(data){
         var $providers = $('.mp-providers').empty();
         
         $.each(data, function(i, value){
@@ -394,7 +298,7 @@
                 text: value.provider,
                 click: function(event) {
                   event.preventDefault();
-                  multipass.loginAuthProvider($(event.target).data('url'));
+                  $.multipass.loginAuthProvider($(event.target).data('url'));
                 }
               })
             )  
@@ -403,37 +307,21 @@
       });
     },
     
-    initUi: function(authResponse) {
+    initUi: function(params) {
+    	var userId = $.multipass.options.userId;
+    	
     	$('.mp-user-form').show();
     	
-      $('.mp-userId').text(multipass.options.userId)
-        .toggle(Boolean(multipass.options.userId));
+      $('.mp-userId').text(userId)
+        .toggle(Boolean(userId));
       
-      $('.mp-user-container').toggle(Boolean(multipass.options.userId));
+      $('.mp-user-container').toggle(Boolean(userId));
       
       $('.mp-user-form input, .mp-user-form button').toggle($('#mp-login').data('auth') && location.hash === '#full');
       
       this.buildProviders();
       
       this.buildProfiles();
-      
-      //authResponse && this.showResponse('', JSON.parse(authResponse));
-    },
-    
-    initAuth: function() {
-      var parent = window.opener || window.parent,
-        response = null;
-      
-      if (window != parent) {
-        if (location.search.indexOf('multipass_error=') != -1) {
-          response = (location.search.match(/multipass_error=([^&]+)/i))[1];
-          response = decodeURIComponent(response);
-        }
-        
-        parent[this.options.authCallback] && parent[this.options.authCallback](response);
-        
-        window.close();
-      }
     },
       
     showResponse: function(url, data) {
@@ -450,40 +338,18 @@
           $( this ).dialog( "destroy" );
         }
       }).show();
-    },
-    
-    apiRequest: function(options, callback, showResponse) {
-      options = $.extend({
-        type: 'get'
-      }, options);
-      showResponse = showResponse == null ? true : showResponse;
-      
-      var onRequestError = function(data) {
-        var res = data.responseText && JSON.parse(data.responseText);
-        if (showResponse) {
-          multipass.showResponse(options.url, res);
-        }
-        callback && callback(null, res, options);
-      };
-      
-      $.ajax(options)
-      .done(function(data){
-        if (data.status == 'Ok') {
-          callback && callback(data.data, null, options);
-        } else {
-          onRequestError(data);
-        }
-      })
-      .fail(onRequestError);
     }
   
   };
   
-  var options = {
-  	apiBaseUrl: location.protocol + '//' + location.host + '/demo'
-  };
+  $.multipass.init({
+  	apiBaseUrl: location.protocol + '//' + location.host + '/demo',
+  	authCallbackUrl: location.protocol + '//' + location.host + '/auth.html',
+  });
   
-  multipass.init(options);
+  $(document).on('multipass-auth', function (event, params) {
+  	demo.initUi(params);
+  });
   
   /*
    * Set up event listeners and code on DOM ready
@@ -492,7 +358,7 @@
     
     // Demo app
     if ($('.mp-demo').length) {
-      multipass.initUi();
+      demo.initUi();
       
       $('.mp-user-form').submit(function(event){
         $('#mp-submit').click();
@@ -501,8 +367,8 @@
       
       $('#mp-submit').click(function(event){
         if ($('#mp-userId-input').val() != '') { 
-          multipass.updateUserId($('#mp-userId-input').val());
-          multipass.initUi();
+          $.multipass.setUserId($('#mp-userId-input').val());
+          demo.initUi();
         }
       });
       
@@ -510,8 +376,8 @@
         event.preventDefault();
         
         if (window.confirm("Are you sure you want to remove this user and all its profiles?")) {
-          multipass.removeUser(function(data, options){
-            multipass.initUi();
+          $.multipass.removeUser(function(data, options){
+            demo.initUi();
           });
         }
       });
@@ -519,7 +385,7 @@
       $('.mp-profiles-cross-post').click(function(event){
         event.preventDefault();
         
-        multipass.openCrossPost();
+        demo.openCrossPost();
       });
       
 			$('#mp-login').multiAuth({
@@ -531,25 +397,22 @@
 						$(this.authLink)
 							.html('Logout (' + json.response.data.userData.attributes.displayName +')')
 							.data('auth', true);
-						multipass.updateUserId(json.response.data.userData.attributes.loginId);
+						$.multipass.setUserId(json.response.data.userData.attributes.loginId);
 					} else {
 						$(this.authLink)
 							.html('Login')
 							.data('auth', false);
-						multipass.updateUserId('');
+						$.multipass.setUserId('');
 					}
 					
-          multipass.initUi();
+          demo.initUi();
 				}
 			});
     
-    // Auth handler window
-    } else if ($('.mp-auth').length) {
-      multipass.initAuth();
     }
     
   });
   
-  return multipass;
+  return demo;
   
 }(jQuery));
