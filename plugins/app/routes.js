@@ -91,7 +91,7 @@ module.exports = function(app){
         
       } else if (req.param('action') == 'create') {
         
-        res.render(viewsPath + 'appform', { app: { userId: userId } });
+        res.render(viewsPath + 'appform', { app: { userId: userId, hosts: req.host } });
         
       } else if (req.param('action') == 'edit' && req.param('appId')) {
         

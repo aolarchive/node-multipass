@@ -21,6 +21,11 @@ input[type='text']{
   font-size: 1em;
 }
 
+input[type='text'].disabled {
+	background-color: #EEEEEE;
+	color: #666666;
+}
+
 .mp-button,
 input[type='button'],
 input[type='submit'] {
