@@ -37,18 +37,79 @@
       docExpansion: "none"
     });
 
-    $('#input_apiKey').change(function() {
-      var key = $('#input_apiKey')[0].value;
-      console.log("key: " + key);
-      if(key && key.trim() != "") {
-        console.log("added key " + key);
-        window.authorizations.add("key", new ApiKeyAuthorization("api_key", key, "query"));
+    $('#input_apiKey, #input_appId, #input_appSecret').change(function() {
+      var userId = $('#input_apiKey')[0].value,
+      	appId = $('#input_appId')[0].value,
+      	appSecret = $('#input_appSecret')[0].value;
+
+      console.log("userId: " + userId, "appId: " + appId, "appSecret: " + appSecret);
+      
+      if(userId && userId.trim() != "") {
+        console.log("added userId " + userId);
+        window.authorizations.add("userid", new ApiKeyAuthorization("X-Multipass-User", userId, "header"));
       }
-    })
+      if (appId && appSecret) {
+      	console.log("added appId " + appId);
+        window.authorizations.add("api-auth", new PasswordAuthorization("api-auth", appId, appSecret));
+      }
+    });
+    
+    $('#save').click(function (event) {
+    	event.preventDefault();
+    	
+    	if (localStorage) {
+    		
+	    	var userId = $('#input_apiKey')[0].value,
+	      	appId = $('#input_appId')[0].value,
+	      	appSecret = $('#input_appSecret')[0].value,
+	      	auth = localStorage.getItem('auth');
+	      	
+	      auth = (auth && JSON.parse(auth)) || {};
+	      
+	      auth.userId = userId || null;
+	      auth.appId = appId || null;
+	      auth.appSecret = appSecret || null;
+	      
+	      console.log('Saving auth: ', auth);
+	      localStorage.setItem('auth', JSON.stringify(auth));
+	  	}
+    });
+    
+    if (localStorage) {
+    	var auth = localStorage.getItem('auth');
+    	
+    	if (auth) {
+    		auth = JSON.parse(auth);
+    	
+	    	$('#input_apiKey').val(auth.userId || '');
+	    	$('#input_appId').val(auth.appId || '');
+	    	$('#input_appSecret').val(auth.appSecret || '');
+	    	
+	    	$('#input_apiKey').change();
+	    }
+    }
+    
     window.swaggerUi.load();
   });
 
   </script>
+  <style>
+  	body #header form#api_selector .input a.button {
+		    display: block;
+		    text-decoration: none;
+		    font-weight: bold;
+		    padding: 6px 8px;
+		    font-size: 0.9em;
+		    color: white;
+		    background-color: #547f00;
+		    -moz-border-radius: 4px;
+		    -webkit-border-radius: 4px;
+		    -o-border-radius: 4px;
+		    -ms-border-radius: 4px;
+		    -khtml-border-radius: 4px;
+		    border-radius: 4px;
+		}
+  </style>
 </head>
 
 <body>
@@ -57,9 +118,12 @@
     <a id="logo" href="http://swagger.wordnik.com">swagger</a>
 
     <form id='api_selector'>
-      <div class='input'><input placeholder="http://example.com/api" id="input_baseUrl" name="baseUrl" type="text"/></div>
-      <div class='input'><input placeholder="api_key" id="input_apiKey" name="apiKey" type="text"/></div>
-      <div class='input'><a id="explore" href="#">Explore</a></div>
+      <!--<div class='input'><input placeholder="http://example.com/api" id="input_baseUrl" name="baseUrl" type="text"/></div>-->
+      <div class='input'><input placeholder="userId" id="input_apiKey" name="apiKey" type="text"/></div>
+      <div class='input'><input placeholder="appId" id="input_appId" name="appId" type="text"/></div>
+      <div class='input'><input placeholder="appSecret" id="input_appSecret" name="appSecret" type="text"/></div>
+      <div class='input'><a id="save" class="button" href="#">Save</a></div>
+      <!--<div class='input'><a id="explore" href="#">Explore</a></div>-->
     </form>
   </div>
 </div>

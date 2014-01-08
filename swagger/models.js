@@ -3,8 +3,11 @@ module.exports = {
 	'User': {
 		id: 'User',
 		description: 'A user object containing all associated profiles',
-		required: ['profiles'],
+		required: ['_id', 'profiles'],
 		properties: {
+			_id: {
+				type: 'string'
+			},
 			appId: {
 				type: 'string'
 			},
@@ -29,8 +32,11 @@ module.exports = {
 	'UserProfile': {
 		id: 'UserProfile',
 		description: 'A social account for the User containing auth details, and some basic normalized profile data',
-		required: ['provider', 'providerId'],
+		required: ['_id', 'provider', 'providerId'],
 		properties: {
+			_id: {
+				type: 'string'
+			},
 			provider: {
 				type: 'string'
 			},
@@ -64,7 +70,7 @@ module.exports = {
 			emails: {
 				type: 'array',
 				items: {
-					'$ref': 'string'
+					'type': 'string'
 				}
 			},
 			metaData: {
@@ -82,8 +88,11 @@ module.exports = {
 	'App': {
 		id: 'App',
 		description: 'API auth permissions for an application',
-		required: ['appId', 'userId', 'secret'],
+		required: ['_id', 'appId', 'userId', 'secret'],
 		properties: {
+			_id: {
+				type: 'string'
+			},
 			appId: {
 				type: 'string'
 			},
@@ -93,7 +102,7 @@ module.exports = {
 			hosts: {
 				type: 'array',
 				items: {
-					'$ref': 'string'
+					'type': 'string'
 				}
 			},
 			userId: {
