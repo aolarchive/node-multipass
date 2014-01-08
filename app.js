@@ -71,7 +71,8 @@ if (clusterEnabled && cluster.isMaster) {
 	  
 	  // Setup middleware
 	  app.use(express.cookieParser());
-	  app.use(express.bodyParser());
+		app.use(express.urlencoded());
+		app.use(express.json());
 	  app.use(express.methodOverride());
 	  
 	  // Trust proxy if exists
