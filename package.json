@@ -16,7 +16,7 @@
     "url": "https://github.com/aol/node-multipass/issues"
   },
   "dependencies": {
-    "express": "3.4.0",
+    "express": "3.4.7",
     "ejs": "0.8.4",
     "node-uuid": "1.4.1",
     "underscore": "1.5.2",
@@ -24,7 +24,7 @@
     "mongodb": "1.3.19",
     "mongoose": "3.6.19",
     "connect-mongo": "0.3.3",
-    "passport": "0.1.17",
+    "passport": "0.1.18",
     "passport-facebook": "1.0.1",
     "passport-twitter": "1.0.2",
     "passport-aol-oauth": "git://github.com/jeremyjannotta/passport-aol-oauth.git",
@@ -36,13 +36,14 @@
     "passport-dropbox": "0.1.2",
     "passport-tumblr": "0.1.2",
     "passport-els": "git+ssh://repo-node-multipass-els/aol/node-passport-els.git#0ae2ea5c926c2322090ec52c99ecb4b21112d131",
-    "oauth": "0.9.10",
+    "oauth": "0.9.11",
     "googleapis": "0.4.5",
     "fbgraph": "0.2.7",
     "nstest": "git+ssh://git@stash.ops.aol.com:2022/amp/amp-node-nstest.git",
     "moment": "2.2.1",
     "microtime": "0.4.0",
-    "swagger-node-express": "~1.3.2"
+    "swagger-node-express": "git+https://github.com/wordnik/swagger-node-express.git#5a4123e01765b6022a3ff8ae1a23577035698d28",
+    "swagger-ui": "2.0.2"
   },
   "engines": {
     "node": "0.10.x",
