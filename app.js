@@ -9,7 +9,7 @@ var express = require('express')
   , initialize = require('./conf/initialize')
   , nstest = require('nstest')
   , HttpHelper = require('./routes/httphelper')
-  , swagger = require("swagger-node-express");
+  , swagger = require('./swagger');
 
 
 var debugMode = typeof global.v8debug != 'undefined',
@@ -90,12 +90,9 @@ if (clusterEnabled && cluster.isMaster) {
 	  app.use(app.router);
 	  app.use(express.static(__dirname + '/public'));
 	  
-	  
-  swagger.setAppHandler(app);
-  swagger.configure("https://devlocal.aol.com:3443", require('./package.json').version);
-  //app.use('/swagger', express.static(path.join(__dirname, 'public/swagger')));
-  
-	  
+	  // Swagger docs setup
+		swagger.init(app);
+
 	  // Log errors
 	  app.use(function(err, req, res, next) {
 	    console.error(err.stack);
