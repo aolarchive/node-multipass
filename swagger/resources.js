@@ -139,7 +139,7 @@ module.exports = {
 			path: '/api/user/{provider}/{providerId}',
 			method: 'DELETE',
 			summary: 'Delete a user profile',
-			notes: 'Removeds the user profile object for a particular provider and providerId',
+			notes: 'Deletes the user profile object for a particular provider and providerId',
 			type: 'UserProfile',
 			nickname: 'deleteUserProfile',
 			produces: ['application/json'],

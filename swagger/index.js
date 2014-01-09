@@ -5,14 +5,10 @@ var express = require('express')
 	, resources = require('./resources');
 
 
-module.exports.init = function (app) {
-
- 	swagger.setAppHandler(app);
-
-	// Add models 
-	swagger.addModels(models);
-	
-	// Add resources automatically based on their spec.method
+/**
+ * Add resources automatically based on their spec.method
+ */
+function addResources (resources) {
 	Object.keys(resources).forEach(function (key) {
 		var resource = resources[key];
 		switch(resource.spec.method) {
@@ -30,6 +26,20 @@ module.exports.init = function (app) {
 				break;
 		}
 	});
+};
+
+/**
+ * Initialize the swagger docs
+ */
+function init (app) {
+
+ 	swagger.setAppHandler(app);
+
+	// Add models 
+	swagger.addModels(models);
+	
+	// Add resources
+	addResources(resources);
 
 	swagger.setApiInfo({
 	  title: "Multipass API",
@@ -67,3 +77,7 @@ module.exports.init = function (app) {
 	});
   
 };
+
+module.exports.init = init;
+module.exports.addResources = addResources;
+module.exports.addModels = swagger.addModels;
